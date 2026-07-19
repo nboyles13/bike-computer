@@ -46,18 +46,18 @@ public final class CyclingSensor {
     private final Context ctx;
     private String deviceName;
     private BluetoothGatt gatt;
-    private final CyclingSensor$gattCb$1 gattCb;
+    private final BluetoothGattCallback gattCb;
     private int lastCrankRevs;
     private int lastCrankTime;
     private final Function1<Integer, Unit> onCadence;
     private final Function1<Integer, Unit> onPower;
     private final Function1<String, Unit> onStatus;
-    private final CyclingSensor$scanCb$1 scanCb;
+    private final ScanCallback scanCb;
 
     /* JADX WARN: Multi-variable type inference failed */
     /* JADX WARN: Type inference failed for: r0v20, types: [com.bike.computer.CyclingSensor$scanCb$1] */
     /* JADX WARN: Type inference failed for: r0v21, types: [com.bike.computer.CyclingSensor$gattCb$1] */
-    public CyclingSensor(Context ctx, Function1<? super Integer, Unit> onPower, Function1<? super Integer, Unit> onCadence, Function1<? super String, Unit> onStatus) {
+    public CyclingSensor(Context ctx, Function1<Integer, Unit> onPower, Function1<Integer, Unit> onCadence, Function1<String, Unit> onStatus) {
         Intrinsics.checkNotNullParameter(ctx, "ctx");
         Intrinsics.checkNotNullParameter(onPower, "onPower");
         Intrinsics.checkNotNullParameter(onCadence, "onCadence");
@@ -85,11 +85,11 @@ public final class CyclingSensor {
             */
             public void onScanResult(int callbackType, ScanResult result) {
                 String name;
-                boolean hasSvc;
+                boolean hasSvc = false;
                 Iterable serviceUuids;
                 boolean z;
                 Intrinsics.checkNotNullParameter(result, "result");
-                if (this.this$0.connecting) {
+                if (CyclingSensor.this.connecting) {
                     return;
                 }
                 ScanRecord rec = result.getScanRecord();
@@ -100,7 +100,7 @@ public final class CyclingSensor {
                     hasSvc = false;
                 } else {
                     Iterable $this$any$iv = serviceUuids;
-                    CyclingSensor cyclingSensor = this.this$0;
+                    CyclingSensor cyclingSensor = CyclingSensor.this;
                     if (($this$any$iv instanceof Collection) && ((Collection) $this$any$iv).isEmpty()) {
                         z = false;
                     } else {
@@ -125,25 +125,25 @@ public final class CyclingSensor {
                 }
                 boolean looks = StringsKt.contains((CharSequence) name, (CharSequence) "power", true) || StringsKt.contains((CharSequence) name, (CharSequence) "cadence", true) || StringsKt.contains((CharSequence) name, (CharSequence) "stages", true) || StringsKt.contains((CharSequence) name, (CharSequence) "assioma", true) || StringsKt.contains((CharSequence) name, (CharSequence) "4iiii", true);
                 if (hasSvc || looks) {
-                    this.this$0.connecting = true;
-                    CyclingSensor cyclingSensor2 = this.this$0;
+                    CyclingSensor.this.connecting = true;
+                    CyclingSensor cyclingSensor2 = CyclingSensor.this;
                     String address = name;
                     if (StringsKt.isBlank(address)) {
                         address = result.getDevice().getAddress();
                     }
                     cyclingSensor2.deviceName = address;
-                    BluetoothLeScanner scanner = this.this$0.getScanner();
+                    BluetoothLeScanner scanner = CyclingSensor.this.getScanner();
                     if (scanner != null) {
                         scanner.stopScan(this);
                     }
-                    this.this$0.onStatus.invoke("connecting " + result.getDevice().getAddress());
-                    this.this$0.gatt = result.getDevice().connectGatt(this.this$0.ctx, false, this.this$0.gattCb, 2);
+                    CyclingSensor.this.onStatus.invoke("connecting " + result.getDevice().getAddress());
+                    CyclingSensor.this.gatt = result.getDevice().connectGatt(CyclingSensor.this.ctx, false, CyclingSensor.this.gattCb, 2);
                 }
             }
 
             @Override // android.bluetooth.le.ScanCallback
             public void onScanFailed(int errorCode) {
-                this.this$0.onStatus.invoke("scan fail " + errorCode);
+                CyclingSensor.this.onStatus.invoke("scan fail " + errorCode);
             }
         };
         this.gattCb = new BluetoothGattCallback() { // from class: com.bike.computer.CyclingSensor$gattCb$1
@@ -152,7 +152,7 @@ public final class CyclingSensor {
                 Intrinsics.checkNotNullParameter(g, "g");
                 switch (newState) {
                     case 0:
-                        this.this$0.onStatus.invoke("disconnected");
+                        CyclingSensor.this.onStatus.invoke("disconnected");
                         break;
                     case 2:
                         g.discoverServices();
@@ -164,17 +164,17 @@ public final class CyclingSensor {
             public void onServicesDiscovered(BluetoothGatt g, int status) {
                 BluetoothGattCharacteristic chr;
                 Intrinsics.checkNotNullParameter(g, "g");
-                BluetoothGattService service = g.getService(this.this$0.CPS_SVC);
-                if (service == null || (chr = service.getCharacteristic(this.this$0.CPM_CHR)) == null) {
-                    BluetoothGattService service2 = g.getService(this.this$0.CSC_SVC);
-                    chr = service2 != null ? service2.getCharacteristic(this.this$0.CSC_CHR) : null;
+                BluetoothGattService service = g.getService(CyclingSensor.this.CPS_SVC);
+                if (service == null || (chr = service.getCharacteristic(CyclingSensor.this.CPM_CHR)) == null) {
+                    BluetoothGattService service2 = g.getService(CyclingSensor.this.CSC_SVC);
+                    chr = service2 != null ? service2.getCharacteristic(CyclingSensor.this.CSC_CHR) : null;
                 }
                 if (chr == null) {
-                    this.this$0.onStatus.invoke("no power/cadence char");
+                    CyclingSensor.this.onStatus.invoke("no power/cadence char");
                     return;
                 }
                 g.setCharacteristicNotification(chr, true);
-                BluetoothGattDescriptor cccd = chr.getDescriptor(this.this$0.CCCD);
+                BluetoothGattDescriptor cccd = chr.getDescriptor(CyclingSensor.this.CCCD);
                 if (cccd == null) {
                     return;
                 }
@@ -184,7 +184,7 @@ public final class CyclingSensor {
                     cccd.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                     g.writeDescriptor(cccd);
                 }
-                this.this$0.onStatus.invoke("live");
+                CyclingSensor.this.onStatus.invoke("live");
             }
 
             @Override // android.bluetooth.BluetoothGattCallback
@@ -192,7 +192,7 @@ public final class CyclingSensor {
                 Intrinsics.checkNotNullParameter(g, "g");
                 Intrinsics.checkNotNullParameter(c, "c");
                 Intrinsics.checkNotNullParameter(value, "value");
-                CyclingSensor cyclingSensor = this.this$0;
+                CyclingSensor cyclingSensor = CyclingSensor.this;
                 UUID uuid = c.getUuid();
                 Intrinsics.checkNotNullExpressionValue(uuid, "getUuid(...)");
                 cyclingSensor.handle(uuid, value);
@@ -205,7 +205,7 @@ public final class CyclingSensor {
                 Intrinsics.checkNotNullParameter(c, "c");
                 byte[] it = c.getValue();
                 if (it != null) {
-                    CyclingSensor cyclingSensor = this.this$0;
+                    CyclingSensor cyclingSensor = CyclingSensor.this;
                     UUID uuid = c.getUuid();
                     Intrinsics.checkNotNullExpressionValue(uuid, "getUuid(...)");
                     cyclingSensor.handle(uuid, it);

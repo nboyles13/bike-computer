@@ -35,15 +35,7 @@ public final /* data */ class RouteResult {
         return this.points;
     }
 
-    /* JADX INFO: renamed from: component2, reason: from getter */
-    public final int getDistanceM() {
-        return this.distanceM;
-    }
 
-    /* JADX INFO: renamed from: component3, reason: from getter */
-    public final int getAscendM() {
-        return this.ascendM;
-    }
 
     public final List<NavHint> component4() {
         return this.steps;

@@ -36,7 +36,7 @@ public final class ElevationView extends View {
     /* JADX WARN: 'this' call moved to the top of the method (can break code semantics) */
     /* JADX WARN: Multi-variable type inference failed */
     public ElevationView(Context context) {
-        this(context, null, 2, 0 == true ? 1 : 0);
+        this(context, null);
         Intrinsics.checkNotNullParameter(context, "context");
     }
 

@@ -28,7 +28,7 @@ public final class BikeRouter {
     public final RouteResult route(String segmentDir, String profilePath, double fromLat, double fromLon, double toLat, double toLon) {
         Intrinsics.checkNotNullParameter(segmentDir, "segmentDir");
         Intrinsics.checkNotNullParameter(profilePath, "profilePath");
-        return route(segmentDir, profilePath, CollectionsKt.listOf((Object[]) new double[][]{new double[]{fromLon, fromLat}, new double[]{toLon, toLat}}));
+        return route(segmentDir, profilePath, CollectionsKt.listOf((double[][]) new double[][]{new double[]{fromLon, fromLat}, new double[]{toLon, toLat}}));
     }
 
     public final RouteResult route(String segmentDir, String profilePath, List<double[]> waypoints) {
@@ -62,9 +62,7 @@ public final class BikeRouter {
                 } else if (i == CollectionsKt.getLastIndex(waypoints)) {
                     str2 = "to";
                 } else {
-                    str = "via" + i;
-                    wps.add(bikeRouter.waypoint(d, d2, str));
-                    i = index$iv;
+                    str2 = "via" + i;
                 }
                 str = str2;
                 wps.add(bikeRouter.waypoint(d, d2, str));

@@ -36,7 +36,7 @@ public final class HrGraphView extends View {
     /* JADX WARN: 'this' call moved to the top of the method (can break code semantics) */
     /* JADX WARN: Multi-variable type inference failed */
     public HrGraphView(Context context) {
-        this(context, null, 2, 0 == true ? 1 : 0);
+        this(context, null);
         Intrinsics.checkNotNullParameter(context, "context");
     }
 
@@ -93,7 +93,7 @@ public final class HrGraphView extends View {
         float padT;
         float gh;
         float h2;
-        boolean z;
+        boolean z = false;
         int i;
         HrZone[] zones;
         float padT2;

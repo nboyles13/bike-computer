@@ -6,6 +6,9 @@ plugins {
 android {
     namespace = "com.bike.computer"
     compileSdk = 35
+    // Pin to the build-tools installed in the Nix-provided SDK (store is read-only,
+    // so Gradle cannot auto-download a different version).
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "com.bike.computer"
@@ -13,11 +16,17 @@ android {
         targetSdk = 35
         versionCode = 2
         versionName = "0.2"
+        // Launcher label; overridden per build type so the recovery build is
+        // distinguishable from a production install.
+        manifestPlaceholders["appLabel"] = "Harmin"
     }
 
     buildTypes {
         debug {
             isMinifyEnabled = false
+            // Install side-by-side with a production build (different package id).
+            applicationIdSuffix = ".recovery"
+            manifestPlaceholders["appLabel"] = "Harmin (Rec)"
         }
         release {
             // BRouter is vendored as source and uses reflection in places;

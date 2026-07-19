@@ -51,7 +51,11 @@ public final class GoogleDriveClient {
     }
 
     private final String enc(String s) {
-        return URLEncoder.encode(s, "UTF-8");
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public final String authorizeUrl(String clientId, String redirect) {
@@ -65,7 +69,7 @@ public final class GoogleDriveClient {
         Intrinsics.checkNotNullParameter(c, "c");
         Intrinsics.checkNotNullParameter(code, "code");
         Intrinsics.checkNotNullParameter(redirect, "redirect");
-        JSONObject jSONObjectPost = post(TOKEN, new FormBody.Builder(null, 1, 0 == true ? 1 : 0).add("client_id", Prefs.INSTANCE.driveClientId(c)).add("client_secret", Prefs.INSTANCE.driveClientSecret(c)).add("code", code).add("redirect_uri", redirect).add("grant_type", "authorization_code").build());
+        JSONObject jSONObjectPost = post(TOKEN, new FormBody.Builder().add("client_id", Prefs.INSTANCE.driveClientId(c)).add("client_secret", Prefs.INSTANCE.driveClientSecret(c)).add("code", code).add("redirect_uri", redirect).add("grant_type", "authorization_code").build());
         Prefs prefs = Prefs.INSTANCE;
         String string = jSONObjectPost.getString("access_token");
         Intrinsics.checkNotNullExpressionValue(string, "getString(...)");
@@ -77,7 +81,7 @@ public final class GoogleDriveClient {
         if (now() < Prefs.INSTANCE.driveExpiresAt(c) - ((long) 60)) {
             return Prefs.INSTANCE.driveAccessToken(c);
         }
-        JSONObject jSONObjectPost = post(TOKEN, new FormBody.Builder(null, 1, 0 == true ? 1 : 0).add("client_id", Prefs.INSTANCE.driveClientId(c)).add("client_secret", Prefs.INSTANCE.driveClientSecret(c)).add("grant_type", "refresh_token").add("refresh_token", Prefs.INSTANCE.driveRefreshToken(c)).build());
+        JSONObject jSONObjectPost = post(TOKEN, new FormBody.Builder().add("client_id", Prefs.INSTANCE.driveClientId(c)).add("client_secret", Prefs.INSTANCE.driveClientSecret(c)).add("grant_type", "refresh_token").add("refresh_token", Prefs.INSTANCE.driveRefreshToken(c)).build());
         Prefs prefs = Prefs.INSTANCE;
         String string = jSONObjectPost.getString("access_token");
         Intrinsics.checkNotNullExpressionValue(string, "getString(...)");
@@ -94,11 +98,11 @@ public final class GoogleDriveClient {
         Intrinsics.checkNotNullParameter(file, "file");
         String strFreshToken = freshToken(c);
         JSONObject jSONObjectPut = new JSONObject().put("name", file.getName()).put("parents", new JSONArray().put(ensureFolder(c, strFreshToken)));
-        MultipartBody.Builder type = new MultipartBody.Builder(null, 1, 0 == true ? 1 : 0).setType(MediaType.INSTANCE.get("multipart/related"));
-        RequestBody.Companion companion = RequestBody.INSTANCE;
+        MultipartBody.Builder type = new MultipartBody.Builder().setType(MediaType.Companion.get("multipart/related"));
+        RequestBody.Companion companion = RequestBody.Companion;
         String string = jSONObjectPut.toString();
         Intrinsics.checkNotNullExpressionValue(string, "toString(...)");
-        Response responseExecute = http.newCall(new Request.Builder().url("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart").header("Authorization", "Bearer " + strFreshToken).post(type.addPart(companion.create(string, MediaType.INSTANCE.get("application/json; charset=UTF-8"))).addPart(RequestBody.INSTANCE.create(file, MediaType.INSTANCE.get("application/gpx+xml"))).build()).build()).execute();
+        Response responseExecute = http.newCall(new Request.Builder().url("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart").header("Authorization", "Bearer " + strFreshToken).post(type.addPart(companion.create(string, MediaType.Companion.get("application/json; charset=UTF-8"))).addPart(RequestBody.Companion.create(file, MediaType.Companion.get("application/gpx+xml"))).build()).build()).execute();
         try {
             Response response = responseExecute;
             ResponseBody responseBodyBody = response.body();
@@ -131,10 +135,10 @@ public final class GoogleDriveClient {
         }
         JSONObject meta = new JSONObject().put("name", name).put("mimeType", "application/vnd.google-apps.folder");
         Request.Builder builderHeader = new Request.Builder().url("https://www.googleapis.com/drive/v3/files?fields=id").header("Authorization", "Bearer " + token);
-        RequestBody.Companion companion = RequestBody.INSTANCE;
+        RequestBody.Companion companion = RequestBody.Companion;
         String string = meta.toString();
         Intrinsics.checkNotNullExpressionValue(string, "toString(...)");
-        Request create = builderHeader.post(companion.create(string, MediaType.INSTANCE.get("application/json; charset=UTF-8"))).build();
+        Request create = builderHeader.post(companion.create(string, MediaType.Companion.get("application/json; charset=UTF-8"))).build();
         Response responseExecute = http.newCall(create).execute();
         try {
             Response resp = responseExecute;
@@ -154,7 +158,7 @@ public final class GoogleDriveClient {
 
     private final String findFolderId(String token, String name) throws IOException {
         String strString;
-        String safe = StringsKt.replace$default(StringsKt.replace$default(name, "\\", "\\\\", false, 4, (Object) null), "'", "\\'", false, 4, (Object) null);
+        String safe = StringsKt.replace(StringsKt.replace(name, "\\", "\\\\", false), "'", "\\'", false);
         String q = enc("mimeType='application/vnd.google-apps.folder' and name='" + safe + "' and trashed=false");
         Request req = new Request.Builder().url("https://www.googleapis.com/drive/v3/files?q=" + q + "&fields=files(id)").header("Authorization", "Bearer " + token).build();
         Response responseExecute = http.newCall(req).execute();
@@ -164,8 +168,14 @@ public final class GoogleDriveClient {
             if (responseBodyBody == null || (strString = responseBodyBody.string()) == null) {
                 strString = "{}";
             }
-            JSONArray files = new JSONObject(strString).optJSONArray("files");
-            String string = (files == null || files.length() <= 0) ? null : files.getJSONObject(0).getString("id");
+            JSONArray files;
+            String string;
+            try {
+                files = new JSONObject(strString).optJSONArray("files");
+                string = (files == null || files.length() <= 0) ? null : files.getJSONObject(0).getString("id");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
             CloseableKt.closeFinally(responseExecute, null);
             return string;
         } finally {
@@ -177,7 +187,7 @@ public final class GoogleDriveClient {
         Code decompiled incorrectly, please refer to instructions dump.
     */
     public final List<DriveFile> listRoutes(Context c) throws JSONException, IOException {
-        Throwable th;
+        Throwable th = null;
         Intrinsics.checkNotNullParameter(c, "c");
         String token = freshToken(c);
         String name = Prefs.INSTANCE.driveRoutesFolder(c);
@@ -244,7 +254,7 @@ public final class GoogleDriveClient {
                             $i$f$filter = $i$f$filter2;
                             $this$filterTo$iv$iv = $this$filterTo$iv$iv2;
                         }
-                        ArrayList arrayList = (List) destination$iv$iv2;
+                        List arrayList = (List) destination$iv$iv2;
                         CloseableKt.closeFinally(responseExecute, null);
                         return arrayList;
                     } catch (Throwable th3) {
@@ -261,7 +271,7 @@ public final class GoogleDriveClient {
             throw th;
         } catch (Throwable th6) {
             CloseableKt.closeFinally(responseExecute, th);
-            throw th6;
+            throw Sneaky.sneak(th6);
         }
     }
 
@@ -287,47 +297,35 @@ public final class GoogleDriveClient {
         }
     }
 
-    public final int syncRoutes(Context c, String localDir) {
+    public final int syncRoutes(Context c, String localDir) throws JSONException, IOException {
         Object objM118constructorimpl;
         Intrinsics.checkNotNullParameter(c, "c");
         Intrinsics.checkNotNullParameter(localDir, "localDir");
         File dir = new File(localDir);
         dir.mkdirs();
         try {
-            Result.Companion companion = Result.INSTANCE;
-            GoogleDriveClient $this$syncRoutes_u24lambda_u2410 = this;
-            objM118constructorimpl = Result.m118constructorimpl(Integer.valueOf($this$syncRoutes_u24lambda_u2410.syncGpxFiles(c, dir)));
+            objM118constructorimpl = Integer.valueOf(syncGpxFiles(c, dir));
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
             objM118constructorimpl = 0;
         }
         int added = 0 + ((Number) objM118constructorimpl).intValue();
         return added + syncLinkSheet(c, dir);
     }
 
-    private final int syncGpxFiles(Context c, File dir) {
+    private final int syncGpxFiles(Context c, File dir) throws JSONException, IOException {
         Object objM118constructorimpl;
         int added = 0;
         for (DriveFile f : listRoutes(c)) {
             File local = new File(dir, f.getName());
             if (!local.exists()) {
                 try {
-                    Result.Companion companion = Result.INSTANCE;
-                    GoogleDriveClient $this$syncGpxFiles_u24lambda_u2411 = this;
-                    objM118constructorimpl = Result.m118constructorimpl($this$syncGpxFiles_u24lambda_u2411.download(c, f.getId()));
+                    objM118constructorimpl = download(c, f.getId());
                 } catch (Throwable th) {
-                    Result.Companion companion2 = Result.INSTANCE;
-                    objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-                }
-                if (Result.m124isFailureimpl(objM118constructorimpl)) {
                     objM118constructorimpl = null;
                 }
                 String gpx = (String) objM118constructorimpl;
                 if (gpx != null && GpxRoute.INSTANCE.parse(gpx).size() >= 2) {
-                    FilesKt.writeText$default(local, gpx, null, 2, null);
+                    FilesKt.writeText(local, gpx, kotlin.text.Charsets.UTF_8);
                     added++;
                 }
             }
@@ -345,9 +343,6 @@ public final class GoogleDriveClient {
         String strString;
         Intrinsics.checkNotNullParameter(c, "c");
         String strDriveSheetId = Prefs.INSTANCE.driveSheetId(c);
-        int i = 1;
-        String str = null;
-        Object[] objArr = 0;
         if (!(strDriveSheetId.length() > 0)) {
             strDriveSheetId = null;
         }
@@ -362,11 +357,11 @@ public final class GoogleDriveClient {
             return strFindSheetInFolder;
         }
         JSONObject jSONObjectPut = new JSONObject().put("name", "Harmin Route Links").put("mimeType", "application/vnd.google-apps.spreadsheet").put("parents", new JSONArray().put(strEnsureRoutesFolder));
-        MultipartBody.Builder type = new MultipartBody.Builder(str, i, objArr == true ? 1 : 0).setType(MediaType.INSTANCE.get("multipart/related"));
-        RequestBody.Companion companion = RequestBody.INSTANCE;
+        MultipartBody.Builder type = new MultipartBody.Builder().setType(MediaType.Companion.get("multipart/related"));
+        RequestBody.Companion companion = RequestBody.Companion;
         String string = jSONObjectPut.toString();
         Intrinsics.checkNotNullExpressionValue(string, "toString(...)");
-        Response responseExecute = http.newCall(new Request.Builder().url("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id").header("Authorization", "Bearer " + strFreshToken).post(type.addPart(companion.create(string, MediaType.INSTANCE.get("application/json; charset=UTF-8"))).addPart(RequestBody.INSTANCE.create("Name,Google Maps Link\n", MediaType.INSTANCE.get("text/csv"))).build()).build()).execute();
+        Response responseExecute = http.newCall(new Request.Builder().url("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id").header("Authorization", "Bearer " + strFreshToken).post(type.addPart(companion.create(string, MediaType.Companion.get("application/json; charset=UTF-8"))).addPart(RequestBody.Companion.create("Name,Google Maps Link\n", MediaType.Companion.get("text/csv"))).build()).build()).execute();
         try {
             Response response = responseExecute;
             ResponseBody responseBodyBody = response.body();
@@ -392,7 +387,7 @@ public final class GoogleDriveClient {
     */
     private final int syncLinkSheet(Context c, File dir) throws JSONException, IOException {
         int i;
-        int i2;
+        int i2 = 0;
         Object objM118constructorimpl;
         String id = ensureLinksSheet(c);
         Iterable $this$filter$iv = parseCsv(exportCsv(c, id));
@@ -446,21 +441,15 @@ public final class GoogleDriveClient {
                 seen.add(name);
                 File file = new File(dir, name + ".gpx");
                 if (!file.exists() || !Intrinsics.areEqual(linkMap.get(name), link)) {
-                    try {
-                        Result.Companion companion = Result.INSTANCE;
-                        GoogleDriveClient googleDriveClient = this;
-                        objM118constructorimpl = Result.m118constructorimpl(GmapsRoute.INSTANCE.points(link));
-                    } catch (Throwable th) {
-                        Result.Companion companion2 = Result.INSTANCE;
-                        objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-                    }
                     List listEmptyList = CollectionsKt.emptyList();
-                    if (Result.m124isFailureimpl(objM118constructorimpl)) {
+                    try {
+                        objM118constructorimpl = GmapsRoute.INSTANCE.points(link);
+                    } catch (Throwable th) {
                         objM118constructorimpl = listEmptyList;
                     }
                     List<double[]> list4 = (List) objM118constructorimpl;
                     if (list4.size() >= 2) {
-                        FilesKt.writeText$default(file, GmapsRoute.INSTANCE.toGpx(name, list4), null, 2, null);
+                        FilesKt.writeText(file, GmapsRoute.INSTANCE.toGpx(name, list4), kotlin.text.Charsets.UTF_8);
                         linkMap.put(name, link);
                         added++;
                     }
@@ -511,10 +500,10 @@ public final class GoogleDriveClient {
         }
         JSONObject meta = new JSONObject().put("name", name).put("mimeType", "application/vnd.google-apps.folder");
         Request.Builder builderHeader = new Request.Builder().url("https://www.googleapis.com/drive/v3/files?fields=id").header("Authorization", "Bearer " + token);
-        RequestBody.Companion companion = RequestBody.INSTANCE;
+        RequestBody.Companion companion = RequestBody.Companion;
         String string = meta.toString();
         Intrinsics.checkNotNullExpressionValue(string, "toString(...)");
-        Request create = builderHeader.post(companion.create(string, MediaType.INSTANCE.get("application/json; charset=UTF-8"))).build();
+        Request create = builderHeader.post(companion.create(string, MediaType.Companion.get("application/json; charset=UTF-8"))).build();
         Response responseExecute = http.newCall(create).execute();
         try {
             Response resp = responseExecute;
@@ -541,8 +530,14 @@ public final class GoogleDriveClient {
             if (responseBodyBody == null || (strString = responseBodyBody.string()) == null) {
                 strString = "{}";
             }
-            JSONArray files = new JSONObject(strString).optJSONArray("files");
-            String string = (files == null || files.length() <= 0) ? null : files.getJSONObject(0).getString("id");
+            JSONArray files;
+            String string;
+            try {
+                files = new JSONObject(strString).optJSONArray("files");
+                string = (files == null || files.length() <= 0) ? null : files.getJSONObject(0).getString("id");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
             CloseableKt.closeFinally(responseExecute, null);
             return string;
         } finally {
@@ -555,10 +550,9 @@ public final class GoogleDriveClient {
         if (!f.exists()) {
             return new HashMap<>();
         }
+        HashMap map = new HashMap();
         try {
-            Result.Companion companion = Result.INSTANCE;
-            GoogleDriveClient googleDriveClient = this;
-            JSONObject o = new JSONObject(FilesKt.readText$default(f, null, 1, null));
+            JSONObject o = new JSONObject(FilesKt.readText(f, kotlin.text.Charsets.UTF_8));
             HashMap m = new HashMap();
             Iterator<String> itKeys = o.keys();
             Intrinsics.checkNotNullExpressionValue(itKeys, "keys(...)");
@@ -566,13 +560,8 @@ public final class GoogleDriveClient {
                 String k = itKeys.next();
                 m.put(k, o.getString(k));
             }
-            objM118constructorimpl = Result.m118constructorimpl(m);
+            objM118constructorimpl = m;
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        HashMap map = new HashMap();
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
             objM118constructorimpl = map;
         }
         return (HashMap) objM118constructorimpl;
@@ -580,17 +569,12 @@ public final class GoogleDriveClient {
 
     private final void writeLinkMap(File dir, Map<String, String> m) {
         try {
-            Result.Companion companion = Result.INSTANCE;
-            GoogleDriveClient googleDriveClient = this;
             File file = new File(dir, ".link_sync.json");
             Intrinsics.checkNotNull(m, "null cannot be cast to non-null type kotlin.collections.Map<*, *>");
             String string = new JSONObject(m).toString();
             Intrinsics.checkNotNullExpressionValue(string, "toString(...)");
-            FilesKt.writeText$default(file, string, null, 2, null);
-            Result.m118constructorimpl(Unit.INSTANCE);
+            FilesKt.writeText(file, string, kotlin.text.Charsets.UTF_8);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
     }
 
@@ -672,7 +656,7 @@ public final class GoogleDriveClient {
                 throw th;
             } catch (Throwable th2) {
                 CloseableKt.closeFinally(responseExecute, th);
-                throw th2;
+                throw Sneaky.sneak(th2);
             }
         }
     }

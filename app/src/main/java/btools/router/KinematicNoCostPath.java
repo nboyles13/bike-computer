@@ -1,296 +1,264 @@
+/**
+ * The path-instance of the kinematic model
+ *
+ * @author ab
+ */
 package btools.router;
 
-/* JADX INFO: loaded from: classes.dex */
 final class KinematicNoCostPath extends OsmPath {
-    private double ekin;
-    private float floatingAngleLeft;
-    private float floatingAngleRight;
-    private double totalEnergy;
-    private double totalTime;
+  private double ekin; // kinetic energy (Joule)
+  private double totalTime;  // travel time (seconds)
+  private double totalEnergy; // total route energy (Joule)
+  private float floatingAngleLeft; // sliding average left bend (degree)
+  private float floatingAngleRight; // sliding average right bend (degree)
 
-    KinematicNoCostPath() {
+  @Override
+  protected void init(OsmPath orig) {
+    KinematicNoCostPath origin = (KinematicNoCostPath) orig;
+    ekin = origin.ekin;
+    totalTime = origin.totalTime;
+    totalEnergy = origin.totalEnergy;
+    floatingAngleLeft = origin.floatingAngleLeft;
+    floatingAngleRight = origin.floatingAngleRight;
+  }
+
+  @Override
+  protected void resetState() {
+    ekin = 0.;
+    totalTime = 0.;
+    totalEnergy = 0.;
+    floatingAngleLeft = 0.f;
+    floatingAngleRight = 0.f;
+  }
+
+  @Override
+  protected double processWaySection(RoutingContext rc, double dist, double delta_h, double elevation, double angle, double cosangle, boolean isStartpoint, int nsection, int lastpriorityclassifier) {
+    KinematicNoCostModel km = (KinematicNoCostModel) rc.pm;
+
+    double cost = 0.;
+    double extraTime = 0.;
+
+    if (isStartpoint) {
+      // for forward direction, we start with target speed
+      if (!rc.inverseDirection) {
+        extraTime = 0.5 * (1. - cosangle) * 40.; // 40 seconds turn penalty
+      }
+    } else {
+      double turnspeed = 999.; // just high
+
+      if (km.turnAngleDecayTime != 0.) { // process turn-angle slowdown
+        if (angle < 0) floatingAngleLeft -= (float) angle;
+        else floatingAngleRight += (float) angle;
+        float aa = Math.max(floatingAngleLeft, floatingAngleRight);
+
+        double curveSpeed = aa > 10. ? 200. / aa : 20.;
+        double distanceTime = dist / curveSpeed;
+        double decayFactor = Math.exp(-distanceTime / km.turnAngleDecayTime);
+        floatingAngleLeft = (float) (floatingAngleLeft * decayFactor);
+        floatingAngleRight = (float) (floatingAngleRight * decayFactor);
+
+        if (curveSpeed < 20.) {
+          turnspeed = curveSpeed;
+        }
+      }
+
+      if (nsection == 0) { // process slowdown by crossing geometry
+        double junctionspeed = 999.; // just high
+
+        int classifiermask = (int) rc.expctxWay.getClassifierMask();
+
+        // penalty for equal priority crossing
+        boolean hasLeftWay = false;
+        boolean hasRightWay = false;
+        boolean hasResidential = false;
+        for (OsmPrePath prePath = rc.firstPrePath; prePath != null; prePath = prePath.next) {
+          KinematicPrePath pp = (KinematicPrePath) prePath;
+
+          if (((pp.classifiermask ^ classifiermask) & 8) != 0) { // exactly one is linktype
+            continue;
+          }
+
+          if ((pp.classifiermask & 32) != 0) { // touching a residential?
+            hasResidential = true;
+          }
+
+          if (pp.priorityclassifier > priorityclassifier || pp.priorityclassifier == priorityclassifier && priorityclassifier < 20) {
+            double diff = pp.angle - angle;
+            if (diff < -40. && diff > -140.) hasLeftWay = true;
+            if (diff > 40. && diff < 140.) hasRightWay = true;
+          }
+        }
+        double residentialSpeed = 13.;
+
+        if (hasLeftWay && junctionspeed > km.leftWaySpeed) junctionspeed = km.leftWaySpeed;
+        if (hasRightWay && junctionspeed > km.rightWaySpeed) junctionspeed = km.rightWaySpeed;
+        if (hasResidential && junctionspeed > residentialSpeed) junctionspeed = residentialSpeed;
+
+        if ((lastpriorityclassifier < 20) ^ (priorityclassifier < 20)) {
+          extraTime += 10.;
+          junctionspeed = 0; // full stop for entering or leaving road network
+        }
+
+        if (lastpriorityclassifier != priorityclassifier && (classifiermask & 8) != 0) {
+          extraTime += 2.; // two seconds for entering a link-type
+        }
+        turnspeed = turnspeed > junctionspeed ? junctionspeed : turnspeed;
+
+        if (message != null) {
+          message.vnode0 = (int) (junctionspeed * 3.6 + 0.5);
+        }
+      }
+      cutEkin(km.totalweight, turnspeed); // apply turnspeed
     }
 
-    @Override // btools.router.OsmPath
-    protected void init(OsmPath orig) {
-        KinematicNoCostPath origin = (KinematicNoCostPath) orig;
-        this.ekin = origin.ekin;
-        this.totalTime = origin.totalTime;
-        this.totalEnergy = origin.totalEnergy;
-        this.floatingAngleLeft = origin.floatingAngleLeft;
-        this.floatingAngleRight = origin.floatingAngleRight;
+    // linear temperature correction
+    double tcorr = (20. - km.outside_temp) * 0.0035;
+
+    // air_pressure down 1mb/8m
+    double ecorr = 0.0001375 * (elevation - 100.);
+
+    double f_air = km.f_air * (1. + tcorr - ecorr);
+
+    double distanceCost = evolveDistance(km, dist, delta_h, f_air);
+
+    if (message != null) {
+      message.costfactor = (float) (distanceCost / dist);
+      message.vmax = (int) (km.getWayMaxspeed() * 3.6 + 0.5);
+      message.vmaxExplicit = (int) (km.getWayMaxspeedExplicit() * 3.6 + 0.5);
+      message.vmin = (int) (km.getWayMinspeed() * 3.6 + 0.5);
+      message.extraTime = (int) (extraTime * 1000);
     }
 
-    @Override // btools.router.OsmPath
-    protected void resetState() {
-        this.ekin = 0.0d;
-        this.totalTime = 0.0d;
-        this.totalEnergy = 0.0d;
-        this.floatingAngleLeft = 0.0f;
-        this.floatingAngleRight = 0.0f;
-    }
+    cost += extraTime * km.pw / km.cost0;
+    totalTime += extraTime;
 
-    /* JADX WARN: Removed duplicated region for block: B:24:0x0098  */
-    /* JADX WARN: Removed duplicated region for block: B:89:0x0162  */
-    @Override // btools.router.OsmPath
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-    */
-    protected double processWaySection(RoutingContext rc, double dist, double delta_h, double elevation, double angle, double cosangle, boolean isStartpoint, int nsection, int lastpriorityclassifier) {
-        double turnspeed;
-        double cost;
-        double turnspeed2;
-        double extraTime;
-        double extraTime2;
-        double curveSpeed;
-        KinematicNoCostModel km = (KinematicNoCostModel) rc.pm;
-        double extraTime3 = 0.0d;
-        if (isStartpoint) {
-            if (!rc.inverseDirection) {
-                extraTime = (1.0d - cosangle) * 0.5d * 40.0d;
-                cost = 0.0d;
-            } else {
-                extraTime = 0.0d;
-                cost = 0.0d;
-            }
+    return cost + distanceCost;
+  }
+
+
+  protected double evolveDistance(KinematicNoCostModel km, double dist, double delta_h, double f_air) {
+    // elevation force
+    double fh = delta_h * km.totalweight * 9.81 / dist;
+
+    double effectiveSpeedLimit = km.getEffectiveSpeedLimit();
+    double emax = 0.5 * km.totalweight * effectiveSpeedLimit * effectiveSpeedLimit;
+    if (emax <= 0.) {
+      return -1.;
+    }
+    double vb = km.getBreakingSpeed(effectiveSpeedLimit);
+    double elow = 0.5 * km.totalweight * vb * vb;
+
+    double elapsedTime = 0.;
+    double dissipatedEnergy = 0.;
+
+    double v = Math.sqrt(2. * ekin / km.totalweight);
+    double d = dist;
+    while (d > 0.) {
+      boolean slow = ekin < elow;
+      boolean fast = ekin >= emax;
+      double etarget = slow ? elow : emax;
+      double f = km.f_roll + f_air * v * v + fh;
+      double f_recup = Math.max(0., fast ? -f : (slow ? km.f_recup : 0) - fh); // additional recup for slow part
+      f += f_recup;
+
+      double delta_ekin;
+      double timeStep;
+      double x;
+      if (fast) {
+        x = d;
+        delta_ekin = x * f;
+        timeStep = x / v;
+        ekin = etarget;
+      } else {
+        delta_ekin = etarget - ekin;
+        double b = 2. * f_air / km.totalweight;
+        double x0 = delta_ekin / f;
+        double x0b = x0 * b;
+        x = x0 * (1. - x0b * (0.5 + x0b * (0.333333333 - x0b * 0.25))); // = ln( delta_ekin*b/f + 1.) / b;
+        double maxstep = Math.min(50., d);
+        if (x >= maxstep) {
+          x = maxstep;
+          double xb = x * b;
+          delta_ekin = x * f * (1. + xb * (0.5 + xb * (0.166666667 + xb * 0.0416666667))); // = f/b* exp(xb-1)
+          ekin += delta_ekin;
         } else {
-            if (km.turnAngleDecayTime != 0.0d) {
-                if (angle < 0.0d) {
-                    this.floatingAngleLeft -= (float) angle;
-                } else {
-                    this.floatingAngleRight += (float) angle;
-                }
-                float aa = Math.max(this.floatingAngleLeft, this.floatingAngleRight);
-                if (aa > 10.0d) {
-                    turnspeed = 999.0d;
-                    curveSpeed = 200.0d / ((double) aa);
-                } else {
-                    turnspeed = 999.0d;
-                    curveSpeed = 20.0d;
-                }
-                double distanceTime = dist / curveSpeed;
-                cost = 0.0d;
-                double cost2 = -distanceTime;
-                double decayFactor = Math.exp(cost2 / km.turnAngleDecayTime);
-                this.floatingAngleLeft = (float) (((double) this.floatingAngleLeft) * decayFactor);
-                this.floatingAngleRight = (float) (((double) this.floatingAngleRight) * decayFactor);
-                if (curveSpeed < 20.0d) {
-                    turnspeed2 = curveSpeed;
-                }
-                if (nsection != 0) {
-                    double junctionspeed = 999.0d;
-                    int classifiermask = (int) rc.expctxWay.getClassifierMask();
-                    boolean hasRightWay = false;
-                    boolean hasResidential = false;
-                    boolean hasLeftWay = false;
-                    OsmPrePath prePath = rc.firstPrePath;
-                    while (prePath != null) {
-                        KinematicPrePath pp = (KinematicPrePath) prePath;
-                        double turnspeed3 = turnspeed2;
-                        if (((pp.classifiermask ^ classifiermask) & 8) == 0) {
-                            if ((pp.classifiermask & 32) != 0) {
-                                hasResidential = true;
-                            }
-                            if (pp.priorityclassifier > this.priorityclassifier || (pp.priorityclassifier == this.priorityclassifier && this.priorityclassifier < 20)) {
-                                double diff = pp.angle - angle;
-                                if (diff < -40.0d && diff > -140.0d) {
-                                    hasLeftWay = true;
-                                }
-                                if (diff > 40.0d && diff < 140.0d) {
-                                    hasRightWay = true;
-                                }
-                            }
-                        }
-                        prePath = prePath.next;
-                        turnspeed2 = turnspeed3;
-                    }
-                    double turnspeed4 = turnspeed2;
-                    if (hasLeftWay && 999.0d > km.leftWaySpeed) {
-                        junctionspeed = km.leftWaySpeed;
-                    }
-                    if (hasRightWay && junctionspeed > km.rightWaySpeed) {
-                        junctionspeed = km.rightWaySpeed;
-                    }
-                    if (hasResidential && junctionspeed > 13.0d) {
-                        junctionspeed = 13.0d;
-                    }
-                    if ((this.priorityclassifier < 20) ^ (lastpriorityclassifier < 20)) {
-                        extraTime3 = 0.0d + 10.0d;
-                        junctionspeed = 0.0d;
-                    }
-                    if (lastpriorityclassifier != this.priorityclassifier && (classifiermask & 8) != 0) {
-                        extraTime3 += 2.0d;
-                    }
-                    double turnspeed5 = turnspeed4 > junctionspeed ? junctionspeed : turnspeed4;
-                    if (this.message == null) {
-                        extraTime2 = extraTime3;
-                    } else {
-                        extraTime2 = extraTime3;
-                        this.message.vnode0 = (int) ((junctionspeed * 3.6d) + 0.5d);
-                    }
-                    turnspeed2 = turnspeed5;
-                    extraTime3 = extraTime2;
-                }
-                cutEkin(km.totalweight, turnspeed2);
-                extraTime = extraTime3;
-            } else {
-                turnspeed = 999.0d;
-                cost = 0.0d;
-            }
-            turnspeed2 = turnspeed;
-            if (nsection != 0) {
-            }
-            cutEkin(km.totalweight, turnspeed2);
-            extraTime = extraTime3;
+          ekin = etarget;
         }
-        double tcorr = (20.0d - km.outside_temp) * 0.0035d;
-        double ecorr = (elevation - 100.0d) * 1.375E-4d;
-        double f_air = km.f_air * ((tcorr + 1.0d) - ecorr);
-        double distanceCost = evolveDistance(km, dist, delta_h, f_air);
-        if (this.message != null) {
-            this.message.costfactor = (float) (distanceCost / dist);
-            this.message.vmax = (int) ((((double) km.getWayMaxspeed()) * 3.6d) + 0.5d);
-            this.message.vmaxExplicit = (int) ((((double) km.getWayMaxspeedExplicit()) * 3.6d) + 0.5d);
-            this.message.vmin = (int) ((((double) km.getWayMinspeed()) * 3.6d) + 0.5d);
-            this.message.extraTime = (int) (1000.0d * extraTime);
-        }
-        double cost3 = cost + ((km.pw * extraTime) / km.cost0);
-        this.totalTime += extraTime;
-        return cost3 + distanceCost;
+        double v2 = Math.sqrt(2. * ekin / km.totalweight);
+        double a = f / km.totalweight; // TODO: average force?
+        timeStep = (v2 - v) / a;
+        v = v2;
+      }
+      d -= x;
+      elapsedTime += timeStep;
+
+      // dissipated energy does not contain elevation and efficient recup
+      dissipatedEnergy += delta_ekin - x * (fh + f_recup * km.recup_efficiency);
+
+      // correction: inefficient recup going into heating is half efficient
+      double ieRecup = x * f_recup * (1. - km.recup_efficiency);
+      double eaux = timeStep * km.p_standby;
+      dissipatedEnergy -= Math.max(ieRecup, eaux) * 0.5;
     }
 
-    protected double evolveDistance(KinematicNoCostModel km, double dist, double delta_h, double f_air) {
-        double elow;
-        double elow2;
-        double x;
-        double timeStep;
-        double b;
-        double fh = ((km.totalweight * delta_h) * 9.81d) / dist;
-        double eaux = km.getEffectiveSpeedLimit();
-        double emax = km.totalweight * 0.5d * eaux * eaux;
-        if (emax <= 0.0d) {
-            return -1.0d;
-        }
-        double vb = km.getBreakingSpeed(eaux);
-        double elow3 = km.totalweight * 0.5d * vb * vb;
-        double elapsedTime = 0.0d;
-        double dissipatedEnergy = 0.0d;
-        double v = Math.sqrt((this.ekin * 2.0d) / km.totalweight);
-        double d = dist;
-        while (d > 0.0d) {
-            double effectiveSpeedLimit = eaux;
-            double effectiveSpeedLimit2 = this.ekin;
-            boolean slow = effectiveSpeedLimit2 < elow3;
-            double vb2 = vb;
-            boolean fast = this.ekin >= emax;
-            double etarget = slow ? elow3 : emax;
-            double emax2 = emax;
-            double f = km.f_roll + (f_air * v * v) + fh;
-            if (fast) {
-                elow = elow3;
-                elow2 = -f;
-            } else {
-                elow = elow3;
-                elow2 = (slow ? km.f_recup : 0.0d) - fh;
-            }
-            double fh2 = fh;
-            double f_recup = Math.max(0.0d, elow2);
-            double f2 = f + f_recup;
-            if (fast) {
-                double x2 = d;
-                b = x2 * f2;
-                double timeStep2 = x2 / v;
-                this.ekin = etarget;
-                x = x2;
-                timeStep = timeStep2;
-            } else {
-                double delta_ekin = etarget - this.ekin;
-                double b2 = (f_air * 2.0d) / km.totalweight;
-                double x0 = delta_ekin / f2;
-                double x0b = x0 * b2;
-                x = (1.0d - ((((0.333333333d - (0.25d * x0b)) * x0b) + 0.5d) * x0b)) * x0;
-                double delta_ekin2 = delta_ekin;
-                double maxstep = Math.min(50.0d, d);
-                if (x < maxstep) {
-                    this.ekin = etarget;
-                } else {
-                    x = maxstep;
-                    double xb = x * b2;
-                    double delta_ekin3 = x * f2 * ((((((0.0416666667d * xb) + 0.166666667d) * xb) + 0.5d) * xb) + 1.0d);
-                    this.ekin += delta_ekin3;
-                    delta_ekin2 = delta_ekin3;
-                }
-                double v2 = Math.sqrt((this.ekin * 2.0d) / km.totalweight);
-                double a = f2 / km.totalweight;
-                timeStep = (v2 - v) / a;
-                v = v2;
-                b = delta_ekin2;
-            }
-            d -= x;
-            elapsedTime += timeStep;
-            double dissipatedEnergy2 = dissipatedEnergy + (b - ((fh2 + (km.recup_efficiency * f_recup)) * x));
-            double ieRecup = x * f_recup * (1.0d - km.recup_efficiency);
-            dissipatedEnergy = dissipatedEnergy2 - (Math.max(ieRecup, km.p_standby * timeStep) * 0.5d);
-            eaux = effectiveSpeedLimit;
-            vb = vb2;
-            emax = emax2;
-            elow3 = elow;
-            fh = fh2;
-        }
-        double fh3 = fh;
-        double fh4 = km.p_standby;
-        double dissipatedEnergy3 = dissipatedEnergy + (fh4 * elapsedTime);
-        this.totalTime += elapsedTime;
-        this.totalEnergy += dissipatedEnergy3 + (dist * fh3);
-        return ((km.pw * elapsedTime) + dissipatedEnergy3) / km.cost0;
-    }
+    dissipatedEnergy += elapsedTime * km.p_standby;
 
-    @Override // btools.router.OsmPath
-    protected double processTargetNode(RoutingContext rc) {
-        KinematicNoCostModel km = (KinematicNoCostModel) rc.pm;
-        if (this.targetNode.nodeDescription != null) {
-            rc.expctxNode.evaluate(false, this.targetNode.nodeDescription);
-            float initialcost = rc.expctxNode.getInitialcost();
-            if (initialcost >= 1000000.0d) {
-                return -1.0d;
-            }
-            cutEkin(km.totalweight, km.getNodeMaxspeed());
-            if (this.message != null) {
-                this.message.linknodecost += (int) initialcost;
-                this.message.nodeKeyValues = rc.expctxNode.getKeyValueDescription(false, this.targetNode.nodeDescription);
-                this.message.vnode1 = (int) ((((double) km.getNodeMaxspeed()) * 3.6d) + 0.5d);
-            }
-            return initialcost;
-        }
-        return 0.0d;
-    }
+    totalTime += elapsedTime;
+    totalEnergy += dissipatedEnergy + dist * fh;
 
-    private void cutEkin(double weight, double speed) {
-        double e = 0.5d * weight * speed * speed;
-        if (this.ekin > e) {
-            this.ekin = e;
-        }
-    }
+    return (km.pw * elapsedTime + dissipatedEnergy) / km.cost0; // =cost
+  }
 
-    @Override // btools.router.OsmPath
-    public int elevationCorrection() {
-        return 0;
-    }
+  @Override
+  protected double processTargetNode(RoutingContext rc) {
+    KinematicNoCostModel km = (KinematicNoCostModel) rc.pm;
 
-    @Override // btools.router.OsmPath
-    public boolean definitlyWorseThan(OsmPath path) {
-        KinematicNoCostPath p = (KinematicNoCostPath) path;
-        int c = p.cost;
-        return this.cost > c + 100;
-    }
+    // finally add node-costs for target node
+    if (targetNode.nodeDescription != null) {
+      rc.expctxNode.evaluate(false, targetNode.nodeDescription);
+      float initialcost = rc.expctxNode.getInitialcost();
+      if (initialcost >= 1000000.) {
+        return -1.;
+      }
+      cutEkin(km.totalweight, km.getNodeMaxspeed()); // apply node maxspeed
 
-    @Override // btools.router.OsmPath
-    public double getTotalTime() {
-        return this.totalTime;
-    }
+      if (message != null) {
+        message.linknodecost += (int) initialcost;
+        message.nodeKeyValues = rc.expctxNode.getKeyValueDescription(false, targetNode.nodeDescription);
 
-    @Override // btools.router.OsmPath
-    public double getTotalEnergy() {
-        return this.totalEnergy;
+        message.vnode1 = (int) (km.getNodeMaxspeed() * 3.6 + 0.5);
+      }
+      return initialcost;
     }
+    return 0.;
+  }
+
+  private void cutEkin(double weight, double speed) {
+    double e = 0.5 * weight * speed * speed;
+    if (ekin > e) ekin = e;
+  }
+
+
+  @Override
+  public int elevationCorrection() {
+    return 0;
+  }
+
+  @Override
+  public boolean definitlyWorseThan(OsmPath path) {
+    KinematicNoCostPath p = (KinematicNoCostPath) path;
+
+    int c = p.cost;
+    return cost > c + 100;
+  }
+
+  @Override
+  public double getTotalTime() {
+    return totalTime;
+  }
+
+  @Override
+  public double getTotalEnergy() {
+    return totalEnergy;
+  }
 }

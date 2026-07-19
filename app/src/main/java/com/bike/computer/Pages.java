@@ -19,7 +19,7 @@ public final class Pages {
 
     public final boolean isData(String key) {
         Intrinsics.checkNotNullParameter(key, "key");
-        return StringsKt.startsWith$default(key, "DATA", false, 2, (Object) null);
+        return StringsKt.startsWith(key, "DATA", false);
     }
 
     public final int dataId(String key) {

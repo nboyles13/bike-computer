@@ -1,3 +1,8 @@
+/**
+ * Container for an osm node
+ *
+ * @author ab
+ */
 package btools.mapaccess;
 
 import btools.codec.MicroCache;
@@ -6,223 +11,252 @@ import btools.util.ByteArrayUnifier;
 import btools.util.CheapRuler;
 import btools.util.IByteArrayUnifier;
 
-/* JADX INFO: loaded from: classes.dex */
 public class OsmNode extends OsmLink implements OsmPos {
-    public TurnRestriction firstRestriction;
-    public OsmLink firstlink;
-    public int ilat;
-    public int ilon;
-    public byte[] nodeDescription;
-    public short selev = Short.MIN_VALUE;
-    public int visitID;
+  /**
+   * The latitude
+   */
+  public int ilat;
 
-    public void addTurnRestriction(TurnRestriction tr) {
-        tr.next = this.firstRestriction;
-        this.firstRestriction = tr;
+  /**
+   * The longitude
+   */
+  public int ilon;
+
+  /**
+   * The elevation
+   */
+  public short selev = Short.MIN_VALUE;
+
+  /**
+   * The node-tags, if any
+   */
+  public byte[] nodeDescription;
+
+  public TurnRestriction firstRestriction;
+
+  public int visitID;
+
+  public void addTurnRestriction(TurnRestriction tr) {
+    tr.next = firstRestriction;
+    firstRestriction = tr;
+  }
+
+  /**
+   * The links to other nodes
+   */
+  public OsmLink firstlink;
+
+  public OsmNode() {
+  }
+
+  public OsmNode(int ilon, int ilat) {
+    this.ilon = ilon;
+    this.ilat = ilat;
+  }
+
+  public OsmNode(long id) {
+    ilon = (int) (id >> 32);
+    ilat = (int) (id & 0xffffffff);
+  }
+
+
+  // interface OsmPos
+  public final int getILat() {
+    return ilat;
+  }
+
+  public final int getILon() {
+    return ilon;
+  }
+
+  public final short getSElev() {
+    return selev;
+  }
+
+  public final double getElev() {
+    return selev / 4.;
+  }
+
+  public final void addLink(OsmLink link, boolean isReverse, OsmNode tn) {
+    if (link == firstlink) {
+      throw new IllegalArgumentException("UUUUPS");
     }
 
-    public OsmNode() {
+    if (isReverse) {
+      link.n1 = tn;
+      link.n2 = this;
+      link.next = tn.firstlink;
+      link.previous = firstlink;
+      tn.firstlink = link;
+      firstlink = link;
+    } else {
+      link.n1 = this;
+      link.n2 = tn;
+      link.next = firstlink;
+      link.previous = tn.firstlink;
+      tn.firstlink = link;
+      firstlink = link;
+    }
+  }
+
+  public final int calcDistance(OsmPos p) {
+    return (int) Math.max(1.0, Math.round(CheapRuler.distance(ilon, ilat, p.getILon(), p.getILat())));
+  }
+
+  public String toString() {
+    return "n_" + (ilon - 180000000) + "_" + (ilat - 90000000);
+  }
+
+  public final void parseNodeBody(MicroCache mc, OsmNodesMap hollowNodes, IByteArrayUnifier expCtxWay) {
+    if (mc instanceof MicroCache2) {
+      parseNodeBody2((MicroCache2) mc, hollowNodes, expCtxWay);
+    } else
+      throw new IllegalArgumentException("unknown cache version: " + mc.getClass());
+  }
+
+  public final void parseNodeBody2(MicroCache2 mc, OsmNodesMap hollowNodes, IByteArrayUnifier expCtxWay) {
+    ByteArrayUnifier abUnifier = hollowNodes.getByteArrayUnifier();
+
+    // read turn restrictions
+    while (mc.readBoolean()) {
+      TurnRestriction tr = new TurnRestriction();
+      tr.exceptions = mc.readShort();
+      tr.isPositive = mc.readBoolean();
+      tr.fromLon = mc.readInt();
+      tr.fromLat = mc.readInt();
+      tr.toLon = mc.readInt();
+      tr.toLat = mc.readInt();
+      addTurnRestriction(tr);
     }
 
-    public OsmNode(int ilon, int ilat) {
-        this.ilon = ilon;
-        this.ilat = ilat;
+    selev = mc.readShort();
+    int nodeDescSize = mc.readVarLengthUnsigned();
+    nodeDescription = nodeDescSize == 0 ? null : mc.readUnified(nodeDescSize, abUnifier);
+
+    while (mc.hasMoreData()) {
+      // read link data
+      int endPointer = mc.getEndPointer();
+      int linklon = ilon + mc.readVarLengthSigned();
+      int linklat = ilat + mc.readVarLengthSigned();
+      int sizecode = mc.readVarLengthUnsigned();
+      boolean isReverse = (sizecode & 1) != 0;
+      byte[] description = null;
+      int descSize = sizecode >> 1;
+      if (descSize > 0) {
+        description = mc.readUnified(descSize, expCtxWay);
+      }
+      byte[] geometry = mc.readDataUntil(endPointer);
+
+      addLink(linklon, linklat, description, geometry, hollowNodes, isReverse);
+    }
+    hollowNodes.remove(this);
+  }
+
+  public void addLink(int linklon, int linklat, byte[] description, byte[] geometry, OsmNodesMap hollowNodes, boolean isReverse) {
+    if (linklon == ilon && linklat == ilat) {
+      return; // skip self-ref
     }
 
-    public OsmNode(long id) {
-        this.ilon = (int) (id >> 32);
-        this.ilat = (int) ((-1) & id);
-    }
+    OsmNode tn = null; // find the target node
+    OsmLink link = null;
 
-    @Override // btools.mapaccess.OsmPos
-    public final int getILat() {
-        return this.ilat;
-    }
-
-    @Override // btools.mapaccess.OsmPos
-    public final int getILon() {
-        return this.ilon;
-    }
-
-    @Override // btools.mapaccess.OsmPos
-    public final short getSElev() {
-        return this.selev;
-    }
-
-    @Override // btools.mapaccess.OsmPos
-    public final double getElev() {
-        return ((double) this.selev) / 4.0d;
-    }
-
-    public final void addLink(OsmLink link, boolean isReverse, OsmNode tn) {
-        if (link == this.firstlink) {
-            throw new IllegalArgumentException("UUUUPS");
+    // ...in our known links
+    for (OsmLink l = firstlink; l != null; l = l.getNext(this)) {
+      OsmNode t = l.getTarget(this);
+      if (t.ilon == linklon && t.ilat == linklat) {
+        tn = t;
+        if (isReverse || (l.descriptionBitmap == null && !l.isReverse(this))) {
+          link = l; // the correct one that needs our data
+          break;
         }
-        if (isReverse) {
-            link.n1 = tn;
-            link.n2 = this;
-            link.next = tn.firstlink;
-            link.previous = this.firstlink;
-            tn.firstlink = link;
-            this.firstlink = link;
-            return;
-        }
-        link.n1 = this;
-        link.n2 = tn;
-        link.next = this.firstlink;
-        link.previous = tn.firstlink;
-        tn.firstlink = link;
-        this.firstlink = link;
+      }
     }
+    if (tn == null) { // .. not found, then check the hollow nodes
+      tn = hollowNodes.get(linklon, linklat); // target node
+      if (tn == null) { // node not yet known, create a new hollow proxy
+        tn = new OsmNode(linklon, linklat);
+        tn.setHollow();
+        hollowNodes.put(tn);
+        addLink(link = tn, isReverse, tn); // technical inheritance: link instance in node
+      }
+    }
+    if (link == null) {
+      addLink(link = new OsmLink(), isReverse, tn);
+    }
+    if (!isReverse) {
+      link.descriptionBitmap = description;
+      link.geometry = geometry;
+    }
+  }
 
-    @Override // btools.mapaccess.OsmPos
-    public final int calcDistance(OsmPos p) {
-        return (int) Math.max(1.0d, Math.round(CheapRuler.distance(this.ilon, this.ilat, p.getILon(), p.getILat())));
-    }
 
-    public String toString() {
-        return "n_" + (this.ilon - 180000000) + "_" + (this.ilat - 90000000);
-    }
+  public final boolean isHollow() {
+    return selev == -12345;
+  }
 
-    public final void parseNodeBody(MicroCache mc, OsmNodesMap hollowNodes, IByteArrayUnifier expCtxWay) {
-        if (mc instanceof MicroCache2) {
-            parseNodeBody2((MicroCache2) mc, hollowNodes, expCtxWay);
-        } else {
-            throw new IllegalArgumentException("unknown cache version: " + String.valueOf(mc.getClass()));
-        }
-    }
+  public final void setHollow() {
+    selev = -12345;
+  }
 
-    public final void parseNodeBody2(MicroCache2 mc, OsmNodesMap hollowNodes, IByteArrayUnifier expCtxWay) {
-        ByteArrayUnifier abUnifier = hollowNodes.getByteArrayUnifier();
-        while (mc.readBoolean()) {
-            TurnRestriction tr = new TurnRestriction();
-            tr.exceptions = mc.readShort();
-            tr.isPositive = mc.readBoolean();
-            tr.fromLon = mc.readInt();
-            tr.fromLat = mc.readInt();
-            tr.toLon = mc.readInt();
-            tr.toLat = mc.readInt();
-            addTurnRestriction(tr);
-        }
-        this.selev = mc.readShort();
-        int nodeDescSize = mc.readVarLengthUnsigned();
-        this.nodeDescription = nodeDescSize == 0 ? null : mc.readUnified(nodeDescSize, abUnifier);
-        while (mc.hasMoreData()) {
-            int endPointer = mc.getEndPointer();
-            int linklon = this.ilon + mc.readVarLengthSigned();
-            int linklat = this.ilat + mc.readVarLengthSigned();
-            int sizecode = mc.readVarLengthUnsigned();
-            boolean isReverse = (sizecode & 1) != 0;
-            byte[] description = null;
-            int descSize = sizecode >> 1;
-            if (descSize > 0) {
-                description = mc.readUnified(descSize, expCtxWay);
-            }
-            byte[] geometry = mc.readDataUntil(endPointer);
-            addLink(linklon, linklat, description, geometry, hollowNodes, isReverse);
-        }
-        hollowNodes.remove(this);
-    }
+  public final long getIdFromPos() {
+    return ((long) ilon) << 32 | ilat;
+  }
 
-    public void addLink(int linklon, int linklat, byte[] description, byte[] geometry, OsmNodesMap hollowNodes, boolean isReverse) {
-        if (linklon == this.ilon && linklat == this.ilat) {
-            return;
+  public void vanish() {
+    if (!isHollow()) {
+      OsmLink l = firstlink;
+      while (l != null) {
+        OsmNode target = l.getTarget(this);
+        OsmLink nextLink = l.getNext(this);
+        if (!target.isHollow()) {
+          unlinkLink(l);
+          if (!l.isLinkUnused()) {
+            target.unlinkLink(l);
+          }
         }
-        OsmNode tn = null;
-        OsmLink link = null;
-        OsmLink l = this.firstlink;
-        while (l != null) {
-            OsmNode t = l.getTarget(this);
-            if (t.ilon == linklon && t.ilat == linklat) {
-                tn = t;
-                if (isReverse || (l.descriptionBitmap == null && !l.isReverse(this))) {
-                    link = l;
-                    break;
-                }
-            }
-            l = l.getNext(this);
-        }
-        if (tn == null && (tn = hollowNodes.get(linklon, linklat)) == null) {
-            tn = new OsmNode(linklon, linklat);
-            tn.setHollow();
-            hollowNodes.put(tn);
-            link = tn;
-            addLink(tn, isReverse, tn);
-        }
-        if (link == null) {
-            OsmLink osmLink = new OsmLink();
-            link = osmLink;
-            addLink(osmLink, isReverse, tn);
-        }
-        if (!isReverse) {
-            link.descriptionBitmap = description;
-            link.geometry = geometry;
-        }
+        l = nextLink;
+      }
     }
+  }
 
-    public final boolean isHollow() {
-        return this.selev == -12345;
-    }
+  public final void unlinkLink(OsmLink link) {
+    OsmLink n = link.clear(this);
 
-    public final void setHollow() {
-        this.selev = (short) -12345;
+    if (link == firstlink) {
+      firstlink = n;
+      return;
     }
-
-    @Override // btools.mapaccess.OsmPos
-    public final long getIdFromPos() {
-        return (((long) this.ilon) << 32) | ((long) this.ilat);
-    }
-
-    public void vanish() {
-        if (!isHollow()) {
-            OsmLink l = this.firstlink;
-            while (l != null) {
-                OsmNode target = l.getTarget(this);
-                OsmLink nextLink = l.getNext(this);
-                if (!target.isHollow()) {
-                    unlinkLink(l);
-                    if (!l.isLinkUnused()) {
-                        target.unlinkLink(l);
-                    }
-                }
-                l = nextLink;
-            }
+    OsmLink l = firstlink;
+    while (l != null) {
+      // if ( l.isReverse( this ) )
+      if (l.n1 != this && l.n1 != null) { // isReverse inline
+        OsmLink nl = l.previous;
+        if (nl == link) {
+          l.previous = n;
+          return;
         }
-    }
-
-    public final void unlinkLink(OsmLink link) {
-        OsmLink n = link.clear(this);
-        if (link == this.firstlink) {
-            this.firstlink = n;
-            return;
+        l = nl;
+      } else if (l.n2 != this && l.n2 != null) {
+        OsmLink nl = l.next;
+        if (nl == link) {
+          l.next = n;
+          return;
         }
-        OsmLink l = this.firstlink;
-        while (l != null) {
-            if (l.n1 != this && l.n1 != null) {
-                OsmLink nl = l.previous;
-                if (nl == link) {
-                    l.previous = n;
-                    return;
-                }
-                l = nl;
-            } else if (l.n2 != this && l.n2 != null) {
-                OsmLink nl2 = l.next;
-                if (nl2 == link) {
-                    l.next = n;
-                    return;
-                }
-                l = nl2;
-            } else {
-                throw new IllegalArgumentException("unlinkLink: unknown source");
-            }
-        }
+        l = nl;
+      } else {
+        throw new IllegalArgumentException("unlinkLink: unknown source");
+      }
     }
+  }
 
-    public final boolean equals(Object o) {
-        return ((OsmNode) o).ilon == this.ilon && ((OsmNode) o).ilat == this.ilat;
-    }
 
-    public final int hashCode() {
-        return this.ilon + this.ilat;
-    }
+  @Override
+  public final boolean equals(Object o) {
+    return ((OsmNode) o).ilon == ilon && ((OsmNode) o).ilat == ilat;
+  }
+
+  @Override
+  public final int hashCode() {
+    return ilon + ilat;
+  }
 }

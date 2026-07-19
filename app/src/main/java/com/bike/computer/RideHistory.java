@@ -37,17 +37,16 @@ public final class RideHistory {
     }
 
     public final List<RideSummary> all() {
-        Object objM118constructorimpl;
+        List<RideSummary> objM118constructorimpl;
         File f = new File(FILE);
         if (!f.exists()) {
             return CollectionsKt.emptyList();
         }
         try {
-            Result.Companion companion = Result.INSTANCE;
             RideHistory $this$all_u24lambda_u241 = this;
-            JSONArray a = new JSONArray(FilesKt.readText$default(f, null, 1, null));
+            JSONArray a = new JSONArray(FilesKt.readText(f, kotlin.text.Charsets.UTF_8));
             Iterable $this$map$iv = RangesKt.until(0, a.length());
-            Collection destination$iv$iv = new ArrayList(CollectionsKt.collectionSizeOrDefault($this$map$iv, 10));
+            Collection<RideSummary> destination$iv$iv = new ArrayList<>(CollectionsKt.collectionSizeOrDefault($this$map$iv, 10));
             Iterator<Integer> it = $this$map$iv.iterator();
             while (it.hasNext()) {
                 int item$iv$iv = ((IntIterator) it).nextInt();
@@ -55,20 +54,15 @@ public final class RideHistory {
                 Intrinsics.checkNotNullExpressionValue(jSONObject, "getJSONObject(...)");
                 destination$iv$iv.add($this$all_u24lambda_u241.fromJson(jSONObject));
             }
-            objM118constructorimpl = Result.m118constructorimpl((List) destination$iv$iv);
+            objM118constructorimpl = (List<RideSummary>) destination$iv$iv;
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        List listEmptyList = CollectionsKt.emptyList();
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
-            objM118constructorimpl = listEmptyList;
+            objM118constructorimpl = CollectionsKt.emptyList();
         }
         Iterable $this$sortedByDescending$iv = (Iterable) objM118constructorimpl;
         return CollectionsKt.sortedWith($this$sortedByDescending$iv, new Comparator() { // from class: com.bike.computer.RideHistory$all$$inlined$sortedByDescending$1
             /* JADX WARN: Multi-variable type inference failed */
             @Override // java.util.Comparator
-            public final int compare(T t, T t2) {
+            public final int compare(Object t, Object t2) {
                 RideSummary it2 = (RideSummary) t2;
                 RideSummary it3 = (RideSummary) t;
                 return ComparisonsKt.compareValues(Long.valueOf(it2.getStartMs()), Long.valueOf(it3.getStartMs()));
@@ -121,7 +115,6 @@ public final class RideHistory {
     public final void delete(long startMs) {
         Object element$iv;
         String it;
-        Object objM118constructorimpl;
         Iterable $this$firstOrNull$iv = all();
         Iterator it2 = $this$firstOrNull$iv.iterator();
         while (true) {
@@ -139,13 +132,9 @@ public final class RideHistory {
         if (rideSummary != null && (it = rideSummary.getGpx()) != null) {
             RideHistory rideHistory = INSTANCE;
             try {
-                Result.Companion companion = Result.INSTANCE;
-                objM118constructorimpl = Result.m118constructorimpl(Boolean.valueOf(new File(GPX_DIR, it).delete()));
+                new File(GPX_DIR, it).delete();
             } catch (Throwable th) {
-                Result.Companion companion2 = Result.INSTANCE;
-                objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
             }
-            Result.m117boximpl(objM118constructorimpl);
         }
         Iterable $this$filter$iv = all();
         Collection destination$iv$iv = new ArrayList();
@@ -230,27 +219,31 @@ public final class RideHistory {
     public static final boolean reconcile$lambda$12(File f) {
         String name = f.getName();
         Intrinsics.checkNotNullExpressionValue(name, "getName(...)");
-        if (!StringsKt.startsWith$default(name, "ride_", false, 2, (Object) null)) {
+        if (!StringsKt.startsWith(name, "ride_", false)) {
             return false;
         }
         String name2 = f.getName();
         Intrinsics.checkNotNullExpressionValue(name2, "getName(...)");
-        return StringsKt.endsWith$default(name2, ".gpx", false, 2, (Object) null);
+        return StringsKt.endsWith(name2, ".gpx", false);
     }
 
     private final void writeAll(List<RideSummary> list) {
         JSONArray arr = new JSONArray();
         List<RideSummary> $this$sortedByDescending$iv = list;
-        for (RideSummary s : CollectionsKt.sortedWith($this$sortedByDescending$iv, new Comparator() { // from class: com.bike.computer.RideHistory$writeAll$$inlined$sortedByDescending$1
+        for (RideSummary s : CollectionsKt.sortedWith($this$sortedByDescending$iv, new Comparator<RideSummary>() { // from class: com.bike.computer.RideHistory$writeAll$$inlined$sortedByDescending$1
             /* JADX WARN: Multi-variable type inference failed */
             @Override // java.util.Comparator
-            public final int compare(T t, T t2) {
+            public final int compare(RideSummary t, RideSummary t2) {
                 RideSummary it = (RideSummary) t2;
                 RideSummary it2 = (RideSummary) t;
                 return ComparisonsKt.compareValues(Long.valueOf(it.getStartMs()), Long.valueOf(it2.getStartMs()));
             }
         })) {
-            arr.put(toJson(s));
+            try {
+                arr.put(toJson(s));
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
         File f = new File(FILE);
         File parentFile = f.getParentFile();
@@ -258,22 +251,18 @@ public final class RideHistory {
             parentFile.mkdirs();
         }
         try {
-            Result.Companion companion = Result.INSTANCE;
             RideHistory rideHistory = this;
             File tmp = new File("/sdcard/BikeComputer/rides.json.tmp");
             String string = arr.toString();
             Intrinsics.checkNotNullExpressionValue(string, "toString(...)");
-            FilesKt.writeText$default(tmp, string, null, 2, null);
+            FilesKt.writeText(tmp, string, kotlin.text.Charsets.UTF_8);
             if (!tmp.renameTo(f)) {
                 String string2 = arr.toString();
                 Intrinsics.checkNotNullExpressionValue(string2, "toString(...)");
-                FilesKt.writeText$default(f, string2, null, 2, null);
+                FilesKt.writeText(f, string2, kotlin.text.Charsets.UTF_8);
                 tmp.delete();
             }
-            Result.m118constructorimpl(Unit.INSTANCE);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
     }
 
@@ -291,7 +280,7 @@ public final class RideHistory {
         return CollectionsKt.sortedWith($this$sortedBy$iv, new Comparator() { // from class: com.bike.computer.RideHistory$forRoute$$inlined$sortedBy$1
             /* JADX WARN: Multi-variable type inference failed */
             @Override // java.util.Comparator
-            public final int compare(T t, T t2) {
+            public final int compare(Object t, Object t2) {
                 RideSummary it2 = (RideSummary) t;
                 RideSummary it3 = (RideSummary) t2;
                 return ComparisonsKt.compareValues(Long.valueOf(it2.getMovingMs()), Long.valueOf(it3.getMovingMs()));

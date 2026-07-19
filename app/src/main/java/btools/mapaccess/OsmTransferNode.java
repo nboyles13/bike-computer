@@ -1,9 +1,16 @@
+/**
+ * Container for link between two Osm nodes
+ *
+ * @author ab
+ */
 package btools.mapaccess;
 
-/* JADX INFO: loaded from: classes.dex */
+
 public final class OsmTransferNode {
-    public int ilat;
-    public int ilon;
-    public OsmTransferNode next;
-    public short selev;
+  public OsmTransferNode next;
+
+  public int ilon;
+  public int ilat;
+  public short selev;
+
 }

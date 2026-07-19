@@ -49,7 +49,7 @@ public final class MainActivity$conn$1 implements ServiceConnection {
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.MainActivity$conn$1$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                MainActivity.access$onRideUpdate(this$0);
+                this$0.onRideUpdate();
             }
         });
         return Unit.INSTANCE;

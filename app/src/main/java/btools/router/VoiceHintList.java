@@ -1,46 +1,61 @@
+/**
+ * Container for a voice hint
+ * (both input- and result data for voice hint processing)
+ *
+ * @author ab
+ */
 package btools.router;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/* JADX INFO: loaded from: classes.dex */
 public class VoiceHintList {
-    static final int TRANS_MODE_BIKE = 2;
-    static final int TRANS_MODE_CAR = 3;
-    static final int TRANS_MODE_FOOT = 1;
-    static final int TRANS_MODE_NONE = 0;
-    int turnInstructionMode;
-    private int transportMode = 2;
-    List<VoiceHint> list = new ArrayList();
 
-    public void setTransportMode(boolean isCar, boolean isBike) {
-        this.transportMode = isCar ? 3 : isBike ? 2 : 1;
-    }
+  static final int TRANS_MODE_NONE = 0;
+  static final int TRANS_MODE_FOOT = 1;
+  static final int TRANS_MODE_BIKE = 2;
+  static final int TRANS_MODE_CAR  = 3;
 
-    public void setTransportMode(int mode) {
-        this.transportMode = mode;
-    }
+  private int transportMode = TRANS_MODE_BIKE;
+  int turnInstructionMode;
+  List<VoiceHint> list = new ArrayList<>();
 
-    public String getTransportMode() {
-        switch (this.transportMode) {
-            case 1:
-                return "foot";
-            case 2:
-            default:
-                return "bike";
-            case 3:
-                return "car";
-        }
-    }
+  public void setTransportMode(boolean isCar, boolean isBike) {
+    transportMode = isCar ? TRANS_MODE_CAR : (isBike ? TRANS_MODE_BIKE : TRANS_MODE_FOOT);
+  }
 
-    public int transportMode() {
-        return this.transportMode;
-    }
+  public void setTransportMode(int mode) {
+    transportMode = mode;
+  }
 
-    public int getLocusRouteType() {
-        if (this.transportMode == 3) {
-            return 0;
-        }
-        return this.transportMode == 2 ? 5 : 3;
+  public String getTransportMode() {
+    String ret;
+    switch (transportMode) {
+      case TRANS_MODE_FOOT:
+        ret = "foot";
+        break;
+      case TRANS_MODE_CAR:
+        ret = "car";
+        break;
+      case TRANS_MODE_BIKE:
+      default:
+        ret = "bike";
+        break;
     }
+    return ret;
+  }
+
+  public int transportMode() {
+    return transportMode;
+  }
+
+  public int getLocusRouteType() {
+    if (transportMode == TRANS_MODE_CAR) {
+      return 0;
+    }
+    if (transportMode == TRANS_MODE_BIKE) {
+      return 5;
+    }
+    return 3; // foot
+  }
 }

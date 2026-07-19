@@ -104,17 +104,17 @@ public final class RideService extends Service implements LocationListener {
     private final Lazy sensorMgr = LazyKt.lazy(new Function0() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda6
         @Override // kotlin.jvm.functions.Function0
         public final Object invoke() {
-            return RideService.sensorMgr_delegate$lambda$1(this.f$0);
+            return RideService.sensorMgr_delegate$lambda$1(RideService.this);
         }
     });
     private double baroAltM = Double.NaN;
     private final ArrayDeque<double[]> gradeWin = new ArrayDeque<>();
-    private final RideService$baroListener$1 baroListener = new SensorEventListener() { // from class: com.bike.computer.RideService$baroListener$1
+    private final SensorEventListener baroListener = new SensorEventListener() { // from class: com.bike.computer.RideService$baroListener$1
         @Override // android.hardware.SensorEventListener
         public void onSensorChanged(SensorEvent e) {
             Intrinsics.checkNotNullParameter(e, "e");
             double alt = (((double) 1) - Math.pow(((double) e.values[0]) / 1013.25d, 0.19029495718363465d)) * 44330.0d;
-            this.this$0.baroAltM = Double.isNaN(this.this$0.baroAltM) ? alt : (this.this$0.baroAltM * 0.85d) + (0.15d * alt);
+            RideService.this.baroAltM = Double.isNaN(RideService.this.baroAltM) ? alt : (RideService.this.baroAltM * 0.85d) + (0.15d * alt);
         }
 
         @Override // android.hardware.SensorEventListener
@@ -124,7 +124,7 @@ public final class RideService extends Service implements LocationListener {
     private boolean autoPauseEnabled = true;
     private final LedController led = new LedController();
     private boolean ledEnabled = true;
-    private final RideService$batteryReceiver$1 batteryReceiver = new BroadcastReceiver() { // from class: com.bike.computer.RideService$batteryReceiver$1
+    private final BroadcastReceiver batteryReceiver = new BroadcastReceiver() { // from class: com.bike.computer.RideService$batteryReceiver$1
         @Override // android.content.BroadcastReceiver
         public void onReceive(Context c, Intent i) {
             Intrinsics.checkNotNullParameter(c, "c");
@@ -136,9 +136,9 @@ public final class RideService extends Service implements LocationListener {
                 return;
             }
             int pct = (level * 100) / scale;
-            if (pct <= 2 && plugged == 0 && this.this$0.getRecorder().isRecording() && !this.this$0.criticalDone) {
-                this.this$0.criticalDone = true;
-                this.this$0.criticalShutdown();
+            if (pct <= 2 && plugged == 0 && RideService.this.getRecorder().isRecording() && !RideService.this.criticalDone) {
+                RideService.this.criticalDone = true;
+                RideService.this.criticalShutdown();
             }
         }
     };
@@ -272,17 +272,17 @@ public final class RideService extends Service implements LocationListener {
         CyclingSensor it3 = new CyclingSensor(this, new Function1() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda7
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return RideService.onCreate$lambda$4(this.f$0, ((Integer) obj).intValue());
+                return RideService.onCreate$lambda$4(RideService.this, ((Integer) obj).intValue());
             }
         }, new Function1() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda8
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return RideService.onCreate$lambda$5(this.f$0, ((Integer) obj).intValue());
+                return RideService.onCreate$lambda$5(RideService.this, ((Integer) obj).intValue());
             }
         }, new Function1() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda9
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return RideService.onCreate$lambda$6(this.f$0, (String) obj);
+                return RideService.onCreate$lambda$6(RideService.this, (String) obj);
             }
         });
         it3.start();
@@ -324,12 +324,8 @@ public final class RideService extends Service implements LocationListener {
     /* JADX INFO: Access modifiers changed from: private */
     public final void criticalShutdown() {
         try {
-            Result.Companion companion = Result.INSTANCE;
-            RideService rideService = this;
-            Result.m118constructorimpl(Runtime.getRuntime().exec(new String[]{"su", "-c", "input keyevent 224"}));
+            Runtime.getRuntime().exec(new String[]{"su", "-c", "input keyevent 224"});
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
         this.shutdownSecs = 10;
         this.shutdownHandler = new Handler(getMainLooper());
@@ -343,15 +339,10 @@ public final class RideService extends Service implements LocationListener {
             return;
         }
         try {
-            Result.Companion companion = Result.INSTANCE;
-            RideService $this$tickShutdown_u24lambda_u249 = this;
-            Object systemService = $this$tickShutdown_u24lambda_u249.getSystemService("notification");
+            Object systemService = getSystemService("notification");
             Intrinsics.checkNotNull(systemService, "null cannot be cast to non-null type android.app.NotificationManager");
-            ((NotificationManager) systemService).notify(2, $this$tickShutdown_u24lambda_u249.buildShutdownNotification($this$tickShutdown_u24lambda_u249.shutdownSecs));
-            Result.m118constructorimpl(Unit.INSTANCE);
+            ((NotificationManager) systemService).notify(2, buildShutdownNotification(this.shutdownSecs));
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
         this.shutdownSecs--;
         Handler handler = this.shutdownHandler;
@@ -359,7 +350,7 @@ public final class RideService extends Service implements LocationListener {
             handler.postDelayed(new Runnable() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda5
                 @Override // java.lang.Runnable
                 public final void run() {
-                    this.f$0.tickShutdown();
+                    RideService.this.tickShutdown();
                 }
             }, 1000L);
         }
@@ -372,15 +363,10 @@ public final class RideService extends Service implements LocationListener {
         }
         this.shutdownHandler = null;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            RideService $this$abortShutdown_u24lambda_u2411 = this;
-            Object systemService = $this$abortShutdown_u24lambda_u2411.getSystemService("notification");
+            Object systemService = getSystemService("notification");
             Intrinsics.checkNotNull(systemService, "null cannot be cast to non-null type android.app.NotificationManager");
             ((NotificationManager) systemService).cancel(2);
-            Result.m118constructorimpl(Unit.INSTANCE);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
     }
 
@@ -389,15 +375,10 @@ public final class RideService extends Service implements LocationListener {
         String strSubstringAfterLast$default = null;
         this.shutdownHandler = null;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            RideService $this$doShutdown_u24lambda_u2412 = this;
-            Object systemService = $this$doShutdown_u24lambda_u2412.getSystemService("notification");
+            Object systemService = getSystemService("notification");
             Intrinsics.checkNotNull(systemService, "null cannot be cast to non-null type android.app.NotificationManager");
             ((NotificationManager) systemService).cancel(2);
-            Result.m118constructorimpl(Unit.INSTANCE);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
         RideRecorder rec = getRecorder();
         if (rec.getStartMs() > 0 && rec.getPoints() >= 2) {
@@ -409,43 +390,20 @@ public final class RideService extends Service implements LocationListener {
         String path = stopRecording();
         if (summary != null) {
             try {
-                Result.Companion companion3 = Result.INSTANCE;
-                RideService rideService = this;
                 RideHistory rideHistory = RideHistory.INSTANCE;
                 if (path != null) {
-                    try {
-                        strSubstringAfterLast$default = StringsKt.substringAfterLast$default(path, '/', (String) null, 2, (Object) null);
-                    } catch (Throwable th2) {
-                        th = th2;
-                        Result.Companion companion4 = Result.INSTANCE;
-                        Result.m118constructorimpl(ResultKt.createFailure(th));
-                        new Thread(new Runnable() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda4
-                            @Override // java.lang.Runnable
-                            public final void run() {
-                                RideService.doShutdown$lambda$17(this.f$0);
-                            }
-                        }).start();
-                    }
-                    try {
-                        rideHistory.add(summary.copy((12287 & 1) != 0 ? summary.startMs : 0L, (12287 & 2) != 0 ? summary.route : null, (12287 & 4) != 0 ? summary.distanceM : 0.0d, (12287 & 8) != 0 ? summary.movingMs : 0L, (12287 & 16) != 0 ? summary.avgMps : 0.0f, (12287 & 32) != 0 ? summary.maxMps : 0.0f, (12287 & 64) != 0 ? summary.hrAvg : 0, (12287 & 128) != 0 ? summary.hrMax : 0, (12287 & 256) != 0 ? summary.ascentM : 0.0d, (12287 & 512) != 0 ? summary.powerAvg : 0, (12287 & 1024) != 0 ? summary.powerMax : 0, (12287 & 2048) != 0 ? summary.gpx : strSubstringAfterLast$default, (12287 & 4096) != 0 ? summary.uploaded : false, (12287 & 8192) != 0 ? summary.name : null));
-                        Result.m118constructorimpl(Unit.INSTANCE);
-                    } catch (Throwable th3) {
-                        th = th3;
-                        Result.Companion companion42 = Result.INSTANCE;
-                        Result.m118constructorimpl(ResultKt.createFailure(th));
-                    }
+                    strSubstringAfterLast$default = StringsKt.substringAfterLast(path, '/', path);
+                    rideHistory.add(summary.copy((12287 & 1) != 0 ? summary.startMs : 0L, (12287 & 2) != 0 ? summary.route : null, (12287 & 4) != 0 ? summary.distanceM : 0.0d, (12287 & 8) != 0 ? summary.movingMs : 0L, (12287 & 16) != 0 ? summary.avgMps : 0.0f, (12287 & 32) != 0 ? summary.maxMps : 0.0f, (12287 & 64) != 0 ? summary.hrAvg : 0, (12287 & 128) != 0 ? summary.hrMax : 0, (12287 & 256) != 0 ? summary.ascentM : 0.0d, (12287 & 512) != 0 ? summary.powerAvg : 0, (12287 & 1024) != 0 ? summary.powerMax : 0, (12287 & 2048) != 0 ? summary.gpx : strSubstringAfterLast$default, (12287 & 4096) != 0 ? summary.uploaded : false, (12287 & 8192) != 0 ? summary.name : null));
                 } else {
                     rideHistory.add(summary.copy((12287 & 1) != 0 ? summary.startMs : 0L, (12287 & 2) != 0 ? summary.route : null, (12287 & 4) != 0 ? summary.distanceM : 0.0d, (12287 & 8) != 0 ? summary.movingMs : 0L, (12287 & 16) != 0 ? summary.avgMps : 0.0f, (12287 & 32) != 0 ? summary.maxMps : 0.0f, (12287 & 64) != 0 ? summary.hrAvg : 0, (12287 & 128) != 0 ? summary.hrMax : 0, (12287 & 256) != 0 ? summary.ascentM : 0.0d, (12287 & 512) != 0 ? summary.powerAvg : 0, (12287 & 1024) != 0 ? summary.powerMax : 0, (12287 & 2048) != 0 ? summary.gpx : strSubstringAfterLast$default, (12287 & 4096) != 0 ? summary.uploaded : false, (12287 & 8192) != 0 ? summary.name : null));
-                    Result.m118constructorimpl(Unit.INSTANCE);
                 }
-            } catch (Throwable th4) {
-                th = th4;
+            } catch (Throwable th) {
             }
         }
         new Thread(new Runnable() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda4
             @Override // java.lang.Runnable
             public final void run() {
-                RideService.doShutdown$lambda$17(this.f$0);
+                RideService.doShutdown$lambda$17(RideService.this);
             }
         }).start();
     }
@@ -453,33 +411,24 @@ public final class RideService extends Service implements LocationListener {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void doShutdown$lambda$17(RideService this$0) {
         try {
-            Result.Companion companion = Result.INSTANCE;
-            Result.m118constructorimpl(Integer.valueOf(Runtime.getRuntime().exec(new String[]{"su", "-c", "sync"}).waitFor()));
+            Runtime.getRuntime().exec(new String[]{"su", "-c", "sync"}).waitFor();
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
         try {
             Thread.sleep(1500L);
         } catch (Exception e) {
         }
         try {
-            Result.Companion companion3 = Result.INSTANCE;
-            Result.m118constructorimpl(Integer.valueOf(Runtime.getRuntime().exec(new String[]{"su", "-c", "svc power shutdown"}).waitFor()));
+            Runtime.getRuntime().exec(new String[]{"su", "-c", "svc power shutdown"}).waitFor();
         } catch (Throwable th2) {
-            Result.Companion companion4 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th2));
         }
         try {
             Thread.sleep(1500L);
         } catch (Exception e2) {
         }
         try {
-            Result.Companion companion5 = Result.INSTANCE;
-            Result.m118constructorimpl(Integer.valueOf(Runtime.getRuntime().exec(new String[]{"su", "-c", "reboot -p"}).waitFor()));
+            Runtime.getRuntime().exec(new String[]{"su", "-c", "reboot -p"}).waitFor();
         } catch (Throwable th3) {
-            Result.Companion companion6 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th3));
         }
     }
 
@@ -494,7 +443,7 @@ public final class RideService extends Service implements LocationListener {
         return new HrSensor(this, new Function1() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda10
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return RideService.newHrSensor$lambda$18(this.f$0, ((Integer) obj).intValue());
+                return RideService.newHrSensor$lambda$18(RideService.this, ((Integer) obj).intValue());
             }
         }, new Function1() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda11
             @Override // kotlin.jvm.functions.Function1
@@ -504,7 +453,7 @@ public final class RideService extends Service implements LocationListener {
         }, new Function1() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda12
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return RideService.newHrSensor$lambda$20(this.f$0, (String) obj);
+                return RideService.newHrSensor$lambda$20(RideService.this, (String) obj);
             }
         });
     }
@@ -609,7 +558,7 @@ public final class RideService extends Service implements LocationListener {
     }
 
     @Override // android.app.Service
-    public int onStartCommand(Intent intent, int flags, int startId) throws IOException {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         if (Intrinsics.areEqual(intent != null ? intent.getAction() : null, ACTION_CANCEL_SHUTDOWN)) {
             abortShutdown();
             return 1;
@@ -618,7 +567,7 @@ public final class RideService extends Service implements LocationListener {
             this.trail.clear();
             this.lastTrailLoc = null;
             getRecorder().setMaxHrForZones(Prefs.INSTANCE.maxHr(this));
-            getRecorder().start();
+            try { getRecorder().start(); } catch (java.io.IOException e) { throw new RuntimeException(e); }
             startForeground(1, buildNotification());
             acquireWake();
             updateLed();
@@ -732,7 +681,8 @@ public final class RideService extends Service implements LocationListener {
         this.manualPause = false;
         this.lowSpeedSince = 0L;
         this.led.off();
-        String path = getRecorder().stop();
+        String path;
+        try { path = getRecorder().stop(); } catch (java.io.IOException e) { throw new RuntimeException(e); }
         this.trail.clear();
         this.lastTrailLoc = null;
         releaseWake();
@@ -743,7 +693,7 @@ public final class RideService extends Service implements LocationListener {
     }
 
     @Override // android.location.LocationListener
-    public void onLocationChanged(Location loc) throws IOException {
+    public void onLocationChanged(Location loc) {
         Location prev;
         Intrinsics.checkNotNullParameter(loc, "loc");
         Location prevLoc = this.lastLocation;
@@ -757,7 +707,7 @@ public final class RideService extends Service implements LocationListener {
         updateGrade(loc, prevLoc);
         autoPauseCheck();
         if (getRecorder().isRecording()) {
-            getRecorder().add(loc, this.lastHr, this.curPower, this.curCadence, (!getHasBaro() || Double.isNaN(this.baroAltM)) ? null : Double.valueOf(this.baroAltM));
+            try { getRecorder().add(loc, this.lastHr, this.curPower, this.curCadence, (!getHasBaro() || Double.isNaN(this.baroAltM)) ? null : Double.valueOf(this.baroAltM)); } catch (java.io.IOException e) { throw new RuntimeException(e); }
         }
         if (getRecorder().isRecording() && ((prev = this.lastTrailLoc) == null || prev.distanceTo(loc) > 4.0f)) {
             this.trail.add(new double[]{loc.getLongitude(), loc.getLatitude()});
@@ -805,7 +755,7 @@ public final class RideService extends Service implements LocationListener {
     }
 
     @Override // android.app.Service
-    public void onDestroy() throws IOException {
+    public void onDestroy() {
         super.onDestroy();
         setWifi(true);
         try {
@@ -827,7 +777,7 @@ public final class RideService extends Service implements LocationListener {
         }
         this.led.close();
         if (getRecorder().isRecording()) {
-            getRecorder().stop();
+            try { getRecorder().stop(); } catch (java.io.IOException e) { throw new RuntimeException(e); }
         }
         releaseWake();
         HrSensor hrSensor = this.hrSensor;
@@ -844,7 +794,7 @@ public final class RideService extends Service implements LocationListener {
         new Thread(new Runnable() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda3
             @Override // java.lang.Runnable
             public final void run() {
-                RideService.closeOtherApps$lambda$28(this.f$0);
+                RideService.closeOtherApps$lambda$28(RideService.this);
             }
         }).start();
     }
@@ -868,12 +818,12 @@ public final class RideService extends Service implements LocationListener {
                 }
             }));
             if (!pkgs.isEmpty()) {
-                String cmd = CollectionsKt.joinToString$default(pkgs, "\n", null, null, 0, null, new Function1() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda1
+                String cmd = CollectionsKt.joinToString(pkgs, "\n", "", "", -1, "...", new Function1() { // from class: com.bike.computer.RideService$$ExternalSyntheticLambda1
                     @Override // kotlin.jvm.functions.Function1
                     public final Object invoke(Object obj) {
                         return RideService.closeOtherApps$lambda$28$lambda$27((String) obj);
                     }
-                }, 30, null);
+                });
                 Runtime.getRuntime().exec(new String[]{"su", "-c", cmd}).waitFor();
             }
         } catch (Exception e) {

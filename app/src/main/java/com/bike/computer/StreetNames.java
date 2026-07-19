@@ -51,8 +51,8 @@ public final class StreetNames {
         Code decompiled incorrectly, please refer to instructions dump.
     */
     public final String nameAt(double lat, double lon) {
-        byte[] bArr;
-        byte[] blob;
+        byte[] bArr = null;
+        byte[] blob = null;
         Throwable th;
         SQLiteDatabase d = db;
         if (d == null) {
@@ -79,7 +79,7 @@ public final class StreetNames {
                                 throw th;
                             } catch (Throwable th3) {
                                 CloseableKt.closeFinally(cursorRawQuery, th);
-                                throw th3;
+                                throw Sneaky.sneak(th3);
                             }
                         }
                     } else {
@@ -116,16 +116,17 @@ public final class StreetNames {
         if (b.length < 2 || (b[0] & UByte.MAX_VALUE) != 31) {
             return b;
         }
-        GZIPInputStream gZIPInputStream = new GZIPInputStream(new ByteArrayInputStream(b));
         try {
+            GZIPInputStream gZIPInputStream = new GZIPInputStream(new ByteArrayInputStream(b));
             GZIPInputStream g = gZIPInputStream;
             ByteArrayOutputStream o = new ByteArrayOutputStream(b.length * 5);
-            ByteStreamsKt.copyTo$default(g, o, 0, 2, null);
+            ByteStreamsKt.copyTo(g, o, 8192);
             byte[] byteArray = o.toByteArray();
             Intrinsics.checkNotNullExpressionValue(byteArray, "toByteArray(...)");
             CloseableKt.closeFinally(gZIPInputStream, null);
             return byteArray;
-        } finally {
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -430,6 +431,8 @@ public final class StreetNames {
                             i3++;
                             cnt3 = cmd3;
                             i2 = i4 + 1;
+                        } else {
+                            break;
                         }
                     }
                     break;

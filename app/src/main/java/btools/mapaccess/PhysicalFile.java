@@ -1,172 +1,156 @@
+/**
+ * cache for a single square
+ *
+ * @author ab
+ */
 package btools.mapaccess;
 
-import androidx.recyclerview.widget.ItemTouchHelper;
-import btools.codec.DataBuffers;
-import btools.codec.MicroCache;
-import btools.util.ByteDataReader;
-import btools.util.Crc32;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-/* JADX INFO: loaded from: classes.dex */
-public final class PhysicalFile {
-    public long creationTime;
-    public int divisor;
-    public byte elevationType;
-    int[] fileHeaderCrcs;
-    long[] fileIndex = new long[25];
-    String fileName;
-    RandomAccessFile ra;
+import btools.codec.DataBuffers;
+import btools.codec.MicroCache;
+import btools.util.ByteDataReader;
+import btools.util.Crc32;
 
-    public static void main(String[] args) throws Throwable {
-        MicroCache.debug = true;
+final public class PhysicalFile {
+  RandomAccessFile ra = null;
+  long[] fileIndex = new long[25];
+  int[] fileHeaderCrcs;
+
+  public long creationTime;
+
+  String fileName;
+
+  public int divisor = 80;
+  public byte elevationType = 3;
+
+  public static void main(String[] args) {
+    MicroCache.debug = true;
+
+    try {
+      checkFileIntegrity(new File(args[0]));
+    } catch (IOException e) {
+      System.err.println("************************************");
+      e.printStackTrace();
+      System.err.println("************************************");
+    }
+  }
+
+  public static int checkVersionIntegrity(File f) {
+    int version = -1;
+    RandomAccessFile raf = null;
+    try {
+      byte[] iobuffer = new byte[200];
+      raf = new RandomAccessFile(f, "r");
+      raf.readFully(iobuffer, 0, 200);
+      ByteDataReader dis = new ByteDataReader(iobuffer);
+      long lv = dis.readLong();
+      version = (int) (lv >> 48);
+    } catch (IOException e) {
+    } finally {
+      try {
+        if (raf != null) raf.close();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return version;
+  }
+
+  /**
+   * Checks the integrity of the file using the build-in checksums
+   *
+   * @return the error message if file corrupt, else null
+   */
+  public static String checkFileIntegrity(File f) throws IOException {
+    PhysicalFile pf = null;
+    try {
+      DataBuffers dataBuffers = new DataBuffers();
+      pf = new PhysicalFile(f, dataBuffers, -1, -1);
+      int div = pf.divisor;
+      for (int lonDegree = 0; lonDegree < 5; lonDegree++) { // doesn't really matter..
+        for (int latDegree = 0; latDegree < 5; latDegree++) { // ..where on earth we are
+          OsmFile osmf = new OsmFile(pf, lonDegree, latDegree, dataBuffers);
+          if (osmf.hasData())
+            for (int lonIdx = 0; lonIdx < div; lonIdx++)
+              for (int latIdx = 0; latIdx < div; latIdx++)
+                osmf.createMicroCache(lonDegree * div + lonIdx, latDegree * div + latIdx, dataBuffers, null, null, MicroCache.debug, null);
+        }
+      }
+    } finally {
+      if (pf != null)
         try {
-            checkFileIntegrity(new File(args[0]));
-        } catch (IOException e) {
-            System.err.println("************************************");
-            e.printStackTrace();
-            System.err.println("************************************");
+          pf.ra.close();
+        } catch (Exception ee) {
         }
+    }
+    return null;
+  }
+
+  public PhysicalFile(File f, DataBuffers dataBuffers, int lookupVersion, int lookupMinorVersion) throws IOException {
+    fileName = f.getName();
+    byte[] iobuffer = dataBuffers.iobuffer;
+    ra = new RandomAccessFile(f, "r");
+    ra.readFully(iobuffer, 0, 200);
+    int fileIndexCrc = Crc32.crc(iobuffer, 0, 200);
+    ByteDataReader dis = new ByteDataReader(iobuffer);
+    for (int i = 0; i < 25; i++) {
+      long lv = dis.readLong();
+      short readVersion = (short) (lv >> 48);
+      if (i == 0 && lookupVersion != -1 && readVersion != lookupVersion) {
+        throw new IOException("lookup version mismatch (old rd5?) lookups.dat="
+          + lookupVersion + " " + f.getName() + "=" + readVersion);
+      }
+      fileIndex[i] = lv & 0xffffffffffffL;
     }
 
-    public static int checkVersionIntegrity(File f) throws IOException {
-        int version = -1;
-        RandomAccessFile raf = null;
-        try {
-            byte[] iobuffer = new byte[ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION];
-            raf = new RandomAccessFile(f, "r");
-            raf.readFully(iobuffer, 0, ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION);
-            ByteDataReader dis = new ByteDataReader(iobuffer);
-            long lv = dis.readLong();
-            version = (int) (lv >> 48);
-            try {
-                raf.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } catch (IOException e2) {
-            if (raf != null) {
-                try {
-                    raf.close();
-                } catch (IOException e3) {
-                    throw new RuntimeException(e3);
-                }
-            }
-        } catch (Throwable e4) {
-            if (raf != null) {
-                try {
-                    raf.close();
-                } catch (IOException e5) {
-                    throw new RuntimeException(e5);
-                }
-            }
-            throw e4;
-        }
-        return version;
+    // read some extra info from the end of the file, if present
+    long len = ra.length();
+
+    long pos = fileIndex[24];
+    int extraLen = 8 + 26 * 4;
+
+    if (len == pos) return; // old format o.k.
+
+    if ((len-pos) > extraLen) {
+      extraLen++;
     }
 
-    public static String checkFileIntegrity(File f) throws Throwable {
-        PhysicalFile pf = null;
-        try {
-            DataBuffers dataBuffers = new DataBuffers();
-            try {
-                pf = new PhysicalFile(f, dataBuffers, -1, -1);
-                int div = pf.divisor;
-                for (int lonDegree = 0; lonDegree < 5; lonDegree++) {
-                    for (int latDegree = 0; latDegree < 5; latDegree++) {
-                        OsmFile osmf = new OsmFile(pf, lonDegree, latDegree, dataBuffers);
-                        if (osmf.hasData()) {
-                            for (int lonIdx = 0; lonIdx < div; lonIdx++) {
-                                int latIdx = 0;
-                                while (latIdx < div) {
-                                    int latIdx2 = latIdx;
-                                    osmf.createMicroCache((lonDegree * div) + lonIdx, (latDegree * div) + latIdx, dataBuffers, null, null, MicroCache.debug, null);
-                                    latIdx = latIdx2 + 1;
-                                }
-                            }
-                        }
-                    }
-                }
-                try {
-                    pf.ra.close();
-                    return null;
-                } catch (Exception e) {
-                    return null;
-                }
-            } catch (Throwable th) {
-                th = th;
-                Throwable th2 = th;
-                if (pf != null) {
-                    try {
-                        pf.ra.close();
-                        throw th2;
-                    } catch (Exception e2) {
-                        throw th2;
-                    }
-                }
-                throw th2;
-            }
-        } catch (Throwable th3) {
-            th = th3;
-        }
+    if (len < pos + extraLen) { // > is o.k. for future extensions!
+      throw new IOException("file of size " + len + " too short, should be " + (pos + extraLen));
     }
 
-    public PhysicalFile(File f, DataBuffers dataBuffers, int lookupVersion, int lookupMinorVersion) throws IOException {
-        this.ra = null;
-        this.divisor = 80;
-        this.elevationType = (byte) 3;
-        this.fileName = f.getName();
-        byte[] iobuffer = dataBuffers.iobuffer;
-        this.ra = new RandomAccessFile(f, "r");
-        this.ra.readFully(iobuffer, 0, ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION);
-        int fileIndexCrc = Crc32.crc(iobuffer, 0, ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION);
-        ByteDataReader dis = new ByteDataReader(iobuffer);
-        for (int i = 0; i < 25; i++) {
-            long lv = dis.readLong();
-            short readVersion = (short) (lv >> 48);
-            if (i == 0 && lookupVersion != -1 && readVersion != lookupVersion) {
-                throw new IOException("lookup version mismatch (old rd5?) lookups.dat=" + lookupVersion + " " + f.getName() + "=" + ((int) readVersion));
-            }
-            this.fileIndex[i] = 281474976710655L & lv;
-        }
-        long len = this.ra.length();
-        long pos = this.fileIndex[24];
-        if (len == pos) {
-            return;
-        }
-        int extraLen = len - pos > ((long) 112) ? 112 + 1 : 112;
-        if (len < ((long) extraLen) + pos) {
-            throw new IOException("file of size " + len + " too short, should be " + (((long) extraLen) + pos));
-        }
-        this.ra.seek(pos);
-        this.ra.readFully(iobuffer, 0, extraLen);
-        ByteDataReader dis2 = new ByteDataReader(iobuffer);
-        this.creationTime = dis2.readLong();
-        int crcData = dis2.readInt();
-        if (crcData == fileIndexCrc) {
-            this.divisor = 80;
-        } else if ((crcData ^ 2) == fileIndexCrc) {
-            this.divisor = 32;
-        } else {
-            throw new IOException("top index checksum error");
-        }
-        this.fileHeaderCrcs = new int[25];
-        for (int i2 = 0; i2 < 25; i2++) {
-            this.fileHeaderCrcs[i2] = dis2.readInt();
-        }
-        try {
-            this.elevationType = dis2.readByte();
-        } catch (Exception e) {
-        }
-    }
+    ra.seek(pos);
+    ra.readFully(iobuffer, 0, extraLen);
+    dis = new ByteDataReader(iobuffer);
+    creationTime = dis.readLong();
 
-    public void close() {
-        if (this.ra != null) {
-            try {
-                this.ra.close();
-            } catch (Exception e) {
-            }
-        }
+    int crcData = dis.readInt();
+    if (crcData == fileIndexCrc) {
+      divisor = 80; // old format
+    } else if ((crcData ^ 2) == fileIndexCrc) {
+      divisor = 32; // new format
+    } else {
+      throw new IOException("top index checksum error");
     }
+    fileHeaderCrcs = new int[25];
+    for (int i = 0; i < 25; i++) {
+      fileHeaderCrcs[i] = dis.readInt();
+    }
+    try {
+      elevationType = dis.readByte();
+    } catch (Exception e) {}
+  }
+
+  public void close(){
+    if (ra != null) {
+      try {
+        ra.close();
+      } catch (Exception ee) {
+      }
+    }
+  }
+
 }

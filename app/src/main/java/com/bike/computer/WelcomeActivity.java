@@ -58,7 +58,7 @@ public final class WelcomeActivity extends Activity {
     private TextView pwrDot;
     private View pwrRow;
     private TextView pwrVal;
-    private RideService ride;
+    RideService ride;
     private final String ROUTES_DIR = "/sdcard/BikeComputer/routes";
     private final int RECENT_COUNT = 5;
     private final Handler ui = new Handler(Looper.getMainLooper());
@@ -93,7 +93,7 @@ public final class WelcomeActivity extends Activity {
         findViewById(R.id.welcome_settings).setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda2
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                WelcomeActivity.onCreate$lambda$0(this.f$0, view);
+                WelcomeActivity.onCreate$lambda$0(WelcomeActivity.this, view);
             }
         });
     }
@@ -130,7 +130,7 @@ public final class WelcomeActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda8
             @Override // java.lang.Runnable
             public final void run() {
-                WelcomeActivity.maybeAutoSync$lambda$4(this.f$0);
+                WelcomeActivity.maybeAutoSync$lambda$4(WelcomeActivity.this);
             }
         }).start();
     }
@@ -139,21 +139,13 @@ public final class WelcomeActivity extends Activity {
     public static final void maybeAutoSync$lambda$4(final WelcomeActivity this$0) {
         Object objM118constructorimpl;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            Result.m118constructorimpl(Boolean.valueOf(RideHistory.INSTANCE.reconcile()));
+            Boolean.valueOf(RideHistory.INSTANCE.reconcile());
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
         if (Prefs.INSTANCE.driveConnected(this$0)) {
             try {
-                Result.Companion companion3 = Result.INSTANCE;
-                objM118constructorimpl = Result.m118constructorimpl(Integer.valueOf(GoogleDriveClient.INSTANCE.syncRoutes(this$0, this$0.ROUTES_DIR)));
+                objM118constructorimpl = Integer.valueOf(GoogleDriveClient.INSTANCE.syncRoutes(this$0, this$0.ROUTES_DIR));
             } catch (Throwable th2) {
-                Result.Companion companion4 = Result.INSTANCE;
-                objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th2));
-            }
-            if (Result.m124isFailureimpl(objM118constructorimpl)) {
                 objM118constructorimpl = 0;
             }
             final int n = ((Number) objM118constructorimpl).intValue();
@@ -161,7 +153,7 @@ public final class WelcomeActivity extends Activity {
                 this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda1
                     @Override // java.lang.Runnable
                     public final void run() {
-                        WelcomeActivity.maybeAutoSync$lambda$4$lambda$3(this.f$0, n);
+                        WelcomeActivity.maybeAutoSync$lambda$4$lambda$3(this$0, n);
                     }
                 });
             }
@@ -214,7 +206,7 @@ public final class WelcomeActivity extends Activity {
         this.ui.postDelayed(new Runnable() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                this.f$0.tick();
+                WelcomeActivity.this.tick();
             }
         }, 1000L);
     }
@@ -230,7 +222,7 @@ public final class WelcomeActivity extends Activity {
         menuCard("Navigate", R.drawable.ic_search, new Function0() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda3
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return WelcomeActivity.build$lambda$6(this.f$0);
+                return WelcomeActivity.build$lambda$6(WelcomeActivity.this);
             }
         });
         File[] fileArrListFiles = new File(this.ROUTES_DIR).listFiles(new FileFilter() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda4
@@ -263,7 +255,7 @@ public final class WelcomeActivity extends Activity {
         List starred = CollectionsKt.sortedWith($this$sortedBy$iv, new Comparator() { // from class: com.bike.computer.WelcomeActivity$build$$inlined$sortedBy$1
             /* JADX WARN: Multi-variable type inference failed */
             @Override // java.util.Comparator
-            public final int compare(T t, T t2) {
+            public final int compare(Object t, Object t2) {
                 File it2 = (File) t;
                 String lowerCase = FilesKt.getNameWithoutExtension(it2).toLowerCase(Locale.ROOT);
                 Intrinsics.checkNotNullExpressionValue(lowerCase, "toLowerCase(...)");
@@ -292,7 +284,7 @@ public final class WelcomeActivity extends Activity {
         List<File> recent = CollectionsKt.take(CollectionsKt.sortedWith($this$sortedByDescending$iv, new Comparator() { // from class: com.bike.computer.WelcomeActivity$build$$inlined$sortedByDescending$1
             /* JADX WARN: Multi-variable type inference failed */
             @Override // java.util.Comparator
-            public final int compare(T t, T t2) {
+            public final int compare(Object t, Object t2) {
                 File it3 = (File) t2;
                 File it4 = (File) t;
                 return ComparisonsKt.compareValues(Long.valueOf(it3.lastModified()), Long.valueOf(it4.lastModified()));
@@ -318,7 +310,7 @@ public final class WelcomeActivity extends Activity {
         menuCard$default(this, "🏁  Ride history", 0, new Function0() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda5
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return WelcomeActivity.build$lambda$14(this.f$0);
+                return WelcomeActivity.build$lambda$14(WelcomeActivity.this);
             }
         }, 2, null);
         sectionLabel("SENSORS");
@@ -355,7 +347,7 @@ public final class WelcomeActivity extends Activity {
     public static final boolean build$lambda$7(File f) {
         String name = f.getName();
         Intrinsics.checkNotNullExpressionValue(name, "getName(...)");
-        return StringsKt.endsWith$default(name, ".gpx", false, 2, (Object) null);
+        return StringsKt.endsWith(name, ".gpx", false);
     }
 
     /* JADX INFO: Access modifiers changed from: private */
@@ -383,6 +375,8 @@ public final class WelcomeActivity extends Activity {
         } else {
             if ((r != null ? r.getHrDeviceName() : null) == null) {
                 z = false;
+            } else {
+                z = true;
             }
         }
         boolean hrShow = z;
@@ -423,13 +417,13 @@ public final class WelcomeActivity extends Activity {
     }
 
     private final String prettyStatus(String s) {
-        if (s == null || StringsKt.startsWith$default(s, "connecting", false, 2, (Object) null)) {
+        if (s == null || StringsKt.startsWith(s, "connecting", false)) {
             return "Connecting…";
         }
         if (Intrinsics.areEqual(s, "live") || Intrinsics.areEqual(s, "connected")) {
             return "Connected";
         }
-        return Intrinsics.areEqual(s, "BT off") ? "Bluetooth off" : StringsKt.startsWith$default(s, "scanning", false, 2, (Object) null) ? "Scanning…" : Intrinsics.areEqual(s, "disconnected") ? "Disconnected" : s;
+        return Intrinsics.areEqual(s, "BT off") ? "Bluetooth off" : StringsKt.startsWith(s, "scanning", false) ? "Scanning…" : Intrinsics.areEqual(s, "disconnected") ? "Disconnected" : s;
     }
 
     private final void setStatus(TextView dot, TextView value, boolean on, String text, boolean searching) {
@@ -571,7 +565,7 @@ public final class WelcomeActivity extends Activity {
         b.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda10
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                WelcomeActivity.startButton$lambda$21(this.f$0, view);
+                WelcomeActivity.startButton$lambda$21(WelcomeActivity.this, view);
             }
         });
         LinearLayout linearLayout = this.container;
@@ -600,7 +594,7 @@ public final class WelcomeActivity extends Activity {
         c.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda6
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                this.f$0.rideRoute(f);
+                WelcomeActivity.this.rideRoute(f);
             }
         });
         TextView star = new TextView(this);
@@ -611,7 +605,7 @@ public final class WelcomeActivity extends Activity {
         star.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.WelcomeActivity$$ExternalSyntheticLambda7
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                WelcomeActivity.routeRow$lambda$23(this.f$0, name, starredNow, view);
+                WelcomeActivity.routeRow$lambda$23(WelcomeActivity.this, name, starredNow, view);
             }
         });
         c.addView(t);
@@ -628,14 +622,11 @@ public final class WelcomeActivity extends Activity {
     public final void rideRoute(File f) {
         Object objM118constructorimpl;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            WelcomeActivity welcomeActivity = this;
-            objM118constructorimpl = Result.m118constructorimpl(FilesKt.readText$default(f, null, 1, null));
+            objM118constructorimpl = FilesKt.readText(f, kotlin.text.Charsets.UTF_8);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
+            objM118constructorimpl = null;
         }
-        String gpx = (String) (Result.m124isFailureimpl(objM118constructorimpl) ? null : objM118constructorimpl);
+        String gpx = (String) objM118constructorimpl;
         if (gpx == null) {
             toast("Couldn't read route");
             return;

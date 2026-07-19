@@ -27,14 +27,14 @@ public enum Metric {
     BATTERY("BATTERY", "%", "BATT");
 
     private final String label;
-    private final String short;
+    private final String shortLabel;
     private final String unit;
-    private static final /* synthetic */ EnumEntries $ENTRIES = EnumEntriesKt.enumEntries($VALUES);
+    private static final /* synthetic */ EnumEntries $ENTRIES = EnumEntriesKt.enumEntries(values());
 
     Metric(String label, String unit, String str) {
         this.label = label;
         this.unit = unit;
-        this.short = str;
+        this.shortLabel = str;
     }
 
     public final String getLabel() {
@@ -42,7 +42,7 @@ public enum Metric {
     }
 
     public final String getShort() {
-        return this.short;
+        return this.shortLabel;
     }
 
     public final String getUnit() {

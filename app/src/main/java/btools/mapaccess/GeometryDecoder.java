@@ -1,66 +1,69 @@
+/**
+ * Container for link between two Osm nodes
+ *
+ * @author ab
+ */
 package btools.mapaccess;
 
 import btools.util.ByteDataReader;
 
-/* JADX INFO: loaded from: classes.dex */
+
 public final class GeometryDecoder {
-    private OsmTransferNode firstTransferNode;
-    private byte[] lastGeometry;
-    private boolean lastReverse;
-    private ByteDataReader r = new ByteDataReader(null);
-    private int nCachedNodes = 128;
-    private OsmTransferNode[] cachedNodes = new OsmTransferNode[this.nCachedNodes];
+  private ByteDataReader r = new ByteDataReader(null);
+  private OsmTransferNode[] cachedNodes;
+  private int nCachedNodes = 128;
 
-    public GeometryDecoder() {
-        for (int i = 0; i < this.nCachedNodes; i++) {
-            this.cachedNodes[i] = new OsmTransferNode();
-        }
+  // result-cache
+  private OsmTransferNode firstTransferNode;
+  private boolean lastReverse;
+  private byte[] lastGeometry;
+
+  public GeometryDecoder() {
+    // create some caches
+    cachedNodes = new OsmTransferNode[nCachedNodes];
+    for (int i = 0; i < nCachedNodes; i++) {
+      cachedNodes[i] = new OsmTransferNode();
+    }
+  }
+
+  public OsmTransferNode decodeGeometry(byte[] geometry, OsmNode sourceNode, OsmNode targetNode, boolean reverseLink) {
+    if ((lastGeometry == geometry) && (lastReverse == reverseLink)) {
+      return firstTransferNode;
     }
 
-    public OsmTransferNode decodeGeometry(byte[] geometry, OsmNode sourceNode, OsmNode targetNode, boolean reverseLink) {
-        int idx;
-        OsmTransferNode trans;
-        if (this.lastGeometry == geometry && this.lastReverse == reverseLink) {
-            return this.firstTransferNode;
+    firstTransferNode = null;
+    OsmTransferNode lastTransferNode = null;
+    OsmNode startnode = reverseLink ? targetNode : sourceNode;
+    r.reset(geometry);
+    int olon = startnode.ilon;
+    int olat = startnode.ilat;
+    int oselev = startnode.selev;
+    int idx = 0;
+    while (r.hasMoreData()) {
+      OsmTransferNode trans = idx < nCachedNodes ? cachedNodes[idx++] : new OsmTransferNode();
+      trans.ilon = olon + r.readVarLengthSigned();
+      trans.ilat = olat + r.readVarLengthSigned();
+      trans.selev = (short) (oselev + r.readVarLengthSigned());
+      olon = trans.ilon;
+      olat = trans.ilat;
+      oselev = trans.selev;
+      if (reverseLink) { // reverse chaining
+        trans.next = firstTransferNode;
+        firstTransferNode = trans;
+      } else {
+        trans.next = null;
+        if (lastTransferNode == null) {
+          firstTransferNode = trans;
+        } else {
+          lastTransferNode.next = trans;
         }
-        this.firstTransferNode = null;
-        OsmTransferNode lastTransferNode = null;
-        OsmNode startnode = reverseLink ? targetNode : sourceNode;
-        this.r.reset(geometry);
-        int olon = startnode.ilon;
-        int olat = startnode.ilat;
-        int oselev = startnode.selev;
-        int idx2 = 0;
-        while (this.r.hasMoreData()) {
-            if (idx2 < this.nCachedNodes) {
-                idx = idx2 + 1;
-                trans = this.cachedNodes[idx2];
-            } else {
-                idx = idx2;
-                trans = new OsmTransferNode();
-            }
-            trans.ilon = this.r.readVarLengthSigned() + olon;
-            trans.ilat = this.r.readVarLengthSigned() + olat;
-            trans.selev = (short) (this.r.readVarLengthSigned() + oselev);
-            olon = trans.ilon;
-            olat = trans.ilat;
-            oselev = trans.selev;
-            if (reverseLink) {
-                trans.next = this.firstTransferNode;
-                this.firstTransferNode = trans;
-            } else {
-                trans.next = null;
-                if (lastTransferNode == null) {
-                    this.firstTransferNode = trans;
-                } else {
-                    lastTransferNode.next = trans;
-                }
-                lastTransferNode = trans;
-            }
-            idx2 = idx;
-        }
-        this.lastReverse = reverseLink;
-        this.lastGeometry = geometry;
-        return this.firstTransferNode;
+        lastTransferNode = trans;
+      }
     }
+
+    lastReverse = reverseLink;
+    lastGeometry = geometry;
+
+    return firstTransferNode;
+  }
 }

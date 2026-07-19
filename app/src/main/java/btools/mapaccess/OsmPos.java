@@ -1,16 +1,22 @@
+/**
+ * Interface for a position (OsmNode or OsmPath)
+ *
+ * @author ab
+ */
 package btools.mapaccess;
 
-/* JADX INFO: loaded from: classes.dex */
+
 public interface OsmPos {
-    int calcDistance(OsmPos osmPos);
+  int getILat();
 
-    double getElev();
+  int getILon();
 
-    int getILat();
+  short getSElev();
 
-    int getILon();
+  double getElev();
 
-    long getIdFromPos();
+  int calcDistance(OsmPos p);
 
-    short getSElev();
+  long getIdFromPos();
+
 }

@@ -61,12 +61,8 @@ public final class Bell {
                 prevVol = $am.getStreamVolume(4);
                 Bell bell = INSTANCE;
                 try {
-                    Result.Companion companion = Result.INSTANCE;
                     $am.setStreamVolume(4, $am.getStreamMaxVolume(4), 0);
-                    Result.m118constructorimpl(Unit.INSTANCE);
                 } catch (Throwable th) {
-                    Result.Companion companion2 = Result.INSTANCE;
-                    Result.m118constructorimpl(ResultKt.createFailure(th));
                 }
             } catch (Throwable th2) {
                 if ($am == null || prevVol < 0) {
@@ -74,14 +70,9 @@ public final class Bell {
                 }
                 Bell bell2 = INSTANCE;
                 try {
-                    Result.Companion companion3 = Result.INSTANCE;
                     $am.setStreamVolume(4, prevVol, 0);
-                    Result.m118constructorimpl(Unit.INSTANCE);
                     return;
                 } catch (Throwable th3) {
-                    th = th3;
-                    Result.Companion companion4 = Result.INSTANCE;
-                    Result.m118constructorimpl(ResultKt.createFailure(th));
                 }
             }
         }
@@ -95,22 +86,19 @@ public final class Bell {
         track.write(it, 0, it.length);
         Bell bell3 = INSTANCE;
         try {
-            Result.Companion companion5 = Result.INSTANCE;
-            Result.m118constructorimpl(Integer.valueOf(track.setVolume(AudioTrack.getMaxVolume())));
+            track.setVolume(AudioTrack.getMaxVolume());
         } catch (Throwable th4) {
-            Result.Companion companion6 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th4));
         }
         track.play();
-        Thread.sleep(((((long) it.length) * 1000) / ((long) SR)) + ((long) MapLibreConstants.ANIMATION_DURATION));
+        try {
+            Thread.sleep(((((long) it.length) * 1000) / ((long) SR)) + ((long) MapLibreConstants.ANIMATION_DURATION));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         Bell bell4 = INSTANCE;
         try {
-            Result.Companion companion7 = Result.INSTANCE;
             track.stop();
-            Result.m118constructorimpl(Unit.INSTANCE);
         } catch (Throwable th5) {
-            Result.Companion companion8 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th5));
         }
         track.release();
         if ($am == null || prevVol < 0) {
@@ -118,13 +106,8 @@ public final class Bell {
         }
         Bell bell5 = INSTANCE;
         try {
-            Result.Companion companion9 = Result.INSTANCE;
             $am.setStreamVolume(4, prevVol, 0);
-            Result.m118constructorimpl(Unit.INSTANCE);
         } catch (Throwable th6) {
-            th = th6;
-            Result.Companion companion42 = Result.INSTANCE;
-            Result.m118constructorimpl(ResultKt.createFailure(th));
         }
     }
 

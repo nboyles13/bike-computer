@@ -1,17 +1,20 @@
+/**
+ * Container for link between two Osm nodes
+ *
+ * @author ab
+ */
 package btools.router;
+
+import java.util.Map;
 
 import btools.expressions.BExpressionContextNode;
 import btools.expressions.BExpressionContextWay;
-import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
+
 abstract class OsmPathModel {
-    public abstract OsmPath createPath();
+  public abstract OsmPrePath createPrePath();
 
-    public abstract OsmPrePath createPrePath();
+  public abstract OsmPath createPath();
 
-    public abstract void init(BExpressionContextWay bExpressionContextWay, BExpressionContextNode bExpressionContextNode, Map<String, String> map);
-
-    OsmPathModel() {
-    }
+  public abstract void init(BExpressionContextWay expctxWay, BExpressionContextNode expctxNode, Map<String, String> keyValues);
 }

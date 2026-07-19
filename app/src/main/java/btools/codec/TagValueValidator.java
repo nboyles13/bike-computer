@@ -1,14 +1,18 @@
 package btools.codec;
 
-/* JADX INFO: loaded from: classes.dex */
+
 public interface TagValueValidator {
-    int accessType(byte[] bArr);
+  /**
+   * @param tagValueSet the way description to check
+   * @return 0 = nothing, 1=no matching, 2=normal
+   */
+  int accessType(byte[] tagValueSet);
 
-    boolean checkStartWay(byte[] bArr);
+  byte[] unify(byte[] tagValueSet, int offset, int len);
 
-    boolean isLookupIdxUsed(int i);
+  boolean isLookupIdxUsed(int idx);
 
-    void setDecodeForbidden(boolean z);
+  void setDecodeForbidden(boolean decodeForbidden);
 
-    byte[] unify(byte[] bArr, int i, int i2);
+  boolean checkStartWay(byte[] ab);
 }

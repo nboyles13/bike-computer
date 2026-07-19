@@ -147,7 +147,7 @@ public final class DashboardView extends ViewGroup {
     /* JADX WARN: 'this' call moved to the top of the method (can break code semantics) */
     /* JADX WARN: Multi-variable type inference failed */
     public DashboardView(Context context) {
-        this(context, null, 2, 0 == true ? 1 : 0);
+        this(context, null);
         Intrinsics.checkNotNullParameter(context, "context");
     }
 
@@ -168,7 +168,7 @@ public final class DashboardView extends ViewGroup {
     }
 
     public final Function1<Metric, String> getValueProvider() {
-        return this.valueProvider;
+        return (Function1<Metric, String>) this.valueProvider;
     }
 
     public final void setValueProvider(Function1<? super Metric, String> function1) {
@@ -184,7 +184,7 @@ public final class DashboardView extends ViewGroup {
     }
 
     public final Function1<DashTile, Unit> getOnPickMetric() {
-        return this.onPickMetric;
+        return (Function1<DashTile, Unit>) this.onPickMetric;
     }
 
     public final void setOnPickMetric(Function1<? super DashTile, Unit> function1) {
@@ -192,7 +192,7 @@ public final class DashboardView extends ViewGroup {
     }
 
     public final Function1<Boolean, Unit> getOnEditModeChanged() {
-        return this.onEditModeChanged;
+        return (Function1<Boolean, Unit>) this.onEditModeChanged;
     }
 
     public final void setOnEditModeChanged(Function1<? super Boolean, Unit> function1) {
@@ -205,7 +205,7 @@ public final class DashboardView extends ViewGroup {
 
     private final int gridRows() {
         Integer num;
-        Iterator<T> it = this.tiles.iterator();
+        Iterator<DashTile> it = this.tiles.iterator();
         if (it.hasNext()) {
             DashTile it2 = (DashTile) it.next();
             Integer numValueOf = Integer.valueOf(it2.getRow() + it2.getH());
@@ -363,7 +363,7 @@ public final class DashboardView extends ViewGroup {
     }
 
     private final void pack(DashTile priority) {
-        int c;
+        int c = 0;
         HashSet occ = new HashSet();
         if (priority != null) {
             priority.setW(RangesKt.coerceIn(priority.getW(), 1, 4));
@@ -372,7 +372,7 @@ public final class DashboardView extends ViewGroup {
             priority.setRow(RangesKt.coerceAtLeast(priority.getRow(), 0));
             pack$reserve(occ, priority.getCol(), priority.getRow(), priority.getW(), priority.getH());
         }
-        for (DashTile t : CollectionsKt.sortedWith(this.tiles, ComparisonsKt.compareBy(new Function1() { // from class: com.bike.computer.DashboardView$$ExternalSyntheticLambda1
+        for (DashTile t : (List<DashTile>) CollectionsKt.sortedWith(this.tiles, ComparisonsKt.compareBy(new Function1() { // from class: com.bike.computer.DashboardView$$ExternalSyntheticLambda1
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
                 return DashboardView.pack$lambda$5((DashTile) obj);
@@ -530,7 +530,7 @@ public final class DashboardView extends ViewGroup {
             $this$rebuild_u24lambda_u2415.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.DashboardView$$ExternalSyntheticLambda0
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    DashboardView.rebuild$lambda$15$lambda$14(this.f$0, t, view);
+                    DashboardView.rebuild$lambda$15$lambda$14(DashboardView.this, t, view);
                 }
             });
             View $this$rebuild_u24lambda_u2416 = new View(getContext());

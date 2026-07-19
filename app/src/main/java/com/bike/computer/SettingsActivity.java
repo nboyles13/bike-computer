@@ -69,14 +69,14 @@ public final class SettingsActivity extends Activity {
     private TextView titleView;
     private final String ROUTES_DIR = "/sdcard/BikeComputer/routes";
     private final Handler ui = new Handler(Looper.getMainLooper());
-    private final List<String> PAGES = CollectionsKt.listOf((Object[]) new String[]{"Pages", "Recording", "Sensors", "Routes", "Google Drive", "Home & system"});
-    private final SettingsActivity$conn$1 conn = new ServiceConnection() { // from class: com.bike.computer.SettingsActivity$conn$1
+    private final List<String> PAGES = CollectionsKt.listOf(new String[]{"Pages", "Recording", "Sensors", "Routes", "Google Drive", "Home & system"});
+    private final ServiceConnection conn = new ServiceConnection() { // from class: com.bike.computer.SettingsActivity$conn$1
         @Override // android.content.ServiceConnection
         public void onServiceConnected(ComponentName n, IBinder b) {
-            SettingsActivity settingsActivity = this.this$0;
+            SettingsActivity settingsActivity = SettingsActivity.this;
             Intrinsics.checkNotNull(b, "null cannot be cast to non-null type com.bike.computer.RideService.LocalBinder");
             settingsActivity.ride = ((RideService.LocalBinder) b).getThis$0();
-            Function0 function0 = this.this$0.liveRefresh;
+            Function0 function0 = SettingsActivity.this.liveRefresh;
             if (function0 != null) {
                 function0.invoke();
             }
@@ -84,7 +84,7 @@ public final class SettingsActivity extends Activity {
 
         @Override // android.content.ServiceConnection
         public void onServiceDisconnected(ComponentName n) {
-            this.this$0.ride = null;
+            SettingsActivity.this.ride = null;
         }
     };
 
@@ -104,13 +104,13 @@ public final class SettingsActivity extends Activity {
         view.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda34
             @Override // android.view.View.OnClickListener
             public final void onClick(View view2) {
-                this.f$0.goMenu();
+                SettingsActivity.this.goMenu();
             }
         });
         findViewById(R.id.done_btn).setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda35
             @Override // android.view.View.OnClickListener
             public final void onClick(View view2) {
-                this.f$0.finish();
+                SettingsActivity.this.finish();
             }
         });
         build();
@@ -186,7 +186,7 @@ public final class SettingsActivity extends Activity {
             this.ui.postDelayed(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda16
                 @Override // java.lang.Runnable
                 public final void run() {
-                    this.f$0.tick();
+                    SettingsActivity.this.tick();
                 }
             }, 1000L);
         }
@@ -246,14 +246,14 @@ public final class SettingsActivity extends Activity {
                 menuRow(p, new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda56
                     @Override // kotlin.jvm.functions.Function0
                     public final Object invoke() {
-                        return SettingsActivity.build$lambda$4(this.f$0, p);
+                        return SettingsActivity.build$lambda$4(SettingsActivity.this, p);
                     }
                 });
             }
             menuRow("Rides", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda57
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.build$lambda$5(this.f$0);
+                    return SettingsActivity.build$lambda$5(SettingsActivity.this);
                 }
             });
         }
@@ -342,17 +342,17 @@ public final class SettingsActivity extends Activity {
             pageRow(key, name, i, order.size(), new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda38
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pagePages$lambda$10$lambda$7(order, i, key, this);
+                    return SettingsActivity.pagePages$lambda$10$lambda$7(order, i, key, SettingsActivity.this);
                 }
             }, new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda39
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pagePages$lambda$10$lambda$8(order, i, key, this);
+                    return SettingsActivity.pagePages$lambda$10$lambda$8(order, i, key, SettingsActivity.this);
                 }
             }, new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda40
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pagePages$lambda$10$lambda$9(this.f$0, key);
+                    return SettingsActivity.pagePages$lambda$10$lambda$9(SettingsActivity.this, key);
                 }
             });
             index$iv = index$iv2;
@@ -360,7 +360,7 @@ public final class SettingsActivity extends Activity {
         button("＋ Add data page", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda41
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pagePages$lambda$11(this.f$0);
+                return SettingsActivity.pagePages$lambda$11(SettingsActivity.this);
             }
         });
         text("Long-press a Data page to edit it — drag boxes to move, drag a corner to resize, tap a box to change its metric, and use ＋ Add box.");
@@ -402,43 +402,43 @@ public final class SettingsActivity extends Activity {
         switchRow("Auto-pause when stopped", Prefs.INSTANCE.autoPause(this), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda0
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRecording$lambda$12(this.f$0, ((Boolean) obj).booleanValue());
+                return SettingsActivity.pageRecording$lambda$12(SettingsActivity.this, ((Boolean) obj).booleanValue());
             }
         });
         switchRow("Voice & beep turn cues", Prefs.INSTANCE.voice(this), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda11
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRecording$lambda$13(this.f$0, ((Boolean) obj).booleanValue());
+                return SettingsActivity.pageRecording$lambda$13(SettingsActivity.this, ((Boolean) obj).booleanValue());
             }
         });
         switchRow("Heart-rate zone LED", Prefs.INSTANCE.led(this), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda22
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRecording$lambda$14(this.f$0, ((Boolean) obj).booleanValue());
+                return SettingsActivity.pageRecording$lambda$14(SettingsActivity.this, ((Boolean) obj).booleanValue());
             }
         });
         switchRow("Close other apps when recording", Prefs.INSTANCE.closeApps(this), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda33
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRecording$lambda$15(this.f$0, ((Boolean) obj).booleanValue());
+                return SettingsActivity.pageRecording$lambda$15(SettingsActivity.this, ((Boolean) obj).booleanValue());
             }
         });
         switchRow("Low-power map (flat, saves battery)", Prefs.INSTANCE.lowPowerMap(this), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda44
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRecording$lambda$16(this.f$0, ((Boolean) obj).booleanValue());
+                return SettingsActivity.pageRecording$lambda$16(SettingsActivity.this, ((Boolean) obj).booleanValue());
             }
         });
         switchRow("Turn off Wi-Fi while recording", Prefs.INSTANCE.wifiOffOnRide(this), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda53
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRecording$lambda$17(this.f$0, ((Boolean) obj).booleanValue());
+                return SettingsActivity.pageRecording$lambda$17(SettingsActivity.this, ((Boolean) obj).booleanValue());
             }
         });
         switchRow("Endurance mode (dim + throttle)", Prefs.INSTANCE.endurance(this), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda54
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRecording$lambda$18(this.f$0, ((Boolean) obj).booleanValue());
+                return SettingsActivity.pageRecording$lambda$18(SettingsActivity.this, ((Boolean) obj).booleanValue());
             }
         });
         text("Endurance dims the screen and blanks it after 30s while recording (power button to wake), forces the flat map, drops the framerate, and turns the HR LED off — maximum battery life for long rides.");
@@ -505,7 +505,7 @@ public final class SettingsActivity extends Activity {
         this.liveRefresh = new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda42
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pageSensors$lambda$19(this.f$0, hrName, hrVal, cycName, cycVal);
+                return SettingsActivity.pageSensors$lambda$19(SettingsActivity.this, hrName, hrVal, cycName, cycVal);
             }
         };
         Function0<Unit> function0 = this.liveRefresh;
@@ -516,14 +516,14 @@ public final class SettingsActivity extends Activity {
         button("Forget & rescan", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda43
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pageSensors$lambda$20(this.f$0);
+                return SettingsActivity.pageSensors$lambda$20(SettingsActivity.this);
             }
         });
         text("Max HR sets the 5 training zones (Z1 50% … Z5 90% of max)");
         stepperRow("Max heart rate", Prefs.INSTANCE.maxHr(this), 120, 220, 1, " bpm", new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda45
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageSensors$lambda$21(this.f$0, ((Integer) obj).intValue());
+                return SettingsActivity.pageSensors$lambda$21(SettingsActivity.this, ((Integer) obj).intValue());
             }
         });
     }
@@ -579,7 +579,7 @@ public final class SettingsActivity extends Activity {
         if (s == null) {
             return "Not connected";
         }
-        if (StringsKt.startsWith$default(s, "connecting", false, 2, (Object) null)) {
+        if (StringsKt.startsWith(s, "connecting", false)) {
             return "Connecting…";
         }
         if (Intrinsics.areEqual(s, "live") || Intrinsics.areEqual(s, "connected")) {
@@ -622,7 +622,7 @@ public final class SettingsActivity extends Activity {
             button("Stop navigation", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda21
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pageRoutes$lambda$22(this.f$0);
+                    return SettingsActivity.pageRoutes$lambda$22(SettingsActivity.this);
                 }
             });
         }
@@ -632,7 +632,7 @@ public final class SettingsActivity extends Activity {
             button("⟳  Sync routes from Drive", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda23
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pageRoutes$lambda$23(this.f$0);
+                    return SettingsActivity.pageRoutes$lambda$23(SettingsActivity.this);
                 }
             });
             final String sheetId = Prefs.INSTANCE.driveSheetId(this);
@@ -641,7 +641,7 @@ public final class SettingsActivity extends Activity {
                 button("＋  Create route links sheet", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda24
                     @Override // kotlin.jvm.functions.Function0
                     public final Object invoke() {
-                        return SettingsActivity.pageRoutes$lambda$24(this.f$0);
+                        return SettingsActivity.pageRoutes$lambda$24(SettingsActivity.this);
                     }
                 });
             } else {
@@ -649,7 +649,7 @@ public final class SettingsActivity extends Activity {
                 button("⧉  Copy sheet link", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda25
                     @Override // kotlin.jvm.functions.Function0
                     public final Object invoke() {
-                        return SettingsActivity.pageRoutes$lambda$25(this.f$0, sheetId);
+                        return SettingsActivity.pageRoutes$lambda$25(SettingsActivity.this, sheetId);
                     }
                 });
             }
@@ -659,13 +659,13 @@ public final class SettingsActivity extends Activity {
         button("Download & navigate", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda26
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pageRoutes$lambda$27(this.f$0, urlField);
+                return SettingsActivity.pageRoutes$lambda$27(SettingsActivity.this, urlField);
             }
         });
         button("Download & save", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda27
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pageRoutes$lambda$29(this.f$0, urlField);
+                return SettingsActivity.pageRoutes$lambda$29(SettingsActivity.this, urlField);
             }
         });
         text("Or paste a Google Maps link (share a place or directions). We build a bike route between the stops — no GPX needed.");
@@ -673,13 +673,13 @@ public final class SettingsActivity extends Activity {
         button("Navigate this link", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda28
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pageRoutes$lambda$30(this.f$0, gmapField);
+                return SettingsActivity.pageRoutes$lambda$30(SettingsActivity.this, gmapField);
             }
         });
         button("Save this link", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda29
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pageRoutes$lambda$31(this.f$0, gmapField);
+                return SettingsActivity.pageRoutes$lambda$31(SettingsActivity.this, gmapField);
             }
         });
         text("Saved routes");
@@ -692,7 +692,7 @@ public final class SettingsActivity extends Activity {
         if ($this$sortedBy$iv == null || (routes = ArraysKt.sortedWith($this$sortedBy$iv, new Comparator() { // from class: com.bike.computer.SettingsActivity$pageRoutes$$inlined$sortedBy$1
             /* JADX WARN: Multi-variable type inference failed */
             @Override // java.util.Comparator
-            public final int compare(T t, T t2) {
+            public final int compare(Object t, Object t2) {
                 File it = (File) t;
                 String name = it.getName();
                 Intrinsics.checkNotNullExpressionValue(name, "getName(...)");
@@ -748,7 +748,7 @@ public final class SettingsActivity extends Activity {
         this$0.withDownloadedRoute(StringsKt.trim((CharSequence) $urlField.getText().toString()).toString(), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda7
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRoutes$lambda$27$lambda$26(this.f$0, (String) obj);
+                return SettingsActivity.pageRoutes$lambda$27$lambda$26(this$0, (String) obj);
             }
         });
         return Unit.INSTANCE;
@@ -766,7 +766,7 @@ public final class SettingsActivity extends Activity {
         this$0.withDownloadedRoute(StringsKt.trim((CharSequence) $urlField.getText().toString()).toString(), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda36
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
-                return SettingsActivity.pageRoutes$lambda$29$lambda$28(this.f$0, (String) obj);
+                return SettingsActivity.pageRoutes$lambda$29$lambda$28(this$0, (String) obj);
             }
         });
         return Unit.INSTANCE;
@@ -795,7 +795,7 @@ public final class SettingsActivity extends Activity {
     public static final boolean pageRoutes$lambda$32(File f) {
         String name = f.getName();
         Intrinsics.checkNotNullExpressionValue(name, "getName(...)");
-        return StringsKt.endsWith$default(name, ".gpx", false, 2, (Object) null);
+        return StringsKt.endsWith(name, ".gpx", false);
     }
 
     private final void createLinksSheet() {
@@ -803,7 +803,7 @@ public final class SettingsActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda31
             @Override // java.lang.Runnable
             public final void run() {
-                SettingsActivity.createLinksSheet$lambda$38(this.f$0);
+                SettingsActivity.createLinksSheet$lambda$38(SettingsActivity.this);
             }
         }).start();
     }
@@ -811,13 +811,13 @@ public final class SettingsActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void createLinksSheet$lambda$38(final SettingsActivity this$0) {
         final Object r;
+        Object rTmp;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            r = Result.m118constructorimpl(GoogleDriveClient.INSTANCE.ensureLinksSheet(this$0));
+            rTmp = GoogleDriveClient.INSTANCE.ensureLinksSheet(this$0);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            r = Result.m118constructorimpl(ResultKt.createFailure(th));
+            rTmp = th;
         }
+        r = rTmp;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda46
             @Override // java.lang.Runnable
             public final void run() {
@@ -828,18 +828,18 @@ public final class SettingsActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void createLinksSheet$lambda$38$lambda$37(Object $r, SettingsActivity this$0) {
-        if (Result.m125isSuccessimpl($r)) {
+        if (!($r instanceof Throwable)) {
             String id = (String) $r;
             this$0.copyText(GoogleDriveClient.INSTANCE.sheetUrl(id), "Created “Harmin Route Links” — link copied");
             this$0.rebuild();
         }
-        Throwable e = Result.m121exceptionOrNullimpl($r);
+        Throwable e = ($r instanceof Throwable) ? (Throwable) $r : null;
         if (e != null) {
             String m = e.getMessage();
             if (m == null) {
                 m = "failed";
             }
-            this$0.toast((StringsKt.contains$default((CharSequence) m, (CharSequence) "403", false, 2, (Object) null) || StringsKt.contains((CharSequence) m, (CharSequence) "scope", true)) ? "Reconnect Drive to grant access" : "Couldn't create sheet: " + m);
+            this$0.toast((StringsKt.contains((CharSequence) m, (CharSequence) "403", false) || StringsKt.contains((CharSequence) m, (CharSequence) "scope", true)) ? "Reconnect Drive to grant access" : "Couldn't create sheet: " + m);
         }
     }
 
@@ -855,7 +855,7 @@ public final class SettingsActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda55
             @Override // java.lang.Runnable
             public final void run() {
-                SettingsActivity.syncDriveRoutes$lambda$43(this.f$0);
+                SettingsActivity.syncDriveRoutes$lambda$43(SettingsActivity.this);
             }
         }).start();
     }
@@ -863,13 +863,13 @@ public final class SettingsActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void syncDriveRoutes$lambda$43(final SettingsActivity this$0) {
         final Object r;
+        Object rTmp;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            r = Result.m118constructorimpl(Integer.valueOf(GoogleDriveClient.INSTANCE.syncRoutes(this$0, this$0.ROUTES_DIR)));
+            rTmp = Integer.valueOf(GoogleDriveClient.INSTANCE.syncRoutes(this$0, this$0.ROUTES_DIR));
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            r = Result.m118constructorimpl(ResultKt.createFailure(th));
+            rTmp = th;
         }
+        r = rTmp;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda20
             @Override // java.lang.Runnable
             public final void run() {
@@ -881,7 +881,7 @@ public final class SettingsActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void syncDriveRoutes$lambda$43$lambda$42(Object $r, SettingsActivity this$0) {
         String str;
-        if (Result.m125isSuccessimpl($r)) {
+        if (!($r instanceof Throwable)) {
             int n = ((Number) $r).intValue();
             if (n > 0) {
                 str = "Added " + n + " route" + (n == 1 ? "" : "s") + " from Drive";
@@ -893,13 +893,13 @@ public final class SettingsActivity extends Activity {
                 this$0.rebuild();
             }
         }
-        Throwable e = Result.m121exceptionOrNullimpl($r);
+        Throwable e = ($r instanceof Throwable) ? (Throwable) $r : null;
         if (e != null) {
             String m = e.getMessage();
             if (m == null) {
                 m = "failed";
             }
-            this$0.toast((StringsKt.contains$default((CharSequence) m, (CharSequence) "403", false, 2, (Object) null) || StringsKt.contains((CharSequence) m, (CharSequence) "insufficient", true) || StringsKt.contains((CharSequence) m, (CharSequence) "scope", true)) ? "Reconnect Drive to grant route access" : "Sync failed: " + m);
+            this$0.toast((StringsKt.contains((CharSequence) m, (CharSequence) "403", false) || StringsKt.contains((CharSequence) m, (CharSequence) "insufficient", true) || StringsKt.contains((CharSequence) m, (CharSequence) "scope", true)) ? "Reconnect Drive to grant route access" : "Sync failed: " + m);
         }
     }
 
@@ -909,7 +909,7 @@ public final class SettingsActivity extends Activity {
             switchRow("Auto-upload after each ride", Prefs.INSTANCE.driveAutoUpload(this), new Function1() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda1
                 @Override // kotlin.jvm.functions.Function1
                 public final Object invoke(Object obj) {
-                    return SettingsActivity.pageExport$lambda$44(this.f$0, ((Boolean) obj).booleanValue());
+                    return SettingsActivity.pageExport$lambda$44(SettingsActivity.this, ((Boolean) obj).booleanValue());
                 }
             });
             text("Folder names in your Drive — rides upload here; routes are read from here (drop .gpx files in it).");
@@ -918,20 +918,20 @@ public final class SettingsActivity extends Activity {
             button("Save folder names", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda2
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pageExport$lambda$45(this.f$0, ridesFolder, routesFolder);
+                    return SettingsActivity.pageExport$lambda$45(SettingsActivity.this, ridesFolder, routesFolder);
                 }
             });
             text("Reconnect if 'Sync routes from Drive' says it can't read your Drive (grants read access).");
             button("Reconnect Drive", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda3
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pageExport$lambda$46(this.f$0);
+                    return SettingsActivity.pageExport$lambda$46(SettingsActivity.this);
                 }
             });
             button("Disconnect Drive", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda4
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pageExport$lambda$47(this.f$0);
+                    return SettingsActivity.pageExport$lambda$47(SettingsActivity.this);
                 }
             });
         } else {
@@ -941,7 +941,7 @@ public final class SettingsActivity extends Activity {
             button("Connect to Google Drive", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda5
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pageExport$lambda$48(idField, secretField, this);
+                    return SettingsActivity.pageExport$lambda$48(idField, secretField, SettingsActivity.this);
                 }
             });
         }
@@ -949,7 +949,7 @@ public final class SettingsActivity extends Activity {
         button("Open Rides", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda6
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pageExport$lambda$49(this.f$0);
+                return SettingsActivity.pageExport$lambda$49(SettingsActivity.this);
             }
         });
     }
@@ -1011,7 +1011,7 @@ public final class SettingsActivity extends Activity {
             button("Exit to Android launcher", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda8
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pageSystem$lambda$50(this.f$0);
+                    return SettingsActivity.pageSystem$lambda$50(SettingsActivity.this);
                 }
             });
         } else {
@@ -1019,14 +1019,14 @@ public final class SettingsActivity extends Activity {
             button("Set Harmin as home app", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda9
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return SettingsActivity.pageSystem$lambda$51(this.f$0);
+                    return SettingsActivity.pageSystem$lambda$51(SettingsActivity.this);
                 }
             });
         }
         button("Android system settings", new Function0() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda10
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return SettingsActivity.pageSystem$lambda$54(this.f$0);
+                return SettingsActivity.pageSystem$lambda$54(SettingsActivity.this);
             }
         });
     }
@@ -1045,16 +1045,9 @@ public final class SettingsActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final Unit pageSystem$lambda$54(SettingsActivity this$0) {
-        Object objM118constructorimpl;
         try {
-            Result.Companion companion = Result.INSTANCE;
             this$0.startActivity(new Intent("android.settings.SETTINGS"));
-            objM118constructorimpl = Result.m118constructorimpl(Unit.INSTANCE);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m121exceptionOrNullimpl(objM118constructorimpl) != null) {
             this$0.toast("Couldn't open settings");
         }
         return Unit.INSTANCE;
@@ -1071,28 +1064,12 @@ public final class SettingsActivity extends Activity {
     }
 
     private final void openHomeSettings() {
-        Object objM118constructorimpl;
-        Object objM118constructorimpl2;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            SettingsActivity $this$openHomeSettings_u24lambda_u2455 = this;
-            $this$openHomeSettings_u24lambda_u2455.startActivity(new Intent("android.settings.HOME_SETTINGS"));
-            objM118constructorimpl = Result.m118constructorimpl(Unit.INSTANCE);
+            this.startActivity(new Intent("android.settings.HOME_SETTINGS"));
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m121exceptionOrNullimpl(objM118constructorimpl) != null) {
             try {
-                Result.Companion companion3 = Result.INSTANCE;
-                SettingsActivity $this$openHomeSettings_u24lambda_u2458_u24lambda_u2456 = this;
-                $this$openHomeSettings_u24lambda_u2458_u24lambda_u2456.startActivity(new Intent("android.settings.SETTINGS"));
-                objM118constructorimpl2 = Result.m118constructorimpl(Unit.INSTANCE);
+                this.startActivity(new Intent("android.settings.SETTINGS"));
             } catch (Throwable th2) {
-                Result.Companion companion4 = Result.INSTANCE;
-                objM118constructorimpl2 = Result.m118constructorimpl(ResultKt.createFailure(th2));
-            }
-            if (Result.m121exceptionOrNullimpl(objM118constructorimpl2) != null) {
                 toast("Open Settings ▸ Apps ▸ Default apps ▸ Home app");
             }
         }
@@ -1104,7 +1081,6 @@ public final class SettingsActivity extends Activity {
     */
     private final void launchOtherLauncher() {
         Object element$iv;
-        Object objM118constructorimpl;
         Intent home = new Intent("android.intent.action.MAIN").addCategory("android.intent.category.HOME");
         Intrinsics.checkNotNullExpressionValue(home, "addCategory(...)");
         Iterable iterableQueryIntentActivities = getPackageManager().queryIntentActivities(home, 0);
@@ -1160,15 +1136,8 @@ public final class SettingsActivity extends Activity {
         Intent i = new Intent("android.intent.action.MAIN").addCategory("android.intent.category.HOME").setClassName(t.packageName, t.name).addFlags(268435456);
         Intrinsics.checkNotNullExpressionValue(i, "addFlags(...)");
         try {
-            Result.Companion companion = Result.INSTANCE;
-            SettingsActivity $this$launchOtherLauncher_u24lambda_u2462 = this;
-            $this$launchOtherLauncher_u24lambda_u2462.startActivity(i);
-            objM118constructorimpl = Result.m118constructorimpl(Unit.INSTANCE);
+            this.startActivity(i);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m121exceptionOrNullimpl(objM118constructorimpl) != null) {
             openHomeSettings();
         }
     }
@@ -1435,7 +1404,7 @@ public final class SettingsActivity extends Activity {
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda50
             @Override // android.widget.CompoundButton.OnCheckedChangeListener
             public final void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                SettingsActivity.pageRow$lambda$71(this.f$0, key, compoundButton, z);
+                SettingsActivity.pageRow$lambda$71(SettingsActivity.this, key, compoundButton, z);
             }
         });
         c.addView(sw);
@@ -1475,7 +1444,7 @@ public final class SettingsActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda51
             @Override // java.lang.Runnable
             public final void run() {
-                SettingsActivity.withDownloadedRoute$lambda$76(this.f$0, url, onReady);
+                SettingsActivity.withDownloadedRoute$lambda$76(SettingsActivity.this, url, onReady);
             }
         }).start();
     }
@@ -1483,13 +1452,13 @@ public final class SettingsActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void withDownloadedRoute$lambda$76(final SettingsActivity this$0, String $url, final Function1 $onReady) {
         final Object r;
+        Object rTmp;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            r = Result.m118constructorimpl(GpxRoute.INSTANCE.download($url));
+            rTmp = GpxRoute.INSTANCE.download($url);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            r = Result.m118constructorimpl(ResultKt.createFailure(th));
+            rTmp = th;
         }
+        r = rTmp;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda17
             @Override // java.lang.Runnable
             public final void run() {
@@ -1500,10 +1469,10 @@ public final class SettingsActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void withDownloadedRoute$lambda$76$lambda$75(Object $r, Function1 $onReady, SettingsActivity this$0) {
-        if (Result.m125isSuccessimpl($r)) {
+        if (!($r instanceof Throwable)) {
             $onReady.invoke((String) $r);
         }
-        Throwable it = Result.m121exceptionOrNullimpl($r);
+        Throwable it = ($r instanceof Throwable) ? (Throwable) $r : null;
         if (it != null) {
             this$0.toast("Download failed: " + it.getMessage());
         }
@@ -1539,7 +1508,7 @@ public final class SettingsActivity extends Activity {
             new Thread(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda32
                 @Override // java.lang.Runnable
                 public final void run() {
-                    SettingsActivity.withGmapsRoute$lambda$81(this.f$0, link, save);
+                    SettingsActivity.withGmapsRoute$lambda$81(SettingsActivity.this, link, save);
                 }
             }).start();
         }
@@ -1548,13 +1517,13 @@ public final class SettingsActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void withGmapsRoute$lambda$81(final SettingsActivity this$0, String $link, final boolean $save) {
         final Object res;
+        Object resTmp;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            res = Result.m118constructorimpl(GmapsRoute.INSTANCE.points($link));
+            resTmp = GmapsRoute.INSTANCE.points($link);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            res = Result.m118constructorimpl(ResultKt.createFailure(th));
+            resTmp = th;
         }
+        res = resTmp;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda19
             @Override // java.lang.Runnable
             public final void run() {
@@ -1565,7 +1534,7 @@ public final class SettingsActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void withGmapsRoute$lambda$81$lambda$80(Object $res, SettingsActivity this$0, boolean $save) {
-        if (Result.m125isSuccessimpl($res)) {
+        if (!($res instanceof Throwable)) {
             List<double[]> list = (List) $res;
             if (list.isEmpty()) {
                 this$0.toast("Couldn't find a location in that link");
@@ -1582,7 +1551,7 @@ public final class SettingsActivity extends Activity {
                 navigateGpx$default(this$0, GmapsRoute.INSTANCE.toGpx("Maps route", list), null, 2, null);
             }
         }
-        Throwable it = Result.m121exceptionOrNullimpl($res);
+        Throwable it = ($res instanceof Throwable) ? (Throwable) $res : null;
         if (it != null) {
             this$0.toast("Couldn't read that link (need Wi-Fi): " + it.getMessage());
         }
@@ -1602,36 +1571,32 @@ public final class SettingsActivity extends Activity {
         input.setSingleLine(true);
         input.setTextColor(-1);
         input.setPadding(dp(16), dp(12), dp(16), dp(12));
-        new AlertDialog.Builder(this, android.R.style.Theme.Material.Dialog.Alert).setTitle("Save route as").setView(input).setPositiveButton("Save", new DialogInterface.OnClickListener() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda18
+        new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert).setTitle("Save route as").setView(input).setPositiveButton("Save", new DialogInterface.OnClickListener() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda18
             @Override // android.content.DialogInterface.OnClickListener
             public final void onClick(DialogInterface dialogInterface, int i) {
-                SettingsActivity.promptSaveRoute$lambda$85(input, this, gpx, dialogInterface, i);
+                SettingsActivity.promptSaveRoute$lambda$85(input, SettingsActivity.this, gpx, dialogInterface, i);
             }
         }).setNegativeButton("Cancel", (DialogInterface.OnClickListener) null).show();
     }
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void promptSaveRoute$lambda$85(EditText $input, SettingsActivity this$0, String $gpx, DialogInterface dialogInterface, int i) {
-        Object objM118constructorimpl;
         String name = StringsKt.take(new Regex("[/\\\\:*?\"<>|]").replace(StringsKt.trim((CharSequence) $input.getText().toString()).toString(), "_"), 60);
         if (name.length() == 0) {
             this$0.toast("Name required");
             return;
         }
+        Throwable it = null;
         try {
-            Result.Companion companion = Result.INSTANCE;
             new File(this$0.ROUTES_DIR).mkdirs();
-            FilesKt.writeText$default(new File(this$0.ROUTES_DIR, name + ".gpx"), $gpx, null, 2, null);
-            objM118constructorimpl = Result.m118constructorimpl(Unit.INSTANCE);
+            FilesKt.writeText(new File(this$0.ROUTES_DIR, name + ".gpx"), $gpx, kotlin.text.Charsets.UTF_8);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
+            it = th;
         }
-        if (Result.m125isSuccessimpl(objM118constructorimpl)) {
+        if (it == null) {
             this$0.toast("Saved \"" + name + "\"");
             this$0.rebuild();
         }
-        Throwable it = Result.m121exceptionOrNullimpl(objM118constructorimpl);
         if (it != null) {
             this$0.toast("Save failed: " + it.getMessage());
         }
@@ -1652,7 +1617,7 @@ public final class SettingsActivity extends Activity {
         ride.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda12
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                SettingsActivity.savedRouteRow$lambda$87(this.f$0, f, view);
+                SettingsActivity.savedRouteRow$lambda$87(SettingsActivity.this, f, view);
             }
         });
         TextView del = new TextView(this);
@@ -1663,7 +1628,7 @@ public final class SettingsActivity extends Activity {
         del.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.SettingsActivity$$ExternalSyntheticLambda13
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                SettingsActivity.savedRouteRow$lambda$88(f, this, view);
+                SettingsActivity.savedRouteRow$lambda$88(f, SettingsActivity.this, view);
             }
         });
         c.addView(t);
@@ -1673,18 +1638,13 @@ public final class SettingsActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void savedRouteRow$lambda$87(SettingsActivity this$0, File $f, View it) {
-        Object objM118constructorimpl;
+        String objM118constructorimpl;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(FilesKt.readText$default($f, null, 1, null));
+            objM118constructorimpl = FilesKt.readText($f, kotlin.text.Charsets.UTF_8);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
             objM118constructorimpl = "";
         }
-        this$0.navigateGpx((String) objM118constructorimpl, FilesKt.getNameWithoutExtension($f));
+        this$0.navigateGpx(objM118constructorimpl, FilesKt.getNameWithoutExtension($f));
     }
 
     /* JADX INFO: Access modifiers changed from: private */

@@ -28,7 +28,7 @@ public final class GpxRoute {
     private static final Regex ptRe = new Regex("<(?:trkpt|rtept)\\b([^>]*)>", RegexOption.IGNORE_CASE);
     private static final Regex latRe = new Regex("lat=\"([-0-9.]+)\"", RegexOption.IGNORE_CASE);
     private static final Regex lonRe = new Regex("lon=\"([-0-9.]+)\"", RegexOption.IGNORE_CASE);
-    private static final Regex nameRe = new Regex("<name>(.*?)</name>", (Set<? extends RegexOption>) SetsKt.setOf((Object[]) new RegexOption[]{RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL}));
+    private static final Regex nameRe = new Regex("<name>(.*?)</name>", SetsKt.setOf(new RegexOption[]{RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL}));
 
     private GpxRoute() {
     }
@@ -36,7 +36,7 @@ public final class GpxRoute {
     public final String download(String url) throws IOException {
         String body;
         Intrinsics.checkNotNullParameter(url, "url");
-        String u = StringsKt.startsWith$default(url, "http", false, 2, (Object) null) ? url : "https://" + url;
+        String u = StringsKt.startsWith(url, "http", false) ? url : "https://" + url;
         Response responseExecute = http.newCall(new Request.Builder().url(u).header("User-Agent", "BikeComputer").build()).execute();
         try {
             Response r = responseExecute;
@@ -58,7 +58,7 @@ public final class GpxRoute {
         String str;
         String it;
         Intrinsics.checkNotNullParameter(gpx, "gpx");
-        MatchResult matchResultFind$default = Regex.find$default(nameRe, gpx, 0, 2, null);
+        MatchResult matchResultFind$default = nameRe.find(gpx, 0);
         if (matchResultFind$default == null || (groupValues = matchResultFind$default.getGroupValues()) == null || (str = groupValues.get(1)) == null || (it = StringsKt.trim((CharSequence) str).toString()) == null) {
             return null;
         }
@@ -77,12 +77,12 @@ public final class GpxRoute {
         Double doubleOrNull2;
         Intrinsics.checkNotNullParameter(gpx, "gpx");
         ArrayList pts = new ArrayList();
-        for (MatchResult m : Regex.findAll$default(ptRe, gpx, 0, 2, null)) {
+        for (MatchResult m : kotlin.sequences.SequencesKt.asIterable(ptRe.findAll(gpx, 0))) {
             String a = m.getGroupValues().get(1);
-            MatchResult matchResultFind$default = Regex.find$default(latRe, a, 0, 2, null);
+            MatchResult matchResultFind$default = latRe.find(a, 0);
             if (matchResultFind$default != null && (groupValues = matchResultFind$default.getGroupValues()) != null && (str = groupValues.get(1)) != null && (doubleOrNull = StringsKt.toDoubleOrNull(str)) != null) {
                 double lat = doubleOrNull.doubleValue();
-                MatchResult matchResultFind$default2 = Regex.find$default(lonRe, a, 0, 2, null);
+                MatchResult matchResultFind$default2 = lonRe.find(a, 0);
                 if (matchResultFind$default2 != null && (groupValues2 = matchResultFind$default2.getGroupValues()) != null && (str2 = groupValues2.get(1)) != null && (doubleOrNull2 = StringsKt.toDoubleOrNull(str2)) != null) {
                     double lon = doubleOrNull2.doubleValue();
                     pts.add(new double[]{lon, lat});

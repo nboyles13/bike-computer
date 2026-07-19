@@ -21,7 +21,7 @@ public enum DashBlock {
     private final Metric primary;
     private final List<Metric> secondary;
     private final String unit;
-    private static final /* synthetic */ EnumEntries $ENTRIES = EnumEntriesKt.enumEntries($VALUES);
+    private static final /* synthetic */ EnumEntries $ENTRIES = EnumEntriesKt.enumEntries(values());
 
     DashBlock(String label, String unit, Metric primary, List secondary) {
         this.label = label;

@@ -30,17 +30,17 @@ import kotlin.text.StringsKt;
 /* JADX INFO: loaded from: classes3.dex */
 @Metadata(d1 = {"\u0000O\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\b\u0003\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\n\u0002\u0010\u000b\n\u0002\b\u0002\n\u0002\u0010\u000e\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0010\b\n\u0002\b\u0002*\u0001\n\u0018\u00002\u00020\u0001B\u0007¢\u0006\u0004\b\u0002\u0010\u0003J\u0012\u0010\f\u001a\u00020\r2\b\u0010\u000e\u001a\u0004\u0018\u00010\u000fH\u0014J\b\u0010\u0010\u001a\u00020\rH\u0014J\b\u0010\u0011\u001a\u00020\rH\u0014J\u0010\u0010\u0012\u001a\u00020\r2\u0006\u0010\u0013\u001a\u00020\u0014H\u0016J\u0010\u0010\u0015\u001a\u00020\r2\u0006\u0010\u0016\u001a\u00020\u0017H\u0002J\u0010\u0010\u0018\u001a\u00020\r2\u0006\u0010\u0019\u001a\u00020\u001aH\u0002J\u0010\u0010\u001b\u001a\u00020\r2\u0006\u0010\u0019\u001a\u00020\u001aH\u0002J\u0010\u0010\u001c\u001a\u00020\r2\u0006\u0010\u000e\u001a\u00020\u0017H\u0002J\u0010\u0010\u001d\u001a\u00020\u001e2\u0006\u0010\u001f\u001a\u00020\u001eH\u0002R\u000e\u0010\u0004\u001a\u00020\u0005X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\u0006\u001a\u00020\u0005X\u0082.¢\u0006\u0002\n\u0000R\u0010\u0010\u0007\u001a\u0004\u0018\u00010\bX\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\t\u001a\u00020\nX\u0082\u0004¢\u0006\u0004\n\u0002\u0010\u000b¨\u0006 "}, d2 = {"Lcom/bike/computer/DestinationSearchActivity;", "Landroid/app/Activity;", "<init>", "()V", "container", "Landroid/widget/LinearLayout;", "results", "ride", "Lcom/bike/computer/RideService;", "conn", "com/bike/computer/DestinationSearchActivity$conn$1", "Lcom/bike/computer/DestinationSearchActivity$conn$1;", "onCreate", "", "s", "Landroid/os/Bundle;", "onStart", "onStop", "onWindowFocusChanged", "hasFocus", "", "doSearch", "q", "", "resultRow", "p", "Lcom/bike/computer/Geocoder$Place;", "navigateTo", "hint", "dp", "", "v", "app_debug"}, k = 1, mv = {2, 0, 0}, xi = 48)
 public final class DestinationSearchActivity extends Activity {
-    private final DestinationSearchActivity$conn$1 conn = new ServiceConnection() { // from class: com.bike.computer.DestinationSearchActivity$conn$1
+    private final ServiceConnection conn = new ServiceConnection() { // from class: com.bike.computer.DestinationSearchActivity$conn$1
         @Override // android.content.ServiceConnection
         public void onServiceConnected(ComponentName n, IBinder b) {
-            DestinationSearchActivity destinationSearchActivity = this.this$0;
+            DestinationSearchActivity destinationSearchActivity = DestinationSearchActivity.this;
             Intrinsics.checkNotNull(b, "null cannot be cast to non-null type com.bike.computer.RideService.LocalBinder");
             destinationSearchActivity.ride = ((RideService.LocalBinder) b).getThis$0();
         }
 
         @Override // android.content.ServiceConnection
         public void onServiceDisconnected(ComponentName n) {
-            this.this$0.ride = null;
+            DestinationSearchActivity.this.ride = null;
         }
     };
     private LinearLayout container;
@@ -60,7 +60,7 @@ public final class DestinationSearchActivity extends Activity {
         $this$onCreate_u24lambda_u241.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.DestinationSearchActivity$$ExternalSyntheticLambda1
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                this.f$0.finish();
+                DestinationSearchActivity.this.finish();
             }
         });
         final EditText field = new EditText(this);
@@ -79,7 +79,7 @@ public final class DestinationSearchActivity extends Activity {
         field.setOnEditorActionListener(new TextView.OnEditorActionListener() { // from class: com.bike.computer.DestinationSearchActivity$$ExternalSyntheticLambda2
             @Override // android.widget.TextView.OnEditorActionListener
             public final boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                return DestinationSearchActivity.onCreate$lambda$2(this.f$0, field, textView, i, keyEvent);
+                return DestinationSearchActivity.onCreate$lambda$2(DestinationSearchActivity.this, field, textView, i, keyEvent);
             }
         });
         LinearLayout linearLayout = this.container;
@@ -102,7 +102,7 @@ public final class DestinationSearchActivity extends Activity {
         btn.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.DestinationSearchActivity$$ExternalSyntheticLambda3
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                DestinationSearchActivity.onCreate$lambda$3(this.f$0, field, view);
+                DestinationSearchActivity.onCreate$lambda$3(DestinationSearchActivity.this, field, view);
             }
         });
         LinearLayout linearLayout3 = this.container;
@@ -200,25 +200,24 @@ public final class DestinationSearchActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.DestinationSearchActivity$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                DestinationSearchActivity.doSearch$lambda$9(this.f$0, q, near);
+                DestinationSearchActivity.doSearch$lambda$9(DestinationSearchActivity.this, q, near);
             }
         }).start();
     }
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void doSearch$lambda$9(final DestinationSearchActivity this$0, final String $q, double[] $near) {
-        final Object r;
+        Object r0;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            r = Result.m118constructorimpl(Geocoder.INSTANCE.search($q, $near));
+            r0 = Geocoder.INSTANCE.search($q, $near);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            r = Result.m118constructorimpl(ResultKt.createFailure(th));
+            r0 = th;
         }
+        final Object r = r0;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.DestinationSearchActivity$$ExternalSyntheticLambda4
             @Override // java.lang.Runnable
             public final void run() {
-                DestinationSearchActivity.doSearch$lambda$9$lambda$8(this.f$0, r, $q);
+                DestinationSearchActivity.doSearch$lambda$9$lambda$8(this$0, r, $q);
             }
         });
     }
@@ -231,7 +230,7 @@ public final class DestinationSearchActivity extends Activity {
             linearLayout = null;
         }
         linearLayout.removeAllViews();
-        if (Result.m125isSuccessimpl($r)) {
+        if (!($r instanceof Throwable)) {
             List<Geocoder.Place> places = (List) $r;
             if (places.isEmpty()) {
                 this$0.hint("No places found for “" + $q + "”.");
@@ -241,7 +240,7 @@ public final class DestinationSearchActivity extends Activity {
                 }
             }
         }
-        Throwable it = Result.m121exceptionOrNullimpl($r);
+        Throwable it = ($r instanceof Throwable) ? (Throwable) $r : null;
         if (it != null) {
             this$0.hint("Search failed (need Wi-Fi): " + it.getMessage());
         }
@@ -260,7 +259,7 @@ public final class DestinationSearchActivity extends Activity {
         c.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.DestinationSearchActivity$$ExternalSyntheticLambda5
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                this.f$0.navigateTo(p);
+                DestinationSearchActivity.this.navigateTo(p);
             }
         });
         TextView t = new TextView(this);
@@ -287,7 +286,7 @@ public final class DestinationSearchActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public final void navigateTo(Geocoder.Place p) {
         ActionBus.INSTANCE.setPendingDestination(new double[]{p.getLat(), p.getLon()});
-        Toast.makeText(this, "Routing to " + StringsKt.substringBefore$default(p.getName(), ',', (String) null, 2, (Object) null) + "…", 0).show();
+        Toast.makeText(this, "Routing to " + StringsKt.substringBefore(p.getName(), ',', p.getName()) + "…", 0).show();
         startActivity(new Intent(this, (Class<?>) MainActivity.class));
         finish();
     }

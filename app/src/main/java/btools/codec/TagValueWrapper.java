@@ -1,7 +1,11 @@
 package btools.codec;
 
-/* JADX INFO: loaded from: classes.dex */
+
+/**
+ * TagValueWrapper wrapps a description bitmap
+ * to add the access-type
+ */
 public final class TagValueWrapper {
-    public int accessType;
-    public byte[] data;
+  public byte[] data;
+  public int accessType;
 }

@@ -52,20 +52,8 @@ public final class Geocoder {
             return place.copy(str, d3, d2);
         }
 
-        /* JADX INFO: renamed from: component1, reason: from getter */
-        public final String getName() {
-            return this.name;
-        }
 
-        /* JADX INFO: renamed from: component2, reason: from getter */
-        public final double getLat() {
-            return this.lat;
-        }
 
-        /* JADX INFO: renamed from: component3, reason: from getter */
-        public final double getLon() {
-            return this.lon;
-        }
 
         public final Place copy(String name, double lat, double lon) {
             Intrinsics.checkNotNullParameter(name, "name");
@@ -117,7 +105,7 @@ public final class Geocoder {
     */
     public final List<Place> search(String query, double[] near) throws IOException {
         String url;
-        Throwable th;
+        Throwable th = null;
         Intrinsics.checkNotNullParameter(query, "query");
         String q = URLEncoder.encode(StringsKt.trim((CharSequence) query).toString(), "UTF-8");
         String url2 = "https://nominatim.openstreetmap.org/search?q=" + q + "&format=jsonv2&limit=10&countrycodes=us";
@@ -163,7 +151,7 @@ public final class Geocoder {
                                 th = th2;
                             }
                         }
-                        ArrayList arrayList = (List) destination$iv$iv;
+                        List arrayList = (List) destination$iv$iv;
                         CloseableKt.closeFinally(responseExecute, null);
                         return arrayList;
                     } catch (Throwable th3) {
@@ -180,7 +168,7 @@ public final class Geocoder {
             throw th;
         } catch (Throwable th6) {
             CloseableKt.closeFinally(responseExecute, th);
-            throw th6;
+            throw Sneaky.sneak(th6);
         }
     }
 }

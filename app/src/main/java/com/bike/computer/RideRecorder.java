@@ -222,8 +222,8 @@ public final class RideRecorder {
         this.powerMax = 0;
         this.powerSum = 0L;
         this.powerCount = 0;
-        ArraysKt.fill$default(this.zoneMs, 0L, 0, 0, 6, (Object) null);
-        ArraysKt.fill$default(this.hrHistMs, 0L, 0, 0, 6, (Object) null);
+        Arrays.fill(this.zoneMs, 0L);
+        Arrays.fill(this.hrHistMs, 0L);
         this.lastZoneTickMs = 0L;
         this.eleSamples.clear();
         File f = new File(this.dir, "ride_" + this.fnameFmt.format(new Date(this.startMs)) + ".gpx");

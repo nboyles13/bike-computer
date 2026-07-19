@@ -1,61 +1,79 @@
 package btools.codec;
 
-/* JADX INFO: loaded from: classes.dex */
+/**
+ * Encoder/Decoder for signed integers that automatically detects the typical
+ * range of these numbers to determine a noisy-bit count as a very simple
+ * dictionary
+ * <p>
+ * Adapted for 3-pass encoding (counters -&gt; statistics -&gt; encoding )
+ * but doesn't do anything at pass1
+ */
 public final class NoisyDiffCoder {
-    private StatCoderContext bc;
-    private int[] freqs;
-    private int noisybits;
-    private int pass;
-    private int tot;
+  private int tot;
+  private int[] freqs;
+  private int noisybits;
+  private StatCoderContext bc;
+  private int pass;
 
-    public NoisyDiffCoder(StatCoderContext bc) {
-        this.noisybits = bc.decodeVarBits();
-        this.bc = bc;
-    }
+  /**
+   * Create a decoder and read the noisy-bit count from the gibe context
+   */
+  public NoisyDiffCoder(StatCoderContext bc) {
+    noisybits = bc.decodeVarBits();
+    this.bc = bc;
+  }
 
-    public NoisyDiffCoder() {
-    }
+  /**
+   * Create an encoder for 3-pass-encoding
+   */
+  public NoisyDiffCoder() {
+  }
 
-    public void encodeSignedValue(int value) {
-        if (this.pass == 3) {
-            this.bc.encodeNoisyDiff(value, this.noisybits);
-        } else if (this.pass == 2) {
-            count(value < 0 ? -value : value);
-        }
+  /**
+   * encodes a signed int (pass3 only, stats collection in pass2)
+   */
+  public void encodeSignedValue(int value) {
+    if (pass == 3) {
+      bc.encodeNoisyDiff(value, noisybits);
+    } else if (pass == 2) {
+      count(value < 0 ? -value : value);
     }
+  }
 
-    public int decodeSignedValue() {
-        return this.bc.decodeNoisyDiff(this.noisybits);
-    }
+  /**
+   * decodes a signed int
+   */
+  public int decodeSignedValue() {
+    return bc.decodeNoisyDiff(noisybits);
+  }
 
-    public void encodeDictionary(StatCoderContext bc) {
-        int i = this.pass + 1;
-        this.pass = i;
-        if (i == 3) {
-            int i2 = 0;
-            while (true) {
-                this.noisybits = i2;
-                if (this.noisybits >= 14 || this.tot <= 0 || this.freqs[this.noisybits] < (this.tot >> 1)) {
-                    break;
-                } else {
-                    i2 = this.noisybits + 1;
-                }
-            }
-            bc.encodeVarBits(this.noisybits);
-        }
-        this.bc = bc;
+  /**
+   * Starts a new encoding pass and (in pass3) calculates the noisy-bit count
+   * from the stats collected in pass2 and writes that to the given context
+   */
+  public void encodeDictionary(StatCoderContext bc) {
+    if (++pass == 3) {
+      // how many noisy bits?
+      for (noisybits = 0; noisybits < 14 && tot > 0; noisybits++) {
+        if (freqs[noisybits] < (tot >> 1))
+          break;
+      }
+      bc.encodeVarBits(noisybits);
     }
+    this.bc = bc;
+  }
 
-    private void count(int value) {
-        if (this.freqs == null) {
-            this.freqs = new int[14];
-        }
-        int bm = 1;
-        for (int i = 0; i < 14 && value >= bm; i++) {
-            int[] iArr = this.freqs;
-            iArr[i] = iArr[i] + 1;
-            bm <<= 1;
-        }
-        this.tot++;
+  private void count(int value) {
+    if (freqs == null)
+      freqs = new int[14];
+    int bm = 1;
+    for (int i = 0; i < 14; i++) {
+      if (value < bm)
+        break;
+      else
+        freqs[i]++;
+      bm <<= 1;
     }
+    tot++;
+  }
 }

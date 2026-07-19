@@ -2,31 +2,30 @@ package btools.codec;
 
 import btools.util.BitCoderContext;
 
-/* JADX INFO: loaded from: classes.dex */
+/**
+ * Container for some re-usable databuffers for the decoder
+ */
 public final class DataBuffers {
-    public int[] alat;
-    public int[] alon;
-    public byte[] bbuf1;
-    public BitCoderContext bctx1;
-    public int[] ibuf1;
-    public int[] ibuf2;
-    public int[] ibuf3;
-    public byte[] iobuffer;
-    public byte[] tagbuf1;
+  public byte[] iobuffer;
+  public byte[] tagbuf1 = new byte[256];
+  public BitCoderContext bctx1 = new BitCoderContext(tagbuf1);
+  public byte[] bbuf1 = new byte[65636];
+  public int[] ibuf1 = new int[4096];
+  public int[] ibuf2 = new int[2048];
+  public int[] ibuf3 = new int[2048];
+  public int[] alon = new int[2048];
+  public int[] alat = new int[2048];
 
-    public DataBuffers() {
-        this(new byte[65636]);
-    }
+  public DataBuffers() {
+    this(new byte[65636]);
+  }
 
-    public DataBuffers(byte[] iobuffer) {
-        this.tagbuf1 = new byte[256];
-        this.bctx1 = new BitCoderContext(this.tagbuf1);
-        this.bbuf1 = new byte[65636];
-        this.ibuf1 = new int[4096];
-        this.ibuf2 = new int[2048];
-        this.ibuf3 = new int[2048];
-        this.alon = new int[2048];
-        this.alat = new int[2048];
-        this.iobuffer = iobuffer;
-    }
+  /**
+   * construct a set of databuffers except
+   * for 'iobuffer', where the given array is used
+   */
+  public DataBuffers(byte[] iobuffer) {
+    this.iobuffer = iobuffer;
+  }
+
 }

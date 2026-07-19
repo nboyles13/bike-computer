@@ -1125,8 +1125,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -2136,8 +2136,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -2885,8 +2885,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -4008,8 +4008,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -5328,8 +5328,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -5966,8 +5966,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -6925,8 +6925,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -7684,8 +7684,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -8398,8 +8398,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -9403,8 +9403,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -10555,8 +10555,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder
@@ -11885,8 +11885,8 @@ public final class Osmformat {
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.AbstractMessage.Builder, com.google.protobuf.AbstractMessageLite.Builder
             /* JADX INFO: renamed from: clone */
-            public Builder mo111clone() {
-                return (Builder) super.mo111clone();
+            public Builder clone() {
+                return (Builder) super.clone();
             }
 
             @Override // com.google.protobuf.GeneratedMessageV3.Builder, com.google.protobuf.Message.Builder

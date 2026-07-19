@@ -45,7 +45,7 @@ public final class GmapsRoute {
     private static final Regex placeRe = new Regex("!3d(-?\\d{1,3}\\.\\d+)!4d(-?\\d{1,3}\\.\\d+)");
     private static final Regex dblRe = new Regex("!1d(-?\\d{1,3}\\.\\d+)!2d(-?\\d{1,3}\\.\\d+)");
     private static final Regex fullUrlRe = new Regex("https?://(?:www\\.)?(?:google\\.[a-z.]+|maps\\.google\\.[a-z.]+)/maps[^\"'\\\\ ]+");
-    private static final Set<String> ignoreNames = SetsKt.setOf((Object[]) new String[]{"your location", "my location", "current location", ""});
+    private static final Set<String> ignoreNames = SetsKt.setOf(new String[]{"your location", "my location", "current location", ""});
 
     private GmapsRoute() {
     }
@@ -73,15 +73,7 @@ public final class GmapsRoute {
                 return at.copy(d, d2);
             }
 
-            /* JADX INFO: renamed from: component1, reason: from getter */
-            public final double getLat() {
-                return this.lat;
-            }
 
-            /* JADX INFO: renamed from: component2, reason: from getter */
-            public final double getLon() {
-                return this.lon;
-            }
 
             public final At copy(double lat, double lon) {
                 return new At(lat, lon);
@@ -136,10 +128,6 @@ public final class GmapsRoute {
                 return named.copy(str);
             }
 
-            /* JADX INFO: renamed from: component1, reason: from getter */
-            public final String getQ() {
-                return this.q;
-            }
 
             public final Named copy(String q) {
                 Intrinsics.checkNotNullParameter(q, "q");
@@ -178,7 +166,7 @@ public final class GmapsRoute {
         Intrinsics.checkNotNullParameter(s, "s");
         String t = StringsKt.trim((CharSequence) s).toString().toLowerCase(Locale.ROOT);
         Intrinsics.checkNotNullExpressionValue(t, "toLowerCase(...)");
-        return StringsKt.contains$default((CharSequence) t, (CharSequence) "goo.gl", false, 2, (Object) null) || (StringsKt.contains$default((CharSequence) t, (CharSequence) "google.", false, 2, (Object) null) && StringsKt.contains$default((CharSequence) t, (CharSequence) "/maps", false, 2, (Object) null)) || StringsKt.contains$default((CharSequence) t, (CharSequence) "maps.app", false, 2, (Object) null);
+        return StringsKt.contains((CharSequence) t, (CharSequence) "goo.gl", false) || (StringsKt.contains((CharSequence) t, (CharSequence) "google.", false) && StringsKt.contains((CharSequence) t, (CharSequence) "/maps", false)) || StringsKt.contains((CharSequence) t, (CharSequence) "maps.app", false);
     }
 
     public final List<Stop> resolve(String link) {
@@ -189,7 +177,7 @@ public final class GmapsRoute {
     public final List<double[]> toPoints(List<? extends Stop> stops) {
         double[] dArr;
         Intrinsics.checkNotNullParameter(stops, "stops");
-        Iterator<T> it = stops.iterator();
+        Iterator it = stops.iterator();
         do {
             dArr = null;
             if (!it.hasNext()) {
@@ -211,7 +199,12 @@ public final class GmapsRoute {
                 if (!(s instanceof Stop.Named)) {
                     throw new NoWhenBranchMatchedException();
                 }
-                Geocoder.Place it3 = (Geocoder.Place) CollectionsKt.firstOrNull((List) Geocoder.INSTANCE.search(((Stop.Named) s).getQ(), near));
+                Geocoder.Place it3;
+                try {
+                    it3 = (Geocoder.Place) CollectionsKt.firstOrNull((List) Geocoder.INSTANCE.search(((Stop.Named) s).getQ(), near));
+                } catch (java.io.IOException e) {
+                    throw new RuntimeException(e);
+                }
                 if (it3 != null) {
                     out.add(new double[]{it3.getLon(), it3.getLat()});
                 }
@@ -232,55 +225,43 @@ public final class GmapsRoute {
         String strReplace$default;
         String strString;
         String body = "";
-        String str = StringsKt.startsWith$default(url0, "http", false, 2, (Object) null) ? url0 : "https://" + url0;
+        String str = StringsKt.startsWith(url0, "http", false) ? url0 : "https://" + url0;
         try {
-            Object url = Result.INSTANCE;
-            GmapsRoute gmapsRoute = this;
             String host = new URI(str).getHost();
             if (host == null) {
                 host = "";
             }
-            objM118constructorimpl = Result.m118constructorimpl(host);
+            objM118constructorimpl = host;
         } catch (Throwable th) {
-            Result.Companion companion = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
             objM118constructorimpl = "";
         }
         String host2 = (String) objM118constructorimpl;
-        if (!StringsKt.contains$default((CharSequence) host2, (CharSequence) "goo.gl", false, 2, (Object) null)) {
+        if (!StringsKt.contains((CharSequence) host2, (CharSequence) "goo.gl", false)) {
             return str;
         }
         try {
-            Result.Companion companion2 = Result.INSTANCE;
-            GmapsRoute gmapsRoute2 = this;
             Response responseExecute = http.newCall(new Request.Builder().url(str).header("User-Agent", UA).build()).execute();
             try {
                 Response r = responseExecute;
-                String finalUrl = r.request().url().getUrl();
-                if (StringsKt.contains$default((CharSequence) finalUrl, (CharSequence) "goo.gl", false, 2, (Object) null)) {
+                String finalUrl = r.request().url().toString();
+                if (StringsKt.contains((CharSequence) finalUrl, (CharSequence) "goo.gl", false)) {
                     ResponseBody responseBodyBody = r.body();
                     if (responseBodyBody != null && (strString = responseBodyBody.string()) != null) {
                         body = strString;
                     }
-                    MatchResult matchResultFind$default = Regex.find$default(fullUrlRe, body, 0, 2, null);
-                    if (matchResultFind$default != null && (value = matchResultFind$default.getValue()) != null && (strReplace$default = StringsKt.replace$default(value, "\\u003d", "=", false, 4, (Object) null)) != null) {
-                        String strReplace$default2 = StringsKt.replace$default(strReplace$default, "\\u0026", "&", false, 4, (Object) null);
+                    MatchResult matchResultFind$default = fullUrlRe.find(body, 0);
+                    if (matchResultFind$default != null && (value = matchResultFind$default.getValue()) != null && (strReplace$default = StringsKt.replace(value, "\\u003d", "=", false)) != null) {
+                        String strReplace$default2 = StringsKt.replace(strReplace$default, "\\u0026", "&", false);
                         if (strReplace$default2 != null) {
                             finalUrl = strReplace$default2;
                         }
                     }
                 }
                 CloseableKt.closeFinally(responseExecute, null);
-                objM118constructorimpl2 = Result.m118constructorimpl(finalUrl);
+                objM118constructorimpl2 = finalUrl;
             } finally {
             }
         } catch (Throwable th2) {
-            Result.Companion companion3 = Result.INSTANCE;
-            objM118constructorimpl2 = Result.m118constructorimpl(ResultKt.createFailure(th2));
-        }
-        if (Result.m124isFailureimpl(objM118constructorimpl2)) {
             objM118constructorimpl2 = str;
         }
         return (String) objM118constructorimpl2;
@@ -312,7 +293,7 @@ public final class GmapsRoute {
             if (str == null) {
                 str = query.get("via");
             }
-            if (str != null && (iterableSplit$default = StringsKt.split$default((CharSequence) str, new char[]{'|', '\n'}, false, 0, 6, (Object) null)) != null) {
+            if (str != null && (iterableSplit$default = StringsKt.split((CharSequence) str, new char[]{'|', '\n'}, false, 0)) != null) {
                 Iterable $this$forEach$iv = iterableSplit$default;
                 for (Object element$iv : $this$forEach$iv) {
                     String w = (String) element$iv;
@@ -333,9 +314,9 @@ public final class GmapsRoute {
                 return out;
             }
         }
-        int dirIdx = StringsKt.indexOf$default((CharSequence) url, "/dir/", 0, false, 6, (Object) null);
+        int dirIdx = StringsKt.indexOf((CharSequence) url, "/dir/", 0, false);
         if (dirIdx >= 0) {
-            List<Stop> list = SequencesKt.toList(SequencesKt.map(Regex.findAll$default(dblRe, url, 0, 2, null), new Function1() { // from class: com.bike.computer.GmapsRoute$$ExternalSyntheticLambda0
+            List<Stop> list = SequencesKt.toList(SequencesKt.map(dblRe.findAll(url, 0), new Function1() { // from class: com.bike.computer.GmapsRoute$$ExternalSyntheticLambda0
                 @Override // kotlin.jvm.functions.Function1
                 public final Object invoke(Object obj) {
                     return GmapsRoute.parse$lambda$12((MatchResult) obj);
@@ -346,24 +327,24 @@ public final class GmapsRoute {
             }
             String after = url.substring(dirIdx + 5);
             Intrinsics.checkNotNullExpressionValue(after, "substring(...)");
-            Iterable $this$filter$iv = CollectionsKt.listOf((Object[]) new Integer[]{Integer.valueOf(StringsKt.indexOf$default((CharSequence) after, "/@", 0, false, 6, (Object) null)), Integer.valueOf(StringsKt.indexOf$default((CharSequence) after, "/data=", 0, false, 6, (Object) null)), Integer.valueOf(StringsKt.indexOf$default((CharSequence) after, '?', 0, false, 6, (Object) null))});
-            Collection destination$iv$iv = new ArrayList();
+            Iterable $this$filter$iv = CollectionsKt.listOf((Object[]) new Integer[]{Integer.valueOf(StringsKt.indexOf((CharSequence) after, "/@", 0, false)), Integer.valueOf(StringsKt.indexOf((CharSequence) after, "/data=", 0, false)), Integer.valueOf(StringsKt.indexOf((CharSequence) after, '?', 0, false))});
+            List<Integer> destination$iv$iv = new ArrayList<Integer>();
             for (Object element$iv$iv : $this$filter$iv) {
                 int it4 = ((Number) element$iv$iv).intValue();
                 int it5 = it4 >= 0 ? 1 : 0;
                 if (it5 != 0) {
-                    destination$iv$iv.add(element$iv$iv);
+                    destination$iv$iv.add((Integer) element$iv$iv);
                 }
             }
-            Integer num = (Integer) CollectionsKt.minOrNull(destination$iv$iv);
+            Integer num = (Integer) CollectionsKt.minOrNull((Iterable<Integer>) destination$iv$iv);
             int end = num != null ? num.intValue() : after.length();
             ArrayList out2 = new ArrayList();
             String strSubstring = after.substring(0, end);
             Intrinsics.checkNotNullExpressionValue(strSubstring, "substring(...)");
-            for (String seg : StringsKt.split$default((CharSequence) strSubstring, new char[]{'/'}, false, 0, 6, (Object) null)) {
+            for (String seg : StringsKt.split((CharSequence) strSubstring, new char[]{'/'}, false, 0)) {
                 if (!StringsKt.isBlank(seg)) {
                     String origin2 = origin;
-                    if (StringsKt.startsWith$default(seg, "@", false, 2, (Object) null) || StringsKt.startsWith$default(seg, "data=", false, 2, (Object) null)) {
+                    if (StringsKt.startsWith(seg, "@", false) || StringsKt.startsWith(seg, "data=", false)) {
                         origin = origin2;
                     } else {
                         Stop p04 = stop(seg);
@@ -380,7 +361,7 @@ public final class GmapsRoute {
                 return out2;
             }
         }
-        MatchResult it6 = Regex.find$default(placeRe, url, 0, 2, null);
+        MatchResult it6 = placeRe.find(url, 0);
         if (it6 != null) {
             return CollectionsKt.listOf(new Stop.At(Double.parseDouble(it6.getGroupValues().get(1)), Double.parseDouble(it6.getGroupValues().get(2))));
         }
@@ -388,17 +369,18 @@ public final class GmapsRoute {
         if (it7 != null && (s = INSTANCE.stop(it7)) != null) {
             return CollectionsKt.listOf(s);
         }
-        int placeIdx = StringsKt.indexOf$default((CharSequence) url, "/place/", 0, false, 6, (Object) null);
+        int placeIdx = StringsKt.indexOf((CharSequence) url, "/place/", 0, false);
         if (placeIdx >= 0) {
             String strSubstring2 = url.substring(placeIdx + 7);
             Intrinsics.checkNotNullExpressionValue(strSubstring2, "substring(...)");
-            String name = StringsKt.substringBefore$default(StringsKt.substringBefore$default(strSubstring2, '/', (String) null, 2, (Object) null), '@', (String) null, 2, (Object) null);
+            String beforeSlash = StringsKt.substringBefore(strSubstring2, '/', strSubstring2);
+            String name = StringsKt.substringBefore(beforeSlash, '@', beforeSlash);
             Stop it8 = stop(name);
             if (it8 != null) {
                 return CollectionsKt.listOf(it8);
             }
         }
-        MatchResult it9 = Regex.find$default(atRe, url, 0, 2, null);
+        MatchResult it9 = atRe.find(url, 0);
         return it9 != null ? CollectionsKt.listOf(new Stop.At(Double.parseDouble(it9.getGroupValues().get(1)), Double.parseDouble(it9.getGroupValues().get(2)))) : CollectionsKt.emptyList();
     }
 
@@ -411,26 +393,20 @@ public final class GmapsRoute {
     private final Stop stop(String raw) {
         Object objM118constructorimpl;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            GmapsRoute gmapsRoute = this;
-            objM118constructorimpl = Result.m118constructorimpl(URLDecoder.decode(StringsKt.trim((CharSequence) raw).toString(), "UTF-8"));
+            objM118constructorimpl = URLDecoder.decode(StringsKt.trim((CharSequence) raw).toString(), "UTF-8");
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
             objM118constructorimpl = raw;
         }
         Intrinsics.checkNotNullExpressionValue(objM118constructorimpl, "getOrDefault(...)");
         String s = StringsKt.trim((CharSequence) objM118constructorimpl).toString();
-        MatchResult it = Regex.find$default(coordRe, StringsKt.replace$default(s, " ", "", false, 4, (Object) null), 0, 2, null);
+        MatchResult it = coordRe.find(StringsKt.replace(s, " ", "", false), 0);
         if (it != null) {
             return new Stop.At(Double.parseDouble(it.getGroupValues().get(1)), Double.parseDouble(it.getGroupValues().get(2)));
         }
         Set<String> set = ignoreNames;
         String lowerCase = s.toLowerCase(Locale.ROOT);
         Intrinsics.checkNotNullExpressionValue(lowerCase, "toLowerCase(...)");
-        if (set.contains(lowerCase) || StringsKt.startsWith$default(s, "place_id:", false, 2, (Object) null)) {
+        if (set.contains(lowerCase) || StringsKt.startsWith(s, "place_id:", false)) {
             return null;
         }
         return new Stop.Named(s);
@@ -442,24 +418,18 @@ public final class GmapsRoute {
             return MapsKt.emptyMap();
         }
         HashMap m = new HashMap();
-        for (String kv : StringsKt.split$default((CharSequence) q, new char[]{Typography.amp}, false, 0, 6, (Object) null)) {
-            int i = StringsKt.indexOf$default((CharSequence) kv, '=', 0, false, 6, (Object) null);
+        for (String kv : StringsKt.split((CharSequence) q, new char[]{Typography.amp}, false, 0)) {
+            int i = StringsKt.indexOf((CharSequence) kv, '=', 0, false);
             if (i > 0) {
                 String k = kv.substring(0, i);
                 Intrinsics.checkNotNullExpressionValue(k, "substring(...)");
                 try {
-                    Result.Companion companion = Result.INSTANCE;
-                    GmapsRoute gmapsRoute = this;
                     String strSubstring = kv.substring(i + 1);
                     Intrinsics.checkNotNullExpressionValue(strSubstring, "substring(...)");
-                    objM118constructorimpl = Result.m118constructorimpl(URLDecoder.decode(strSubstring, "UTF-8"));
+                    objM118constructorimpl = URLDecoder.decode(strSubstring, "UTF-8");
                 } catch (Throwable th) {
-                    Result.Companion companion2 = Result.INSTANCE;
-                    objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-                }
-                String strSubstring2 = kv.substring(i + 1);
-                Intrinsics.checkNotNullExpressionValue(strSubstring2, "substring(...)");
-                if (Result.m124isFailureimpl(objM118constructorimpl)) {
+                    String strSubstring2 = kv.substring(i + 1);
+                    Intrinsics.checkNotNullExpressionValue(strSubstring2, "substring(...)");
                     objM118constructorimpl = strSubstring2;
                 }
                 String v = (String) objM118constructorimpl;
@@ -486,6 +456,6 @@ public final class GmapsRoute {
     }
 
     private final String xml(String s) {
-        return StringsKt.replace$default(StringsKt.replace$default(StringsKt.replace$default(s, "&", "&amp;", false, 4, (Object) null), "<", "&lt;", false, 4, (Object) null), ">", "&gt;", false, 4, (Object) null);
+        return StringsKt.replace(StringsKt.replace(StringsKt.replace(s, "&", "&amp;", false), "<", "&lt;", false), ">", "&gt;", false);
     }
 }

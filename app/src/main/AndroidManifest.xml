@@ -39,7 +39,7 @@
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="Harmin"
+        android:label="${appLabel}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
@@ -92,7 +92,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.bike.computer.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

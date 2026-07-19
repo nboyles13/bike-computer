@@ -84,11 +84,10 @@ import org.maplibre.android.style.layers.SymbolLayer;
 import org.maplibre.android.style.sources.GeoJsonSource;
 import org.maplibre.geojson.LineString;
 import org.maplibre.geojson.Point;
-import org.maplibre.turf.TurfConstants;
 
 /* JADX INFO: compiled from: MainActivity.kt */
 /* JADX INFO: loaded from: classes3.dex */
-@Metadata(d1 = {"\u0000\u009f\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0010\u000e\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010!\n\u0002\u0018\u0002\n\u0002\b\u0004\n\u0002\u0010 \n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\b\n\u0002\b\u0005\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0013\n\u0002\b\u0003\n\u0002\u0010\u000b\n\u0000\n\u0002\u0010\u0006\n\u0002\b\u0002\n\u0002\u0010\t\n\u0002\b\u0005\n\u0002\u0018\u0002\n\u0002\b\u000e\n\u0002\u0018\u0002\n\u0002\b\u000e\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0005\n\u0002\u0018\u0002\n\u0002\b\u0004\n\u0002\u0010\u0011\n\u0002\b\u0002\n\u0002\b\u0003\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\n\u0002\u0010\u0015\n\u0002\b\u001a\n\u0002\u0010\u0007\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0002\b\u0006\n\u0002\u0018\u0002\n\u0002\b\u000b\n\u0002\u0018\u0002\n\u0002\b\u001e\n\u0002\u0018\u0002\n\u0002\b\n\n\u0002\u0018\u0002\n\u0002\b\u0014*\u0001p\u0018\u00002\u00020\u0001:\u0002é\u0001B\u0007¢\u0006\u0004\b\u0002\u0010\u0003J\u0012\u0010r\u001a\u00020s2\b\u0010t\u001a\u0004\u0018\u00010uH\u0014J-\u0010v\u001a\u00020s2\u0006\u0010w\u001a\u00020\"2\u000e\u0010x\u001a\n\u0012\u0006\b\u0001\u0012\u00020\u00050m2\u0006\u0010y\u001a\u00020zH\u0016¢\u0006\u0002\u0010{J\b\u0010|\u001a\u00020sH\u0002J\u0010\u0010}\u001a\u00020\t2\u0006\u0010~\u001a\u00020\u0005H\u0002J\u0010\u0010\u007f\u001a\u00020\t2\u0006\u0010~\u001a\u00020\u0005H\u0002J\u0012\u0010\u0080\u0001\u001a\u00020s2\u0007\u0010\u0081\u0001\u001a\u00020.H\u0002J\t\u0010\u0082\u0001\u001a\u00020\u0005H\u0002J\u0012\u0010\u0083\u0001\u001a\u00020s2\u0007\u0010\u0084\u0001\u001a\u00020\u001dH\u0002J\u0012\u0010\u0085\u0001\u001a\u00020s2\u0007\u0010\u0084\u0001\u001a\u00020\u001dH\u0002J\u0012\u0010\u0086\u0001\u001a\u00020s2\u0007\u0010\u0084\u0001\u001a\u00020\u001dH\u0002J\u0012\u0010\u0087\u0001\u001a\u00020s2\u0007\u0010\u0084\u0001\u001a\u00020\u001dH\u0002J\u001b\u0010\u0088\u0001\u001a\u00020.2\u0007\u0010\u0089\u0001\u001a\u0002002\u0007\u0010\u008a\u0001\u001a\u000200H\u0002J\u0018\u0010\u008b\u0001\u001a\u00020s2\r\u0010\u008c\u0001\u001a\b\u0012\u0004\u0012\u00020*0\u0014H\u0002J\u001b\u0010\u008d\u0001\u001a\u00020s2\u0007\u0010\u008e\u0001\u001a\u0002002\u0007\u0010\u008f\u0001\u001a\u000200H\u0002J$\u0010\u0090\u0001\u001a\u00020s2\u0007\u0010\u008e\u0001\u001a\u0002002\u0007\u0010\u008f\u0001\u001a\u0002002\u0007\u0010\u0091\u0001\u001a\u00020.H\u0002J\t\u0010\u0092\u0001\u001a\u00020sH\u0002J\u0013\u0010\u0097\u0001\u001a\u00020s2\b\u0010\u0098\u0001\u001a\u00030\u0099\u0001H\u0002J\t\u0010\u009a\u0001\u001a\u00020sH\u0002J\t\u0010\u009b\u0001\u001a\u00020.H\u0002J\t\u0010\u009c\u0001\u001a\u00020sH\u0002J\t\u0010\u009d\u0001\u001a\u00020sH\u0002J\u001e\u0010\u009f\u0001\u001a\u00030 \u00012\b\u0010¡\u0001\u001a\u00030 \u00012\b\u0010¢\u0001\u001a\u00030\u0095\u0001H\u0002J\u0013\u0010£\u0001\u001a\u00020s2\b\u0010¤\u0001\u001a\u00030\u0095\u0001H\u0002J\t\u0010¥\u0001\u001a\u00020sH\u0002J\t\u0010¦\u0001\u001a\u00020sH\u0002J\u001b\u0010§\u0001\u001a\u00020s2\u0007\u0010¨\u0001\u001a\u0002002\u0007\u0010©\u0001\u001a\u000200H\u0002J\u001b\u0010ª\u0001\u001a\u0002002\u0007\u0010¨\u0001\u001a\u0002002\u0007\u0010©\u0001\u001a\u000200H\u0002J\u001f\u0010«\u0001\u001a\u000f\u0012\u0004\u0012\u00020\u0005\u0012\u0004\u0012\u00020\u00050¬\u00012\u0007\u0010\u00ad\u0001\u001a\u00020\u0005H\u0002J\u0012\u0010®\u0001\u001a\u00020\u00052\u0007\u0010¯\u0001\u001a\u000200H\u0002J-\u0010°\u0001\u001a\u0002002\u0007\u0010±\u0001\u001a\u0002002\u0007\u0010²\u0001\u001a\u0002002\u0007\u0010³\u0001\u001a\u0002002\u0007\u0010´\u0001\u001a\u000200H\u0002J\t\u0010µ\u0001\u001a\u00020sH\u0002J\u0007\u0010¶\u0001\u001a\u00020sJ\u0007\u0010·\u0001\u001a\u00020sJ\t\u0010¸\u0001\u001a\u00020sH\u0002J\t\u0010¹\u0001\u001a\u00020sH\u0002J\t\u0010º\u0001\u001a\u00020sH\u0002J\u0012\u0010»\u0001\u001a\u00020s2\u0007\u0010¼\u0001\u001a\u00020.H\u0002J0\u0010½\u0001\u001a\u00020s2\u0007\u0010¾\u0001\u001a\u00020\t2\u0007\u0010¿\u0001\u001a\u00020.2\u0007\u0010¼\u0001\u001a\u00020.2\n\b\u0002\u0010À\u0001\u001a\u00030\u0095\u0001H\u0002J\u0013\u0010Á\u0001\u001a\u00020.2\b\u0010\u0098\u0001\u001a\u00030\u0099\u0001H\u0016J\t\u0010Ä\u0001\u001a\u00020sH\u0002J\t\u0010Å\u0001\u001a\u00020sH\u0002J\t\u0010Æ\u0001\u001a\u00020sH\u0002J\u0012\u0010Ç\u0001\u001a\u00020\"2\u0007\u0010¾\u0001\u001a\u00020\"H\u0002J\u001c\u0010È\u0001\u001a\u00020s2\u0007\u0010É\u0001\u001a\u00020\u000f2\b\u0010Ê\u0001\u001a\u00030Ë\u0001H\u0002J\u001b\u0010Í\u0001\u001a\u00020\"2\u0007\u0010Î\u0001\u001a\u00020\"2\u0007\u0010Ï\u0001\u001a\u00020\"H\u0002J\u0012\u0010Ð\u0001\u001a\u00020\u00052\u0007\u0010Ñ\u0001\u001a\u000203H\u0002J\t\u0010Ò\u0001\u001a\u00020sH\u0002J\t\u0010Ó\u0001\u001a\u00020sH\u0002J\u0013\u0010Ô\u0001\u001a\u00020\u00052\b\u0010Õ\u0001\u001a\u00030Ö\u0001H\u0002J\u0016\u0010×\u0001\u001a\u000f\u0012\u0004\u0012\u00020\"\u0012\u0004\u0012\u00020.0¬\u0001H\u0002J\t\u0010Ø\u0001\u001a\u00020sH\u0002J\t\u0010Ù\u0001\u001a\u00020sH\u0002J\t\u0010Ú\u0001\u001a\u00020sH\u0002J\t\u0010Û\u0001\u001a\u00020sH\u0002J\t\u0010Ü\u0001\u001a\u00020sH\u0016J\t\u0010Ý\u0001\u001a\u00020sH\u0002J\u0012\u0010Þ\u0001\u001a\u00020s2\u0007\u0010ß\u0001\u001a\u00020.H\u0016J\t\u0010à\u0001\u001a\u00020sH\u0014J\t\u0010á\u0001\u001a\u00020sH\u0014J\t\u0010â\u0001\u001a\u00020sH\u0016J\t\u0010ã\u0001\u001a\u00020sH\u0014J\t\u0010ä\u0001\u001a\u00020sH\u0014J\t\u0010å\u0001\u001a\u00020sH\u0016J\u0012\u0010æ\u0001\u001a\u00020s2\u0007\u0010ç\u0001\u001a\u00020uH\u0014J\t\u0010è\u0001\u001a\u00020sH\u0014R\u000e\u0010\u0004\u001a\u00020\u0005X\u0082D¢\u0006\u0002\n\u0000R\u000e\u0010\u0006\u001a\u00020\u0007X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\b\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R*\u0010\n\u001a\u001e\u0012\u0004\u0012\u00020\u0005\u0012\u0004\u0012\u00020\t0\u000bj\u000e\u0012\u0004\u0012\u00020\u0005\u0012\u0004\u0012\u00020\t`\fX\u0082\u0004¢\u0006\u0002\n\u0000R\u0014\u0010\r\u001a\b\u0012\u0004\u0012\u00020\u000f0\u000eX\u0082\u0004¢\u0006\u0002\n\u0000R\u000e\u0010\u0010\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\u0011\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\u0012\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u0014\u0010\u0013\u001a\b\u0012\u0004\u0012\u00020\u00150\u0014X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010\u0016\u001a\u00020\u0017X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\u0018\u001a\u00020\u0019X\u0082.¢\u0006\u0002\n\u0000R\u0010\u0010\u001a\u001a\u0004\u0018\u00010\u001bX\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\u001c\u001a\u0004\u0018\u00010\u001dX\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\u001e\u001a\u0004\u0018\u00010\u001fX\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010 \u001a\u0004\u0018\u00010\u001fX\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010!\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010#\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010$\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010%\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010&\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u0014\u0010'\u001a\b\u0012\u0004\u0012\u00020(0\u0014X\u0082\u000e¢\u0006\u0002\n\u0000R\u0014\u0010)\u001a\b\u0012\u0004\u0012\u00020*0\u0014X\u0082\u000e¢\u0006\u0002\n\u0000R\u0016\u0010+\u001a\n\u0012\u0004\u0012\u00020*\u0018\u00010\u0014X\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010,\u001a\u0004\u0018\u00010\u0005X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010-\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010/\u001a\u000200X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00101\u001a\u000200X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00102\u001a\u000203X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00104\u001a\u000203X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00105\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00106\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00107\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u00108\u001a\u000209X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010:\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010;\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010<\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010=\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010>\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010?\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010@\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010A\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010B\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010C\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010D\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010E\u001a\u000209X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010F\u001a\u000209X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010G\u001a\u00020HX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010I\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010J\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010K\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010L\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010M\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010N\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010O\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010P\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010Q\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010R\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010S\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010T\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010U\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010V\u001a\u00020WX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010X\u001a\u00020\u0017X\u0082.¢\u0006\u0002\n\u0000R\u001e\u0010Y\u001a\u0012\u0012\u0004\u0012\u00020\u00150Zj\b\u0012\u0004\u0012\u00020\u0015`[X\u0082\u0004¢\u0006\u0002\n\u0000R\u001e\u0010\\\u001a\u0012\u0012\u0004\u0012\u00020\u00150Zj\b\u0012\u0004\u0012\u00020\u0015`[X\u0082\u0004¢\u0006\u0002\n\u0000R\u0010\u0010]\u001a\u0004\u0018\u00010^X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010_\u001a\u00020`X\u0082\u0004¢\u0006\u0002\n\u0000R\u000e\u0010a\u001a\u00020bX\u0082\u0004¢\u0006\u0002\n\u0000R\u000e\u0010c\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010d\u001a\u00020\u0005X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010e\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010f\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010g\u001a\u00020hX\u0082\u0004¢\u0006\u0002\n\u0000R\u000e\u0010i\u001a\u000203X\u0082D¢\u0006\u0002\n\u0000R\u000e\u0010j\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010k\u001a\u00020hX\u0082\u0004¢\u0006\u0002\n\u0000R\u0016\u0010l\u001a\b\u0012\u0004\u0012\u00020\u00050mX\u0082\u0004¢\u0006\u0004\n\u0002\u0010nR\u0010\u0010o\u001a\u00020pX\u0082\u0004¢\u0006\u0004\n\u0002\u0010qR\u000f\u0010\u0093\u0001\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\u0094\u0001\u001a\u00030\u0095\u0001X\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\u0096\u0001\u001a\u00030\u0095\u0001X\u0082\u000e¢\u0006\u0002\n\u0000R\u000f\u0010\u009e\u0001\u001a\u000200X\u0082\u000e¢\u0006\u0002\n\u0000R\u000f\u0010Â\u0001\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000f\u0010Ã\u0001\u001a\u00020hX\u0082\u0004¢\u0006\u0002\n\u0000R\u000f\u0010Ì\u0001\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000¨\u0006ê\u0001"}, d2 = {"Lcom/bike/computer/MainActivity;", "Landroid/app/Activity;", "<init>", "()V", "DATA", "", "pager", "Landroidx/viewpager2/widget/ViewPager2;", "pageMap", "Landroid/view/View;", "dataPages", "Ljava/util/LinkedHashMap;", "Lkotlin/collections/LinkedHashMap;", "dashViews", "", "Lcom/bike/computer/DashboardView;", "pageHr", "pageElev", "pageSummary", "dots", "", "Landroid/widget/TextView;", "dotsBar", "Landroid/widget/LinearLayout;", "mapView", "Lorg/maplibre/android/maps/MapView;", "map", "Lorg/maplibre/android/maps/MapLibreMap;", "loadedStyle", "Lorg/maplibre/android/maps/Style;", "trailSource", "Lorg/maplibre/android/style/sources/GeoJsonSource;", "routeSource", "lastTrailSize", "", "navBanner", "navArrow", "navText", "navDist", "navSteps", "Lbtools/router/NavHint;", "navPoints", "", "routeVias", "currentRouteName", "navigating", "", "destLat", "", "destLon", "offRouteSince", "", "lastRerouteMs", "announcedIdx", "earlyAnnouncedIdx", "recBtn", "recenterBtn", "Landroid/widget/ImageView;", "pauseBtn", "stopBtn", "stopFill", "stopLabel", "recBar", "pausedBadge", "lowBattWarned", "mSpeed", "mHr", "mDist", "mTime", "homeBtn", "bellBtn", "elevView", "Lcom/bike/computer/ElevationView;", "eEle", "eAscent", "eGrade", "sDist", "sTime", "sAvgSpd", "sMaxSpd", "sAvgHr", "sMaxHr", "sAscent", "sStarted", "hrBig", "hrZoneLbl", "hrGraph", "Lcom/bike/computer/HrGraphView;", "hrLegend", "hrTimeLbls", "Ljava/util/ArrayList;", "Lkotlin/collections/ArrayList;", "hrPctLbls", "ride", "Lcom/bike/computer/RideService;", "ui", "Landroid/os/Handler;", "clockFmt", "Ljava/text/SimpleDateFormat;", "mapPageIndex", "pageSig", "cameraTracking", "controlsVisible", "hideRunnable", "Ljava/lang/Runnable;", "screenOffMs", "screenOffArmed", "screenOffRunnable", "perms", "", "[Ljava/lang/String;", "conn", "com/bike/computer/MainActivity$conn$1", "Lcom/bike/computer/MainActivity$conn$1;", "onCreate", "", "savedInstanceState", "Landroid/os/Bundle;", "onRequestPermissionsResult", "rc", "p", "results", "", "(I[Ljava/lang/String;[I)V", "bindViews", "pageViewForKey", "key", "dataPageView", "buildPager", "goToMap", "buildStyle", "add3dBuildings", "style", "addBikeLayer", "addTrailLayer", "addRouteLayer", "startNavigation", "dLat", "dLon", "startRouteNavigation", "vias", "reroute", "fromLat", "fromLon", "computeRoute", "initial", "enableLocationDot", "twoFingerActive", "lastFocusX", "", "lastFocusY", "handleMapTouch", "ev", "Landroid/view/MotionEvent;", "onUserMovedMap", "mapLowPower", "reCenter", "applyMapPower", "mapBearing", "mapLoc", "Landroid/location/Location;", "raw", "speedMps", "speedZoom", "mps", "tryConsumePendingRoute", "onRideUpdate", "updateNav", "lat", "lon", "minDistToRoute", "maneuver", "Lkotlin/Pair;", "cmd", "fmtDistTo", TurfConstants.UNIT_METERS, "hav", "lat1", "lon1", "lat2", "lon2", "cancelNav", "startRec", "stopRec", "updateRecUi", "showChrome", "hideChrome", "syncChrome", "animate", "setFaded", "v", "show", "shownAlpha", "dispatchTouchEvent", "stopHolding", "stopCompleteRunnable", "beginStopHold", "endStopHold", "resetStopButton", "dp", "showMetricPicker", "view", "tile", "Lcom/bike/computer/DashTile;", "hrPageMaxHr", "liveZone", "hr", "maxHr", "fmtZoneTime", "ms", "buildHrPage", "updateHrPage", "metricValue", "m", "Lcom/bike/computer/Metric;", "batteryInfo", "checkLowBattery", "uiTick", "updateScreenPolicy", "sleepScreen", "onUserInteraction", "enterImmersive", "onWindowFocusChanged", "hasFocus", "onStart", "onResume", "onBackPressed", "onPause", "onStop", "onLowMemory", "onSaveInstanceState", "outState", "onDestroy", "PageAdapter", "app_debug"}, k = 1, mv = {2, 0, 0}, xi = 48)
+@Metadata(d1 = {"\u0000\u009f\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0010\u000e\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010!\n\u0002\u0018\u0002\n\u0002\b\u0004\n\u0002\u0010 \n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\b\n\u0002\b\u0005\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0013\n\u0002\b\u0003\n\u0002\u0010\u000b\n\u0000\n\u0002\u0010\u0006\n\u0002\b\u0002\n\u0002\u0010\t\n\u0002\b\u0005\n\u0002\u0018\u0002\n\u0002\b\u000e\n\u0002\u0018\u0002\n\u0002\b\u000e\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0005\n\u0002\u0018\u0002\n\u0002\b\u0004\n\u0002\u0010\u0011\n\u0002\b\u0002\n\u0002\b\u0003\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\n\u0002\u0010\u0015\n\u0002\b\u001a\n\u0002\u0010\u0007\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0002\b\u0006\n\u0002\u0018\u0002\n\u0002\b\u000b\n\u0002\u0018\u0002\n\u0002\b\u001e\n\u0002\u0018\u0002\n\u0002\b\n\n\u0002\u0018\u0002\n\u0002\b\u0014*\u0001p\u0018\u00002\u00020\u0001:\u0002é\u0001B\u0007¢\u0006\u0004\b\u0002\u0010\u0003J\u0012\u0010r\u001a\u00020s2\b\u0010t\u001a\u0004\u0018\u00010uH\u0014J-\u0010v\u001a\u00020s2\u0006\u0010w\u001a\u00020\"2\u000e\u0010x\u001a\n\u0012\u0006\b\u0001\u0012\u00020\u00050m2\u0006\u0010y\u001a\u00020zH\u0016¢\u0006\u0002\u0010{J\b\u0010|\u001a\u00020sH\u0002J\u0010\u0010}\u001a\u00020\t2\u0006\u0010~\u001a\u00020\u0005H\u0002J\u0010\u0010\u007f\u001a\u00020\t2\u0006\u0010~\u001a\u00020\u0005H\u0002J\u0012\u0010\u0080\u0001\u001a\u00020s2\u0007\u0010\u0081\u0001\u001a\u00020.H\u0002J\t\u0010\u0082\u0001\u001a\u00020\u0005H\u0002J\u0012\u0010\u0083\u0001\u001a\u00020s2\u0007\u0010\u0084\u0001\u001a\u00020\u001dH\u0002J\u0012\u0010\u0085\u0001\u001a\u00020s2\u0007\u0010\u0084\u0001\u001a\u00020\u001dH\u0002J\u0012\u0010\u0086\u0001\u001a\u00020s2\u0007\u0010\u0084\u0001\u001a\u00020\u001dH\u0002J\u0012\u0010\u0087\u0001\u001a\u00020s2\u0007\u0010\u0084\u0001\u001a\u00020\u001dH\u0002J\u001b\u0010\u0088\u0001\u001a\u00020.2\u0007\u0010\u0089\u0001\u001a\u0002002\u0007\u0010\u008a\u0001\u001a\u000200H\u0002J\u0018\u0010\u008b\u0001\u001a\u00020s2\r\u0010\u008c\u0001\u001a\b\u0012\u0004\u0012\u00020*0\u0014H\u0002J\u001b\u0010\u008d\u0001\u001a\u00020s2\u0007\u0010\u008e\u0001\u001a\u0002002\u0007\u0010\u008f\u0001\u001a\u000200H\u0002J$\u0010\u0090\u0001\u001a\u00020s2\u0007\u0010\u008e\u0001\u001a\u0002002\u0007\u0010\u008f\u0001\u001a\u0002002\u0007\u0010\u0091\u0001\u001a\u00020.H\u0002J\t\u0010\u0092\u0001\u001a\u00020sH\u0002J\u0013\u0010\u0097\u0001\u001a\u00020s2\b\u0010\u0098\u0001\u001a\u00030\u0099\u0001H\u0002J\t\u0010\u009a\u0001\u001a\u00020sH\u0002J\t\u0010\u009b\u0001\u001a\u00020.H\u0002J\t\u0010\u009c\u0001\u001a\u00020sH\u0002J\t\u0010\u009d\u0001\u001a\u00020sH\u0002J\u001e\u0010\u009f\u0001\u001a\u00030 \u00012\b\u0010¡\u0001\u001a\u00030 \u00012\b\u0010¢\u0001\u001a\u00030\u0095\u0001H\u0002J\u0013\u0010£\u0001\u001a\u00020s2\b\u0010¤\u0001\u001a\u00030\u0095\u0001H\u0002J\t\u0010¥\u0001\u001a\u00020sH\u0002J\t\u0010¦\u0001\u001a\u00020sH\u0002J\u001b\u0010§\u0001\u001a\u00020s2\u0007\u0010¨\u0001\u001a\u0002002\u0007\u0010©\u0001\u001a\u000200H\u0002J\u001b\u0010ª\u0001\u001a\u0002002\u0007\u0010¨\u0001\u001a\u0002002\u0007\u0010©\u0001\u001a\u000200H\u0002J\u001f\u0010«\u0001\u001a\u000f\u0012\u0004\u0012\u00020\u0005\u0012\u0004\u0012\u00020\u00050¬\u00012\u0007\u0010\u00ad\u0001\u001a\u00020\u0005H\u0002J\u0012\u0010®\u0001\u001a\u00020\u00052\u0007\u0010¯\u0001\u001a\u000200H\u0002J-\u0010°\u0001\u001a\u0002002\u0007\u0010±\u0001\u001a\u0002002\u0007\u0010²\u0001\u001a\u0002002\u0007\u0010³\u0001\u001a\u0002002\u0007\u0010´\u0001\u001a\u000200H\u0002J\t\u0010µ\u0001\u001a\u00020sH\u0002J\u0007\u0010¶\u0001\u001a\u00020sJ\u0007\u0010·\u0001\u001a\u00020sJ\t\u0010¸\u0001\u001a\u00020sH\u0002J\t\u0010¹\u0001\u001a\u00020sH\u0002J\t\u0010º\u0001\u001a\u00020sH\u0002J\u0012\u0010»\u0001\u001a\u00020s2\u0007\u0010¼\u0001\u001a\u00020.H\u0002J0\u0010½\u0001\u001a\u00020s2\u0007\u0010¾\u0001\u001a\u00020\t2\u0007\u0010¿\u0001\u001a\u00020.2\u0007\u0010¼\u0001\u001a\u00020.2\n\b\u0002\u0010À\u0001\u001a\u00030\u0095\u0001H\u0002J\u0013\u0010Á\u0001\u001a\u00020.2\b\u0010\u0098\u0001\u001a\u00030\u0099\u0001H\u0016J\t\u0010Ä\u0001\u001a\u00020sH\u0002J\t\u0010Å\u0001\u001a\u00020sH\u0002J\t\u0010Æ\u0001\u001a\u00020sH\u0002J\u0012\u0010Ç\u0001\u001a\u00020\"2\u0007\u0010¾\u0001\u001a\u00020\"H\u0002J\u001c\u0010È\u0001\u001a\u00020s2\u0007\u0010É\u0001\u001a\u00020\u000f2\b\u0010Ê\u0001\u001a\u00030Ë\u0001H\u0002J\u001b\u0010Í\u0001\u001a\u00020\"2\u0007\u0010Î\u0001\u001a\u00020\"2\u0007\u0010Ï\u0001\u001a\u00020\"H\u0002J\u0012\u0010Ð\u0001\u001a\u00020\u00052\u0007\u0010Ñ\u0001\u001a\u000203H\u0002J\t\u0010Ò\u0001\u001a\u00020sH\u0002J\t\u0010Ó\u0001\u001a\u00020sH\u0002J\u0013\u0010Ô\u0001\u001a\u00020\u00052\b\u0010Õ\u0001\u001a\u00030Ö\u0001H\u0002J\u0016\u0010×\u0001\u001a\u000f\u0012\u0004\u0012\u00020\"\u0012\u0004\u0012\u00020.0¬\u0001H\u0002J\t\u0010Ø\u0001\u001a\u00020sH\u0002J\t\u0010Ù\u0001\u001a\u00020sH\u0002J\t\u0010Ú\u0001\u001a\u00020sH\u0002J\t\u0010Û\u0001\u001a\u00020sH\u0002J\t\u0010Ü\u0001\u001a\u00020sH\u0016J\t\u0010Ý\u0001\u001a\u00020sH\u0002J\u0012\u0010Þ\u0001\u001a\u00020s2\u0007\u0010ß\u0001\u001a\u00020.H\u0016J\t\u0010à\u0001\u001a\u00020sH\u0014J\t\u0010á\u0001\u001a\u00020sH\u0014J\t\u0010â\u0001\u001a\u00020sH\u0016J\t\u0010ã\u0001\u001a\u00020sH\u0014J\t\u0010ä\u0001\u001a\u00020sH\u0014J\t\u0010å\u0001\u001a\u00020sH\u0016J\u0012\u0010æ\u0001\u001a\u00020s2\u0007\u0010ç\u0001\u001a\u00020uH\u0014J\t\u0010è\u0001\u001a\u00020sH\u0014R\u000e\u0010\u0004\u001a\u00020\u0005X\u0082D¢\u0006\u0002\n\u0000R\u000e\u0010\u0006\u001a\u00020\u0007X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\b\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R*\u0010\n\u001a\u001e\u0012\u0004\u0012\u00020\u0005\u0012\u0004\u0012\u00020\t0\u000bj\u000e\u0012\u0004\u0012\u00020\u0005\u0012\u0004\u0012\u00020\t`\fX\u0082\u0004¢\u0006\u0002\n\u0000R\u0014\u0010\r\u001a\b\u0012\u0004\u0012\u00020\u000f0\u000eX\u0082\u0004¢\u0006\u0002\n\u0000R\u000e\u0010\u0010\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\u0011\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\u0012\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u0014\u0010\u0013\u001a\b\u0012\u0004\u0012\u00020\u00150\u0014X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010\u0016\u001a\u00020\u0017X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010\u0018\u001a\u00020\u0019X\u0082.¢\u0006\u0002\n\u0000R\u0010\u0010\u001a\u001a\u0004\u0018\u00010\u001bX\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\u001c\u001a\u0004\u0018\u00010\u001dX\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\u001e\u001a\u0004\u0018\u00010\u001fX\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010 \u001a\u0004\u0018\u00010\u001fX\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010!\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010#\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010$\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010%\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010&\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u0014\u0010'\u001a\b\u0012\u0004\u0012\u00020(0\u0014X\u0082\u000e¢\u0006\u0002\n\u0000R\u0014\u0010)\u001a\b\u0012\u0004\u0012\u00020*0\u0014X\u0082\u000e¢\u0006\u0002\n\u0000R\u0016\u0010+\u001a\n\u0012\u0004\u0012\u00020*\u0018\u00010\u0014X\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010,\u001a\u0004\u0018\u00010\u0005X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010-\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010/\u001a\u000200X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00101\u001a\u000200X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00102\u001a\u000203X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00104\u001a\u000203X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00105\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00106\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u00107\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u00108\u001a\u000209X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010:\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010;\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010<\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010=\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010>\u001a\u00020\tX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010?\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010@\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010A\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010B\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010C\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010D\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010E\u001a\u000209X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010F\u001a\u000209X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010G\u001a\u00020HX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010I\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010J\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010K\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010L\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010M\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010N\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010O\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010P\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010Q\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010R\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010S\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010T\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010U\u001a\u00020\u0015X\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010V\u001a\u00020WX\u0082.¢\u0006\u0002\n\u0000R\u000e\u0010X\u001a\u00020\u0017X\u0082.¢\u0006\u0002\n\u0000R\u001e\u0010Y\u001a\u0012\u0012\u0004\u0012\u00020\u00150Zj\b\u0012\u0004\u0012\u00020\u0015`[X\u0082\u0004¢\u0006\u0002\n\u0000R\u001e\u0010\\\u001a\u0012\u0012\u0004\u0012\u00020\u00150Zj\b\u0012\u0004\u0012\u00020\u0015`[X\u0082\u0004¢\u0006\u0002\n\u0000R\u0010\u0010]\u001a\u0004\u0018\u00010^X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010_\u001a\u00020`X\u0082\u0004¢\u0006\u0002\n\u0000R\u000e\u0010a\u001a\u00020bX\u0082\u0004¢\u0006\u0002\n\u0000R\u000e\u0010c\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010d\u001a\u00020\u0005X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010e\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010f\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010g\u001a\u00020hX\u0082\u0004¢\u0006\u0002\n\u0000R\u000e\u0010i\u001a\u000203X\u0082D¢\u0006\u0002\n\u0000R\u000e\u0010j\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000e\u0010k\u001a\u00020hX\u0082\u0004¢\u0006\u0002\n\u0000R\u0016\u0010l\u001a\b\u0012\u0004\u0012\u00020\u00050mX\u0082\u0004¢\u0006\u0004\n\u0002\u0010nR\u0010\u0010o\u001a\u00020pX\u0082\u0004¢\u0006\u0004\n\u0002\u0010qR\u000f\u0010\u0093\u0001\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\u0094\u0001\u001a\u00030\u0095\u0001X\u0082\u000e¢\u0006\u0002\n\u0000R\u0010\u0010\u0096\u0001\u001a\u00030\u0095\u0001X\u0082\u000e¢\u0006\u0002\n\u0000R\u000f\u0010\u009e\u0001\u001a\u000200X\u0082\u000e¢\u0006\u0002\n\u0000R\u000f\u0010Â\u0001\u001a\u00020.X\u0082\u000e¢\u0006\u0002\n\u0000R\u000f\u0010Ã\u0001\u001a\u00020hX\u0082\u0004¢\u0006\u0002\n\u0000R\u000f\u0010Ì\u0001\u001a\u00020\"X\u0082\u000e¢\u0006\u0002\n\u0000¨\u0006ê\u0001"}, d2 = {"Lcom/bike/computer/MainActivity;", "Landroid/app/Activity;", "<init>", "()V", "DATA", "", "pager", "Landroidx/viewpager2/widget/ViewPager2;", "pageMap", "Landroid/view/View;", "dataPages", "Ljava/util/LinkedHashMap;", "Lkotlin/collections/LinkedHashMap;", "dashViews", "", "Lcom/bike/computer/DashboardView;", "pageHr", "pageElev", "pageSummary", "dots", "", "Landroid/widget/TextView;", "dotsBar", "Landroid/widget/LinearLayout;", "mapView", "Lorg/maplibre/android/maps/MapView;", "map", "Lorg/maplibre/android/maps/MapLibreMap;", "loadedStyle", "Lorg/maplibre/android/maps/Style;", "trailSource", "Lorg/maplibre/android/style/sources/GeoJsonSource;", "routeSource", "lastTrailSize", "", "navBanner", "navArrow", "navText", "navDist", "navSteps", "Lbtools/router/NavHint;", "navPoints", "", "routeVias", "currentRouteName", "navigating", "", "destLat", "", "destLon", "offRouteSince", "", "lastRerouteMs", "announcedIdx", "earlyAnnouncedIdx", "recBtn", "recenterBtn", "Landroid/widget/ImageView;", "pauseBtn", "stopBtn", "stopFill", "stopLabel", "recBar", "pausedBadge", "lowBattWarned", "mSpeed", "mHr", "mDist", "mTime", "homeBtn", "bellBtn", "elevView", "Lcom/bike/computer/ElevationView;", "eEle", "eAscent", "eGrade", "sDist", "sTime", "sAvgSpd", "sMaxSpd", "sAvgHr", "sMaxHr", "sAscent", "sStarted", "hrBig", "hrZoneLbl", "hrGraph", "Lcom/bike/computer/HrGraphView;", "hrLegend", "hrTimeLbls", "Ljava/util/ArrayList;", "Lkotlin/collections/ArrayList;", "hrPctLbls", "ride", "Lcom/bike/computer/RideService;", "ui", "Landroid/os/Handler;", "clockFmt", "Ljava/text/SimpleDateFormat;", "mapPageIndex", "pageSig", "cameraTracking", "controlsVisible", "hideRunnable", "Ljava/lang/Runnable;", "screenOffMs", "screenOffArmed", "screenOffRunnable", "perms", "", "[Ljava/lang/String;", "conn", "com/bike/computer/MainActivity$conn$1", "Lcom/bike/computer/MainActivity$conn$1;", "onCreate", "", "savedInstanceState", "Landroid/os/Bundle;", "onRequestPermissionsResult", "rc", "p", "results", "", "(I[Ljava/lang/String;[I)V", "bindViews", "pageViewForKey", "key", "dataPageView", "buildPager", "goToMap", "buildStyle", "add3dBuildings", "style", "addBikeLayer", "addTrailLayer", "addRouteLayer", "startNavigation", "dLat", "dLon", "startRouteNavigation", "vias", "reroute", "fromLat", "fromLon", "computeRoute", "initial", "enableLocationDot", "twoFingerActive", "lastFocusX", "", "lastFocusY", "handleMapTouch", "ev", "Landroid/view/MotionEvent;", "onUserMovedMap", "mapLowPower", "reCenter", "applyMapPower", "mapBearing", "mapLoc", "Landroid/location/Location;", "raw", "speedMps", "speedZoom", "mps", "tryConsumePendingRoute", "onRideUpdate", "updateNav", "lat", "lon", "minDistToRoute", "maneuver", "Lkotlin/Pair;", "cmd", "fmtDistTo", "meters", "hav", "lat1", "lon1", "lat2", "lon2", "cancelNav", "startRec", "stopRec", "updateRecUi", "showChrome", "hideChrome", "syncChrome", "animate", "setFaded", "v", "show", "shownAlpha", "dispatchTouchEvent", "stopHolding", "stopCompleteRunnable", "beginStopHold", "endStopHold", "resetStopButton", "dp", "showMetricPicker", "view", "tile", "Lcom/bike/computer/DashTile;", "hrPageMaxHr", "liveZone", "hr", "maxHr", "fmtZoneTime", "ms", "buildHrPage", "updateHrPage", "metricValue", "m", "Lcom/bike/computer/Metric;", "batteryInfo", "checkLowBattery", "uiTick", "updateScreenPolicy", "sleepScreen", "onUserInteraction", "enterImmersive", "onWindowFocusChanged", "hasFocus", "onStart", "onResume", "onBackPressed", "onPause", "onStop", "onLowMemory", "onSaveInstanceState", "outState", "onDestroy", "PageAdapter", "app_debug"}, k = 1, mv = {2, 0, 0}, xi = 48)
 public final class MainActivity extends Activity {
     private ImageView bellBtn;
     private String currentRouteName;
@@ -134,7 +133,7 @@ public final class MainActivity extends Activity {
     private View recBar;
     private TextView recBtn;
     private ImageView recenterBtn;
-    private RideService ride;
+    RideService ride;
     private GeoJsonSource routeSource;
     private List<double[]> routeVias;
     private TextView sAscent;
@@ -170,14 +169,14 @@ public final class MainActivity extends Activity {
     private final Runnable hideRunnable = new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda15
         @Override // java.lang.Runnable
         public final void run() {
-            this.f$0.hideChrome();
+            MainActivity.this.hideChrome();
         }
     };
     private final long screenOffMs = 30000;
     private final Runnable screenOffRunnable = new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda16
         @Override // java.lang.Runnable
         public final void run() {
-            MainActivity.screenOffRunnable$lambda$1(this.f$0);
+            MainActivity.screenOffRunnable$lambda$1(MainActivity.this);
         }
     };
     private final String[] perms = {"android.permission.ACCESS_FINE_LOCATION", "android.permission.BLUETOOTH_SCAN", "android.permission.BLUETOOTH_CONNECT", "android.permission.POST_NOTIFICATIONS"};
@@ -186,7 +185,7 @@ public final class MainActivity extends Activity {
     private final Runnable stopCompleteRunnable = new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda17
         @Override // java.lang.Runnable
         public final void run() {
-            MainActivity.stopCompleteRunnable$lambda$64(this.f$0);
+            MainActivity.stopCompleteRunnable$lambda$64(MainActivity.this);
         }
     };
 
@@ -305,7 +304,7 @@ public final class MainActivity extends Activity {
         mapView2.getMapAsync(new OnMapReadyCallback() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda6
             @Override // org.maplibre.android.maps.OnMapReadyCallback
             public final void onMapReady(MapLibreMap mapLibreMap) {
-                MainActivity.onCreate$lambda$6(this.f$0, mapLibreMap);
+                MainActivity.onCreate$lambda$6(MainActivity.this, mapLibreMap);
             }
         });
         this.pager = (ViewPager2) findViewById(R.id.pager);
@@ -341,7 +340,7 @@ public final class MainActivity extends Activity {
         textView.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda7
             @Override // android.view.View.OnClickListener
             public final void onClick(View view2) {
-                this.f$0.startRec();
+                MainActivity.this.startRec();
             }
         });
         ImageView imageView = this.bellBtn;
@@ -352,7 +351,7 @@ public final class MainActivity extends Activity {
         imageView.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda8
             @Override // android.view.View.OnClickListener
             public final void onClick(View view2) {
-                MainActivity.onCreate$lambda$8(this.f$0, view2);
+                MainActivity.onCreate$lambda$8(MainActivity.this, view2);
             }
         });
         Bell.INSTANCE.prewarm();
@@ -364,7 +363,7 @@ public final class MainActivity extends Activity {
         textView2.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda9
             @Override // android.view.View.OnClickListener
             public final void onClick(View view2) {
-                MainActivity.onCreate$lambda$9(this.f$0, view2);
+                MainActivity.onCreate$lambda$9(MainActivity.this, view2);
             }
         });
         ImageView imageView2 = this.recenterBtn;
@@ -375,7 +374,7 @@ public final class MainActivity extends Activity {
         imageView2.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda10
             @Override // android.view.View.OnClickListener
             public final void onClick(View view2) {
-                this.f$0.reCenter();
+                MainActivity.this.reCenter();
             }
         });
         ImageView imageView3 = this.homeBtn;
@@ -386,7 +385,7 @@ public final class MainActivity extends Activity {
         imageView3.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda12
             @Override // android.view.View.OnClickListener
             public final void onClick(View view2) {
-                MainActivity.onCreate$lambda$11(this.f$0, view2);
+                MainActivity.onCreate$lambda$11(MainActivity.this, view2);
             }
         });
         View view2 = this.stopBtn;
@@ -397,7 +396,7 @@ public final class MainActivity extends Activity {
         view2.setOnTouchListener(new View.OnTouchListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda13
             @Override // android.view.View.OnTouchListener
             public final boolean onTouch(View view3, MotionEvent motionEvent) {
-                return MainActivity.onCreate$lambda$12(this.f$0, view3, motionEvent);
+                return MainActivity.onCreate$lambda$12(MainActivity.this, view3, motionEvent);
             }
         });
         View view3 = this.navBanner;
@@ -409,7 +408,7 @@ public final class MainActivity extends Activity {
         view.setOnLongClickListener(new View.OnLongClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda14
             @Override // android.view.View.OnLongClickListener
             public final boolean onLongClick(View view4) {
-                return MainActivity.onCreate$lambda$14(this.f$0, view4);
+                return MainActivity.onCreate$lambda$14(MainActivity.this, view4);
             }
         });
         Voice.INSTANCE.setEnabled(Prefs.INSTANCE.voice(this));
@@ -444,19 +443,19 @@ public final class MainActivity extends Activity {
         m.setStyle(new Style.Builder().fromJson(this$0.buildStyle()), new Style.OnStyleLoaded() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda18
             @Override // org.maplibre.android.maps.Style.OnStyleLoaded
             public final void onStyleLoaded(Style style) {
-                MainActivity.onCreate$lambda$6$lambda$2(this.f$0, style);
+                MainActivity.onCreate$lambda$6$lambda$2(this$0, style);
             }
         });
         m.addOnMapLongClickListener(new MapLibreMap.OnMapLongClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda19
             @Override // org.maplibre.android.maps.MapLibreMap.OnMapLongClickListener
             public final boolean onMapLongClick(LatLng latLng) {
-                return MainActivity.onCreate$lambda$6$lambda$3(this.f$0, latLng);
+                return MainActivity.onCreate$lambda$6$lambda$3(this$0, latLng);
             }
         });
         m.addOnCameraMoveStartedListener(new MapLibreMap.OnCameraMoveStartedListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda20
             @Override // org.maplibre.android.maps.MapLibreMap.OnCameraMoveStartedListener
             public final void onCameraMoveStarted(int i) {
-                MainActivity.onCreate$lambda$6$lambda$4(this.f$0, i);
+                MainActivity.onCreate$lambda$6$lambda$4(this$0, i);
             }
         });
         MapView mapView = this$0.mapView;
@@ -467,7 +466,7 @@ public final class MainActivity extends Activity {
         mapView.setOnTouchListener(new View.OnTouchListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda21
             @Override // android.view.View.OnTouchListener
             public final boolean onTouch(View view, MotionEvent motionEvent) {
-                return MainActivity.onCreate$lambda$6$lambda$5(this.f$0, view, motionEvent);
+                return MainActivity.onCreate$lambda$6$lambda$5(this$0, view, motionEvent);
             }
         });
     }
@@ -543,10 +542,10 @@ public final class MainActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final boolean onCreate$lambda$14(final MainActivity this$0, View it) {
         if (this$0.navigating) {
-            new AlertDialog.Builder(this$0, android.R.style.Theme.Material.Dialog.Alert).setTitle("Navigation").setMessage("Stop turn-by-turn navigation?").setPositiveButton("Stop navigation", new DialogInterface.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda31
+            new AlertDialog.Builder(this$0, android.R.style.Theme_Material_Dialog_Alert).setTitle("Navigation").setMessage("Stop turn-by-turn navigation?").setPositiveButton("Stop navigation", new DialogInterface.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda31
                 @Override // android.content.DialogInterface.OnClickListener
                 public final void onClick(DialogInterface dialogInterface, int i) {
-                    MainActivity.onCreate$lambda$14$lambda$13(this.f$0, dialogInterface, i);
+                    MainActivity.onCreate$lambda$14$lambda$13(this$0, dialogInterface, i);
                 }
             }).setNegativeButton("Keep", (DialogInterface.OnClickListener) null).show();
             return true;
@@ -812,25 +811,25 @@ public final class MainActivity extends Activity {
             dv.setValueProvider(new Function1() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda0
                 @Override // kotlin.jvm.functions.Function1
                 public final Object invoke(Object obj) {
-                    return MainActivity.dataPageView$lambda$23$lambda$16(this.f$0, (Metric) obj);
+                    return MainActivity.dataPageView$lambda$23$lambda$16(MainActivity.this, (Metric) obj);
                 }
             });
             dv.setOnChanged(new Function0() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda11
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return MainActivity.dataPageView$lambda$23$lambda$17(this.f$0, key, dv);
+                    return MainActivity.dataPageView$lambda$23$lambda$17(MainActivity.this, key, dv);
                 }
             });
             dv.setOnPickMetric(new Function1() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda22
                 @Override // kotlin.jvm.functions.Function1
                 public final Object invoke(Object obj) {
-                    return MainActivity.dataPageView$lambda$23$lambda$18(this.f$0, dv, (DashTile) obj);
+                    return MainActivity.dataPageView$lambda$23$lambda$18(MainActivity.this, dv, (DashTile) obj);
                 }
             });
             dv.setOnEditModeChanged(new Function1() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda26
                 @Override // kotlin.jvm.functions.Function1
                 public final Object invoke(Object obj) {
-                    return MainActivity.dataPageView$lambda$23$lambda$19(toolbar, this, ((Boolean) obj).booleanValue());
+                    return MainActivity.dataPageView$lambda$23$lambda$19(toolbar, MainActivity.this, ((Boolean) obj).booleanValue());
                 }
             });
             dv.setOnLongClickListener(new View.OnLongClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda27
@@ -912,7 +911,7 @@ public final class MainActivity extends Activity {
         Code decompiled incorrectly, please refer to instructions dump.
     */
     private final void buildPager(boolean goToMap) {
-        int current;
+        int current = 0;
         ViewPager2 viewPager2;
         List<String> listEnabledPagesInOrder = Prefs.INSTANCE.enabledPagesInOrder(this);
         this.pageSig = Prefs.INSTANCE.pageSignature(this);
@@ -1018,8 +1017,8 @@ public final class MainActivity extends Activity {
 
     /* JADX INFO: compiled from: MainActivity.kt */
     @Metadata(d1 = {"\u00002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010 \n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0010\b\n\u0002\b\u0004\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\u0002\n\u0002\b\u0003\b\u0002\u0018\u00002\b\u0012\u0004\u0012\u00020\u00020\u0001:\u0001\u0013B\u0015\u0012\f\u0010\u0003\u001a\b\u0012\u0004\u0012\u00020\u00050\u0004¢\u0006\u0004\b\u0006\u0010\u0007J\b\u0010\b\u001a\u00020\tH\u0016J\u0010\u0010\n\u001a\u00020\t2\u0006\u0010\u000b\u001a\u00020\tH\u0016J\u0018\u0010\f\u001a\u00020\u00022\u0006\u0010\r\u001a\u00020\u000e2\u0006\u0010\u000f\u001a\u00020\tH\u0016J\u0018\u0010\u0010\u001a\u00020\u00112\u0006\u0010\u0012\u001a\u00020\u00022\u0006\u0010\u000b\u001a\u00020\tH\u0016R\u0014\u0010\u0003\u001a\b\u0012\u0004\u0012\u00020\u00050\u0004X\u0082\u0004¢\u0006\u0002\n\u0000¨\u0006\u0014"}, d2 = {"Lcom/bike/computer/MainActivity$PageAdapter;", "Landroidx/recyclerview/widget/RecyclerView$Adapter;", "Lcom/bike/computer/MainActivity$PageAdapter$VH;", "pages", "", "Landroid/view/View;", "<init>", "(Ljava/util/List;)V", "getItemCount", "", "getItemViewType", "position", "onCreateViewHolder", "parent", "Landroid/view/ViewGroup;", "viewType", "onBindViewHolder", "", "holder", "VH", "app_debug"}, k = 1, mv = {2, 0, 0}, xi = 48)
-    private static final class PageAdapter extends RecyclerView.Adapter<VH> {
-        private final List<View> pages;
+    private static final class PageAdapter extends RecyclerView.Adapter<PageAdapter.VH> {
+        private final List<? extends View> pages;
 
         /* JADX INFO: compiled from: MainActivity.kt */
         @Metadata(d1 = {"\u0000\u0012\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0018\u00002\u00020\u0001B\u000f\u0012\u0006\u0010\u0002\u001a\u00020\u0003¢\u0006\u0004\b\u0004\u0010\u0005¨\u0006\u0006"}, d2 = {"Lcom/bike/computer/MainActivity$PageAdapter$VH;", "Landroidx/recyclerview/widget/RecyclerView$ViewHolder;", "v", "Landroid/view/View;", "<init>", "(Landroid/view/View;)V", "app_debug"}, k = 1, mv = {2, 0, 0}, xi = 48)
@@ -1066,20 +1065,24 @@ public final class MainActivity extends Activity {
         }
     }
 
-    private final String buildStyle() throws JSONException {
-        JSONObject o = new JSONObject(FilesKt.readText$default(new File(this.DATA + "/styles/style.json"), null, 1, null));
-        JSONObject src = new JSONObject().put("type", "vector").put("tiles", new JSONArray().put("http://bike.local/tiles/{z}/{x}/{y}.pbf")).put("minzoom", 0).put("maxzoom", 14);
-        JSONObject sources = o.getJSONObject("sources");
-        Iterator<String> itKeys = sources.keys();
-        Intrinsics.checkNotNullExpressionValue(itKeys, "keys(...)");
-        for (String k : SequencesKt.toList(SequencesKt.asSequence(itKeys))) {
-            sources.put(k, src);
+    private final String buildStyle() {
+        try {
+            JSONObject o = new JSONObject(FilesKt.readText(new File(this.DATA + "/styles/style.json"), kotlin.text.Charsets.UTF_8));
+            JSONObject src = new JSONObject().put("type", "vector").put("tiles", new JSONArray().put("http://bike.local/tiles/{z}/{x}/{y}.pbf")).put("minzoom", 0).put("maxzoom", 14);
+            JSONObject sources = o.getJSONObject("sources");
+            Iterator<String> itKeys = sources.keys();
+            Intrinsics.checkNotNullExpressionValue(itKeys, "keys(...)");
+            for (String k : SequencesKt.toList(SequencesKt.asSequence(itKeys))) {
+                sources.put(k, src);
+            }
+            o.put("glyphs", "http://bike.local/fonts/{fontstack}/{range}.pbf");
+            o.remove("sprite");
+            String string = o.toString();
+            Intrinsics.checkNotNullExpressionValue(string, "toString(...)");
+            return string;
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-        o.put("glyphs", "http://bike.local/fonts/{fontstack}/{range}.pbf");
-        o.remove("sprite");
-        String string = o.toString();
-        Intrinsics.checkNotNullExpressionValue(string, "toString(...)");
-        return string;
     }
 
     private final void add3dBuildings(Style style) {
@@ -1275,7 +1278,7 @@ public final class MainActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                MainActivity.computeRoute$lambda$43(this.f$0, fromLon, fromLat, initial);
+                MainActivity.computeRoute$lambda$43(MainActivity.this, fromLon, fromLat, initial);
             }
         }).start();
     }
@@ -1289,7 +1292,7 @@ public final class MainActivity extends Activity {
         Iterable $this$mapTo$iv$iv;
         List<double[]> list2 = this$0.routeVias;
         if (list2 == null || (listListOf = CollectionsKt.plus((Collection) CollectionsKt.listOf(new double[]{$fromLon, $fromLat}), (Iterable) list2)) == null) {
-            listListOf = CollectionsKt.listOf((Object[]) new double[][]{new double[]{$fromLon, $fromLat}, new double[]{this$0.destLon, this$0.destLat}});
+            listListOf = CollectionsKt.listOf((double[][]) new double[][]{new double[]{$fromLon, $fromLat}, new double[]{this$0.destLon, this$0.destLat}});
         }
         final RouteResult res = BikeRouter.INSTANCE.route(this$0.DATA + "/routing", this$0.DATA + "/routing/trekking.brf", listListOf);
         if (res != null) {
@@ -1407,7 +1410,7 @@ public final class MainActivity extends Activity {
         mapView.post(new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda25
             @Override // java.lang.Runnable
             public final void run() {
-                MainActivity.enableLocationDot$lambda$44(this.f$0);
+                MainActivity.enableLocationDot$lambda$44(MainActivity.this);
             }
         });
         RideService rideService = this.ride;
@@ -1765,7 +1768,7 @@ public final class MainActivity extends Activity {
                 this.ui.postDelayed(new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda23
                     @Override // java.lang.Runnable
                     public final void run() {
-                        MainActivity.updateNav$lambda$54(this.f$0);
+                        MainActivity.updateNav$lambda$54(MainActivity.this);
                     }
                 }, 6000L);
                 return;
@@ -1989,6 +1992,7 @@ public final class MainActivity extends Activity {
             default:
                 return TuplesKt.to("↑", "Continue");
         }
+        return TuplesKt.to("↑", "Continue");
     }
 
     private final String fmtDistTo(double meters) {
@@ -2112,12 +2116,12 @@ public final class MainActivity extends Activity {
             new Thread(new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda30
                 @Override // java.lang.Runnable
                 public final void run() {
-                    MainActivity.stopRec$lambda$62(this.f$0, f, startMs2);
+                    MainActivity.stopRec$lambda$62(MainActivity.this, f, startMs2);
                 }
             }).start();
         }
         if (summary != null) {
-            RideHistory.INSTANCE.add(summary.copy((12287 & 1) != 0 ? summary.startMs : 0L, (12287 & 2) != 0 ? summary.route : null, (12287 & 4) != 0 ? summary.distanceM : 0.0d, (12287 & 8) != 0 ? summary.movingMs : 0L, (12287 & 16) != 0 ? summary.avgMps : 0.0f, (12287 & 32) != 0 ? summary.maxMps : 0.0f, (12287 & 64) != 0 ? summary.hrAvg : 0, (12287 & 128) != 0 ? summary.hrMax : 0, (12287 & 256) != 0 ? summary.ascentM : 0.0d, (12287 & 512) != 0 ? summary.powerAvg : 0, (12287 & 1024) != 0 ? summary.powerMax : 0, (12287 & 2048) != 0 ? summary.gpx : path != null ? StringsKt.substringAfterLast$default(path, '/', (String) null, 2, (Object) null) : null, (12287 & 4096) != 0 ? summary.uploaded : false, (12287 & 8192) != 0 ? summary.name : null));
+            RideHistory.INSTANCE.add(summary.copy((12287 & 1) != 0 ? summary.startMs : 0L, (12287 & 2) != 0 ? summary.route : null, (12287 & 4) != 0 ? summary.distanceM : 0.0d, (12287 & 8) != 0 ? summary.movingMs : 0L, (12287 & 16) != 0 ? summary.avgMps : 0.0f, (12287 & 32) != 0 ? summary.maxMps : 0.0f, (12287 & 64) != 0 ? summary.hrAvg : 0, (12287 & 128) != 0 ? summary.hrMax : 0, (12287 & 256) != 0 ? summary.ascentM : 0.0d, (12287 & 512) != 0 ? summary.powerAvg : 0, (12287 & 1024) != 0 ? summary.powerMax : 0, (12287 & 2048) != 0 ? summary.gpx : path != null ? StringsKt.substringAfterLast(path, '/', path) : null, (12287 & 4096) != 0 ? summary.uploaded : false, (12287 & 8192) != 0 ? summary.name : null));
             AppState.INSTANCE.setOnMap(false);
             startActivity(new Intent(this, (Class<?>) RideSummaryActivity.class).putExtra("startMs", startMs2).putExtra("welcomeOnDone", true));
             return;
@@ -2128,13 +2132,13 @@ public final class MainActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void stopRec$lambda$62(final MainActivity this$0, File $f, final long $startMs) {
         final Object res;
+        Object res$tmp;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            res = Result.m118constructorimpl(GoogleDriveClient.INSTANCE.uploadGpx(this$0, $f));
+            res$tmp = GoogleDriveClient.INSTANCE.uploadGpx(this$0, $f);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            res = Result.m118constructorimpl(ResultKt.createFailure(th));
+            res$tmp = th;
         }
+        res = res$tmp;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda4
             @Override // java.lang.Runnable
             public final void run() {
@@ -2145,11 +2149,11 @@ public final class MainActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void stopRec$lambda$62$lambda$61(Object $res, long $startMs, MainActivity this$0) {
-        if (Result.m125isSuccessimpl($res)) {
+        if (!(($res) instanceof Throwable)) {
             RideHistory.INSTANCE.markUploaded($startMs);
             Toast.makeText(this$0, (String) $res, 1).show();
         }
-        Throwable it = Result.m121exceptionOrNullimpl($res);
+        Throwable it = ($res) instanceof Throwable ? (Throwable) $res : null;
         if (it != null) {
             Toast.makeText(this$0, "Drive upload failed: " + it.getMessage(), 1).show();
         }
@@ -2404,7 +2408,7 @@ public final class MainActivity extends Activity {
         }
         Collection thisCollection$iv = (List) destination$iv$iv;
         String[] labels = (String[]) thisCollection$iv.toArray(new String[0]);
-        new AlertDialog.Builder(this, android.R.style.Theme.Material.Dialog.Alert).setTitle("Metric").setItems(labels, new DialogInterface.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda3
+        new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert).setTitle("Metric").setItems(labels, new DialogInterface.OnClickListener() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda3
             @Override // android.content.DialogInterface.OnClickListener
             public final void onClick(DialogInterface dialogInterface, int i) {
                 MainActivity.showMetricPicker$lambda$66(view, tile, metrics, dialogInterface, i);
@@ -2717,12 +2721,9 @@ public final class MainActivity extends Activity {
             if (z && !this.lowBattWarned && !charging) {
                 this.lowBattWarned = true;
                 try {
-                    Result.Companion companion = Result.INSTANCE;
                     MainActivity $this$checkLowBattery_u24lambda_u2479 = this;
-                    Result.m118constructorimpl(new AlertDialog.Builder($this$checkLowBattery_u24lambda_u2479, android.R.style.Theme.Material.Dialog.Alert).setTitle("Battery low — " + pct + "%").setMessage("Consider wrapping up. Your ride will auto-save and the phone will power off at 2% to protect it.").setPositiveButton("OK", (DialogInterface.OnClickListener) null).show());
+                    new AlertDialog.Builder($this$checkLowBattery_u24lambda_u2479, android.R.style.Theme_Material_Dialog_Alert).setTitle("Battery low — " + pct + "%").setMessage("Consider wrapping up. Your ride will auto-save and the phone will power off at 2% to protect it.").setPositiveButton("OK", (DialogInterface.OnClickListener) null).show();
                 } catch (Throwable th) {
-                    Result.Companion companion2 = Result.INSTANCE;
-                    Result.m118constructorimpl(ResultKt.createFailure(th));
                 }
             }
         }
@@ -2734,13 +2735,13 @@ public final class MainActivity extends Activity {
         Code decompiled incorrectly, please refer to instructions dump.
     */
     public final void uiTick() {
-        String strFmtFeet;
-        String str;
-        String strFmtSpeed;
-        String strFmtSpeed2;
-        String strValueOf;
-        String strValueOf2;
-        String strFmtFeet2;
+        String strFmtFeet = "--";
+        String str = "--";
+        String strFmtSpeed = "--";
+        String strFmtSpeed2 = "--";
+        String strValueOf = "--";
+        String strValueOf2 = "--";
+        String strFmtFeet2 = "--";
         String str2;
         ArrayList<float[]> eleSamples;
         updateRecUi();
@@ -2889,7 +2890,7 @@ public final class MainActivity extends Activity {
         this.ui.postDelayed(new Runnable() { // from class: com.bike.computer.MainActivity$$ExternalSyntheticLambda5
             @Override // java.lang.Runnable
             public final void run() {
-                this.f$0.uiTick();
+                MainActivity.this.uiTick();
             }
         }, 1000L);
     }
@@ -2899,7 +2900,7 @@ public final class MainActivity extends Activity {
         Code decompiled incorrectly, please refer to instructions dump.
     */
     private final void updateScreenPolicy() {
-        boolean autoOff;
+        boolean autoOff = false;
         RideRecorder recorder;
         if (Prefs.INSTANCE.endurance(this)) {
             RideService rideService = this.ride;

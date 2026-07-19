@@ -35,30 +35,10 @@ public final /* data */ class DashTile {
         return dashTile.copy(metric, i6, i7, i8, i4);
     }
 
-    /* JADX INFO: renamed from: component1, reason: from getter */
-    public final Metric getMetric() {
-        return this.metric;
-    }
 
-    /* JADX INFO: renamed from: component2, reason: from getter */
-    public final int getCol() {
-        return this.col;
-    }
 
-    /* JADX INFO: renamed from: component3, reason: from getter */
-    public final int getRow() {
-        return this.row;
-    }
 
-    /* JADX INFO: renamed from: component4, reason: from getter */
-    public final int getW() {
-        return this.w;
-    }
 
-    /* JADX INFO: renamed from: component5, reason: from getter */
-    public final int getH() {
-        return this.h;
-    }
 
     public final DashTile copy(Metric metric, int col, int row, int w, int h) {
         Intrinsics.checkNotNullParameter(metric, "metric");

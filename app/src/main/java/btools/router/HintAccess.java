@@ -49,6 +49,6 @@ public final class HintAccess {
     private final String nameFrom(String kv) {
         MatchResult m;
         String str = kv;
-        return ((str == null || str.length() == 0) || (m = Regex.find$default(new Regex("(?:^|\\s)name=(.+?)(?:\\s+[\\w:]+=|$)"), kv, 0, 2, null)) == null) ? "" : StringsKt.trim((CharSequence) m.getGroupValues().get(1)).toString();
+        return ((str == null || str.length() == 0) || (m = new Regex("(?:^|\\s)name=(.+?)(?:\\s+[\\w:]+=|$)").find(kv, 0)) == null) ? "" : StringsKt.trim((CharSequence) m.getGroupValues().get(1)).toString();
     }
 }

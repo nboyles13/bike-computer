@@ -1,21 +1,26 @@
+/**
+ * Simple version of OsmPath just to get angle and priority of first segment
+ *
+ * @author ab
+ */
 package btools.router;
 
 import btools.mapaccess.OsmLink;
 import btools.mapaccess.OsmNode;
 
-/* JADX INFO: loaded from: classes.dex */
 public abstract class OsmPrePath {
-    protected OsmLink link;
-    public OsmPrePath next;
-    protected OsmNode sourceNode;
-    protected OsmNode targetNode;
+  protected OsmNode sourceNode;
+  protected OsmNode targetNode;
+  protected OsmLink link;
 
-    protected abstract void initPrePath(OsmPath osmPath, RoutingContext routingContext);
+  public OsmPrePath next;
 
-    public void init(OsmPath origin, OsmLink link, RoutingContext rc) {
-        this.link = link;
-        this.sourceNode = origin.getTargetNode();
-        this.targetNode = link.getTarget(this.sourceNode);
-        initPrePath(origin, rc);
-    }
+  public void init(OsmPath origin, OsmLink link, RoutingContext rc) {
+    this.link = link;
+    this.sourceNode = origin.getTargetNode();
+    this.targetNode = link.getTarget(sourceNode);
+    initPrePath(origin, rc);
+  }
+
+  protected abstract void initPrePath(OsmPath origin, RoutingContext rc);
 }

@@ -49,12 +49,12 @@ public final class HrSensor {
     private final Context ctx;
     private String deviceName;
     private BluetoothGatt gatt;
-    private final HrSensor$gattCb$1 gattCb;
+    private final BluetoothGattCallback gattCb;
     private final Handler handler;
-    private final Function1<Integer, Unit> onBattery;
-    private final Function1<Integer, Unit> onHr;
-    private final Function1<String, Unit> onStatus;
-    private final HrSensor$scanCb$1 scanCb;
+    private final Function1<? super Integer, Unit> onBattery;
+    private final Function1<? super Integer, Unit> onHr;
+    private final Function1<? super String, Unit> onStatus;
+    private final ScanCallback scanCb;
     private int seenCount;
 
     /* JADX WARN: Multi-variable type inference failed */
@@ -91,7 +91,7 @@ public final class HrSensor {
                 Iterable serviceUuids;
                 boolean z;
                 Intrinsics.checkNotNullParameter(result, "result");
-                if (this.this$0.connecting) {
+                if (HrSensor.this.connecting) {
                     return;
                 }
                 ScanRecord rec = result.getScanRecord();
@@ -102,7 +102,7 @@ public final class HrSensor {
                     hasHrSvc = false;
                 } else {
                     Iterable $this$any$iv = serviceUuids;
-                    HrSensor hrSensor = this.this$0;
+                    HrSensor hrSensor = HrSensor.this;
                     if (($this$any$iv instanceof Collection) && ((Collection) $this$any$iv).isEmpty()) {
                         z = false;
                     } else {
@@ -121,50 +121,48 @@ public final class HrSensor {
                             }
                         }
                     }
-                    if (z) {
-                        hasHrSvc = true;
-                    }
+                    hasHrSvc = z;
                 }
                 boolean looksHr = StringsKt.contains((CharSequence) name, (CharSequence) "polar", true) || StringsKt.contains((CharSequence) name, (CharSequence) "heart", true) || StringsKt.contains((CharSequence) name, (CharSequence) "hr", true) || StringsKt.contains((CharSequence) name, (CharSequence) "tickr", true);
-                this.this$0.seenCount++;
-                if (this.this$0.seenCount <= 60 || hasHrSvc || looksHr) {
-                    Log.i(this.this$0.TAG, "scan #" + this.this$0.seenCount + " " + result.getDevice().getAddress() + " name=\"" + name + "\" hrSvc=" + hasHrSvc + " uuids=" + (rec != null ? rec.getServiceUuids() : null));
+                HrSensor.this.seenCount++;
+                if (HrSensor.this.seenCount <= 60 || hasHrSvc || looksHr) {
+                    Log.i(HrSensor.this.TAG, "scan #" + HrSensor.this.seenCount + " " + result.getDevice().getAddress() + " name=\"" + name + "\" hrSvc=" + hasHrSvc + " uuids=" + (rec != null ? rec.getServiceUuids() : null));
                 }
                 if (hasHrSvc || looksHr) {
-                    this.this$0.connecting = true;
-                    HrSensor hrSensor2 = this.this$0;
+                    HrSensor.this.connecting = true;
+                    HrSensor hrSensor2 = HrSensor.this;
                     String address = name;
                     if (StringsKt.isBlank(address)) {
                         address = result.getDevice().getAddress();
                     }
                     hrSensor2.deviceName = address;
-                    BluetoothLeScanner scanner = this.this$0.getScanner();
+                    BluetoothLeScanner scanner = HrSensor.this.getScanner();
                     if (scanner != null) {
                         scanner.stopScan(this);
                     }
-                    Log.i(this.this$0.TAG, "MATCH -> connecting " + result.getDevice().getAddress());
-                    this.this$0.onStatus.invoke("connecting " + result.getDevice().getAddress());
-                    this.this$0.gatt = result.getDevice().connectGatt(this.this$0.ctx, false, this.this$0.gattCb, 2);
+                    Log.i(HrSensor.this.TAG, "MATCH -> connecting " + result.getDevice().getAddress());
+                    HrSensor.this.onStatus.invoke("connecting " + result.getDevice().getAddress());
+                    HrSensor.this.gatt = result.getDevice().connectGatt(HrSensor.this.ctx, false, HrSensor.this.gattCb, 2);
                 }
             }
 
             @Override // android.bluetooth.le.ScanCallback
             public void onScanFailed(int errorCode) {
-                Log.i(this.this$0.TAG, "onScanFailed " + errorCode);
-                this.this$0.onStatus.invoke("scan fail " + errorCode);
+                Log.i(HrSensor.this.TAG, "onScanFailed " + errorCode);
+                HrSensor.this.onStatus.invoke("scan fail " + errorCode);
             }
         };
         this.gattCb = new BluetoothGattCallback() { // from class: com.bike.computer.HrSensor$gattCb$1
             @Override // android.bluetooth.BluetoothGattCallback
             public void onConnectionStateChange(BluetoothGatt g, int status, int newState) {
                 Intrinsics.checkNotNullParameter(g, "g");
-                Log.i(this.this$0.TAG, "connState status=" + status + " newState=" + newState);
+                Log.i(HrSensor.this.TAG, "connState status=" + status + " newState=" + newState);
                 switch (newState) {
                     case 0:
-                        this.this$0.onStatus.invoke("disconnected");
+                        HrSensor.this.onStatus.invoke("disconnected");
                         break;
                     case 2:
-                        this.this$0.onStatus.invoke("connected");
+                        HrSensor.this.onStatus.invoke("connected");
                         g.discoverServices();
                         break;
                 }
@@ -173,15 +171,15 @@ public final class HrSensor {
             @Override // android.bluetooth.BluetoothGattCallback
             public void onServicesDiscovered(BluetoothGatt g, int status) {
                 Intrinsics.checkNotNullParameter(g, "g");
-                Log.i(this.this$0.TAG, "servicesDiscovered status=" + status + " svcCount=" + g.getServices().size());
-                BluetoothGattService service = g.getService(this.this$0.HR_SVC);
-                BluetoothGattCharacteristic chr = service != null ? service.getCharacteristic(this.this$0.HR_CHR) : null;
+                Log.i(HrSensor.this.TAG, "servicesDiscovered status=" + status + " svcCount=" + g.getServices().size());
+                BluetoothGattService service = g.getService(HrSensor.this.HR_SVC);
+                BluetoothGattCharacteristic chr = service != null ? service.getCharacteristic(HrSensor.this.HR_CHR) : null;
                 if (chr == null) {
-                    this.this$0.onStatus.invoke("no HR char");
+                    HrSensor.this.onStatus.invoke("no HR char");
                     return;
                 }
                 g.setCharacteristicNotification(chr, true);
-                BluetoothGattDescriptor cccd = chr.getDescriptor(this.this$0.CCCD);
+                BluetoothGattDescriptor cccd = chr.getDescriptor(HrSensor.this.CCCD);
                 if (cccd == null) {
                     return;
                 }
@@ -198,9 +196,9 @@ public final class HrSensor {
                 BluetoothGattCharacteristic it;
                 Intrinsics.checkNotNullParameter(g, "g");
                 Intrinsics.checkNotNullParameter(d, "d");
-                this.this$0.onStatus.invoke("live");
-                BluetoothGattService service = g.getService(this.this$0.BAT_SVC);
-                if (service != null && (it = service.getCharacteristic(this.this$0.BAT_CHR)) != null) {
+                HrSensor.this.onStatus.invoke("live");
+                BluetoothGattService service = g.getService(HrSensor.this.BAT_SVC);
+                if (service != null && (it = service.getCharacteristic(HrSensor.this.BAT_CHR)) != null) {
                     g.readCharacteristic(it);
                 }
             }
@@ -210,8 +208,8 @@ public final class HrSensor {
                 Intrinsics.checkNotNullParameter(g, "g");
                 Intrinsics.checkNotNullParameter(c, "c");
                 Intrinsics.checkNotNullParameter(value, "value");
-                if (Intrinsics.areEqual(c.getUuid(), this.this$0.HR_CHR)) {
-                    this.this$0.parseHr(value);
+                if (Intrinsics.areEqual(c.getUuid(), HrSensor.this.HR_CHR)) {
+                    HrSensor.this.parseHr(value);
                 }
             }
 
@@ -221,8 +219,8 @@ public final class HrSensor {
                 byte[] it;
                 Intrinsics.checkNotNullParameter(g, "g");
                 Intrinsics.checkNotNullParameter(c, "c");
-                if (Intrinsics.areEqual(c.getUuid(), this.this$0.HR_CHR) && (it = c.getValue()) != null) {
-                    this.this$0.parseHr(it);
+                if (Intrinsics.areEqual(c.getUuid(), HrSensor.this.HR_CHR) && (it = c.getValue()) != null) {
+                    HrSensor.this.parseHr(it);
                 }
             }
 
@@ -231,9 +229,9 @@ public final class HrSensor {
                 Intrinsics.checkNotNullParameter(g, "g");
                 Intrinsics.checkNotNullParameter(c, "c");
                 Intrinsics.checkNotNullParameter(value, "value");
-                if (Intrinsics.areEqual(c.getUuid(), this.this$0.BAT_CHR)) {
+                if (Intrinsics.areEqual(c.getUuid(), HrSensor.this.BAT_CHR)) {
                     if (!(value.length == 0)) {
-                        this.this$0.onBattery.invoke(Integer.valueOf(value[0] & UByte.MAX_VALUE));
+                        HrSensor.this.onBattery.invoke(Integer.valueOf(value[0] & UByte.MAX_VALUE));
                     }
                 }
             }
@@ -244,8 +242,8 @@ public final class HrSensor {
                 byte[] it;
                 Intrinsics.checkNotNullParameter(g, "g");
                 Intrinsics.checkNotNullParameter(c, "c");
-                if (Intrinsics.areEqual(c.getUuid(), this.this$0.BAT_CHR) && (it = c.getValue()) != null) {
-                    HrSensor hrSensor = this.this$0;
+                if (Intrinsics.areEqual(c.getUuid(), HrSensor.this.BAT_CHR) && (it = c.getValue()) != null) {
+                    HrSensor hrSensor = HrSensor.this;
                     if (!(it.length == 0)) {
                         hrSensor.onBattery.invoke(Integer.valueOf(it[0] & UByte.MAX_VALUE));
                     }
@@ -309,7 +307,7 @@ public final class HrSensor {
         this.handler.postDelayed(new Runnable() { // from class: com.bike.computer.HrSensor$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                this.f$0.startScan();
+                HrSensor.this.startScan();
             }
         }, 1500L);
     }

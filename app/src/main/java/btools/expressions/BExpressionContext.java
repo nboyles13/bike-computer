@@ -22,7 +22,6 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import kotlin.text.Typography;
 import okhttp3.internal.http2.Http2Connection;
-import org.maplibre.turf.TurfConstants;
 
 /* JADX INFO: loaded from: classes.dex */
 public abstract class BExpressionContext implements IByteArrayUnifier {
@@ -204,7 +203,7 @@ public abstract class BExpressionContext implements IByteArrayUnifier {
             ld[inum] = d;
             inum++;
         }
-        while (inum < delta) {
+        while (inum < ld.length) {
             ld[inum] = 0;
             inum++;
         }
@@ -617,7 +616,7 @@ public abstract class BExpressionContext implements IByteArrayUnifier {
                             }
                             float inch3 = Float.parseFloat(value2);
                             value2 = String.format(Locale.US, "%3.1f", Float.valueOf(0.0254f * inch3));
-                        } else if (value2.contains(TurfConstants.UNIT_FEET) || value2.contains("foot")) {
+                        } else if (value2.contains("feet") || value2.contains("foot")) {
                             String s = value2.substring(0, value2.indexOf("f"));
                             value2 = String.format(Locale.US, "%3.1f", Float.valueOf(0.3048f * Float.parseFloat(s)));
                         } else if (value2.contains("fathom") || value2.contains("fm")) {
@@ -685,9 +684,8 @@ public abstract class BExpressionContext implements IByteArrayUnifier {
                         }
                         lookupData2[num.intValue()] = ((int) (Math.abs(Float.parseFloat(value2)) * 100.0f)) + 1000;
                     } catch (Exception e2) {
-                        e = e2;
                         if (this.showErrors) {
-                            System.err.println("error for " + name + "  " + value + " trans " + value2 + " " + e.getMessage());
+                            System.err.println("error for " + name + "  " + value + " trans " + value2 + " " + e2.getMessage());
                         }
                         lookupData2[num.intValue()] = 0;
                     }
@@ -817,7 +815,11 @@ public abstract class BExpressionContext implements IByteArrayUnifier {
         }
         this.linenr = 1;
         this.minWriteIdx = this.variableData == null ? 0 : this.variableData.length;
-        this.expressionList = _parseFile(file, null);
+        try {
+            this.expressionList = _parseFile(file, null);
+        } catch (Exception e3) {
+            throw new RuntimeException(e3);
+        }
         this.lastAssignedExpression = null;
         String[] varNames = getBuildInVariableNames();
         this.nBuildInVars = varNames.length;

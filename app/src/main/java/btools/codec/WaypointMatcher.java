@@ -1,12 +1,16 @@
 package btools.codec;
 
-/* JADX INFO: loaded from: classes.dex */
+/**
+ * a waypoint matcher gets way geometries
+ * from the decoder to find the closest
+ * matches to the waypoints
+ */
 public interface WaypointMatcher {
-    void end();
+  boolean start(int ilonStart, int ilatStart, int ilonTarget, int ilatTarget, boolean useAsStartWay);
 
-    boolean hasMatch(int i, int i2);
+  void transferNode(int ilon, int ilat);
 
-    boolean start(int i, int i2, int i3, int i4, boolean z);
+  void end();
 
-    void transferNode(int i, int i2);
+  boolean hasMatch(int lon, int lat);
 }

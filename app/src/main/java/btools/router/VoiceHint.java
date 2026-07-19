@@ -1,668 +1,668 @@
+/**
+ * Container for a voice hint
+ * (both input- and result data for voice hint processing)
+ *
+ * @author ab
+ */
 package btools.router;
 
-import androidx.core.view.PointerIconCompat;
 import java.util.ArrayList;
 import java.util.List;
 
-/* JADX INFO: loaded from: classes.dex */
 public class VoiceHint {
-    static final int BL = 16;
-    static final int C = 1;
-    static final int EL = 17;
-    static final int END = 100;
-    static final int ER = 18;
-    static final int KL = 8;
-    static final int KR = 9;
-    static final int OFFR = 12;
-    static final int RNDB = 13;
-    static final int RNLB = 14;
-    static final int TL = 2;
-    static final int TLU = 10;
-    static final int TR = 5;
-    static final int TRU = 11;
-    static final int TSHL = 4;
-    static final int TSHR = 7;
-    static final int TSLL = 3;
-    static final int TSLR = 6;
-    static final int TU = 15;
-    List<MessageData> badWays;
-    int cmd;
-    double distanceToNext;
-    MessageData goodWay;
-    int ilat;
-    int ilon;
-    int indexInTrack;
-    boolean needsRealTurn;
-    MessageData oldWay;
-    int roundaboutExit;
-    short selev;
-    boolean turnAngleConsumed;
-    float angle = Float.MAX_VALUE;
-    float lowerBadWayAngle = -181.0f;
-    float higherBadWayAngle = 181.0f;
-    int maxBadPrio = -1;
+  static final int C = 1; // continue (go straight)
+  static final int TL = 2; // turn left
+  static final int TSLL = 3; // turn slightly left
+  static final int TSHL = 4; // turn sharply left
+  static final int TR = 5; // turn right
+  static final int TSLR = 6; // turn slightly right
+  static final int TSHR = 7; // turn sharply right
+  static final int KL = 8; // keep left
+  static final int KR = 9; // keep right
+  static final int TLU = 10; // U-turn
+  static final int TRU = 11; // Right U-turn
+  static final int OFFR = 12; // Off route
+  static final int RNDB = 13; // Roundabout
+  static final int RNLB = 14; // Roundabout left
+  static final int TU = 15; // 180 degree u-turn
+  static final int BL = 16; // Beeline routing
+  static final int EL = 17; // exit left
+  static final int ER = 18; // exit right
 
-    public float getTime() {
-        if (this.oldWay == null) {
-            return 0.0f;
+  static final int END = 100; // end point
+
+  int ilon;
+  int ilat;
+  short selev;
+  int cmd;
+  MessageData oldWay;
+  MessageData goodWay;
+  List<MessageData> badWays;
+  double distanceToNext;
+  int indexInTrack;
+
+  public float getTime() {
+    return oldWay == null ? 0.f : oldWay.time;
+  }
+
+  float angle = Float.MAX_VALUE;
+  float lowerBadWayAngle = -181;
+  float higherBadWayAngle = 181;
+
+  boolean turnAngleConsumed;
+  boolean needsRealTurn;
+  int maxBadPrio = -1;
+
+  int roundaboutExit;
+
+  boolean isRoundabout() {
+    return roundaboutExit != 0;
+  }
+
+  public void addBadWay(MessageData badWay) {
+    if (badWay == null) {
+      return;
+    }
+    if (badWays == null) {
+      badWays = new ArrayList<>();
+    }
+    badWays.add(badWay);
+  }
+
+  public int getJsonCommandIndex(int timode) {
+    switch (cmd) {
+      case TLU:
+        return 10;
+      case TU:
+        return 15;
+      case TSHL:
+        return 4;
+      case TL:
+        return 2;
+      case TSLL:
+        return 3;
+      case KL:
+        return 8;
+      case C:
+        return 1;
+      case KR:
+        return 9;
+      case TSLR:
+        return 6;
+      case TR:
+        return 5;
+      case TSHR:
+        return 7;
+      case TRU:
+        return 11;
+      case RNDB:
+        return 13;
+      case RNLB:
+        return 14;
+      case BL:
+        return 16;
+      case EL:
+        return timode == 2 || timode == 9 ? 17 : 8;
+      case ER:
+        return timode == 2 || timode == 9 ? 18 : 9;
+      case OFFR:
+        return 12;
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  public int getExitNumber() {
+    return roundaboutExit;
+  }
+
+  /*
+   * used by comment style, osmand style
+   */
+  public String getCommandString(int timode) {
+    switch (cmd) {
+      case TLU:
+        return "TU";  // should be changed to TLU when osmand uses new voice hint constants
+      case TU:
+        return "TU";
+      case TSHL:
+        return "TSHL";
+      case TL:
+        return "TL";
+      case TSLL:
+        return "TSLL";
+      case KL:
+        return "KL";
+      case C:
+        return "C";
+      case KR:
+        return "KR";
+      case TSLR:
+        return "TSLR";
+      case TR:
+        return "TR";
+      case TSHR:
+        return "TSHR";
+      case TRU:
+        return "TRU";
+      case RNDB:
+        return "RNDB" + roundaboutExit;
+      case RNLB:
+        return "RNLB" + (-roundaboutExit);
+      case BL:
+        return "BL";
+      case EL:
+        return timode == 2 || timode == 9 ? "EL" : "KL";
+      case ER:
+        return timode == 2 || timode == 9 ? "ER" : "KR";
+      case OFFR:
+        return "OFFR";
+      case END:
+        return "END";
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  /*
+   * used by trkpt/sym style
+   */
+  public String getCommandString(int c, int timode) {
+    switch (c) {
+      case TLU:
+        return "TLU";
+      case TU:
+        return "TU";
+      case TSHL:
+        return "TSHL";
+      case TL:
+        return "TL";
+      case TSLL:
+        return "TSLL";
+      case KL:
+        return "KL";
+      case C:
+        return "C";
+      case KR:
+        return "KR";
+      case TSLR:
+        return "TSLR";
+      case TR:
+        return "TR";
+      case TSHR:
+        return "TSHR";
+      case TRU:
+        return "TRU";
+      case RNDB:
+        return "RNDB" + roundaboutExit;
+      case RNLB:
+        return "RNLB" + (-roundaboutExit);
+      case BL:
+        return "BL";
+      case EL:
+        return timode == 2 || timode == 9 ? "EL" : "KL";
+      case ER:
+        return timode == 2 || timode == 9 ? "ER" : "KR";
+      case OFFR:
+        return "OFFR";
+      default:
+        return "unknown command: " + c;
+    }
+  }
+
+  /*
+   * used by gpsies style
+   */
+  public String getSymbolString(int timode) {
+    switch (cmd) {
+      case TLU:
+        return "TU";
+      case TU:
+        return "TU";
+      case TSHL:
+        return "TSHL";
+      case TL:
+        return "Left";
+      case TSLL:
+        return "TSLL";
+      case KL:
+        return "TSLL"; // ?
+      case C:
+        return "Straight";
+      case KR:
+        return "TSLR"; // ?
+      case TSLR:
+        return "TSLR";
+      case TR:
+        return "Right";
+      case TSHR:
+        return "TSHR";
+      case TRU:
+        return "TU";
+      case RNDB:
+        return "RNDB" + roundaboutExit;
+      case RNLB:
+        return "RNLB" + (-roundaboutExit);
+      case BL:
+        return "BL";
+      case EL:
+        return timode == 2 || timode == 9 ? "EL" : "KL";
+      case ER:
+        return timode == 2 || timode == 9 ? "ER" : "KR";
+      case OFFR:
+        return "OFFR";
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  /*
+   * used by new locus trkpt style
+   */
+  public String getLocusSymbolString() {
+    switch (cmd) {
+      case TLU:
+        return "u-turn_left";
+      case TU:
+        return "u-turn";
+      case TSHL:
+        return "left_sharp";
+      case TL:
+        return "left";
+      case TSLL:
+        return "left_slight";
+      case KL:
+        return "stay_left"; // ?
+      case C:
+        return "straight";
+      case KR:
+        return "stay_right"; // ?
+      case TSLR:
+        return "right_slight";
+      case TR:
+        return "right";
+      case TSHR:
+        return "right_sharp";
+      case TRU:
+        return "u-turn_right";
+      case RNDB:
+        return "roundabout_e" + roundaboutExit;
+      case RNLB:
+        return "roundabout_e" + (-roundaboutExit);
+      case BL:
+        return "beeline";
+      case EL:
+        return "exit_left";
+      case ER:
+        return "exit_right";
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  /*
+   * used by osmand style
+   */
+  public String getMessageString(int timode) {
+    switch (cmd) {
+      case TLU:
+        return "u-turn"; // should be changed to u-turn-left when osmand uses new voice hint constants
+      case TU:
+        return "u-turn";
+      case TSHL:
+        return "sharp left";
+      case TL:
+        return "left";
+      case TSLL:
+        return "slight left";
+      case KL:
+        return "keep left";
+      case C:
+        return "straight";
+      case KR:
+        return "keep right";
+      case TSLR:
+        return "slight right";
+      case TR:
+        return "right";
+      case TSHR:
+        return "sharp right";
+      case TRU:
+        return "u-turn";  // should be changed to u-turn-right when osmand uses new voice hint constants
+      case RNDB:
+        return "Take exit " + roundaboutExit;
+      case RNLB:
+        return "Take exit " + (-roundaboutExit);
+      case EL:
+        return timode == 2 || timode == 9 ? "exit left" : "keep left";
+      case ER:
+        return timode == 2 || timode == 9 ? "exit right" : "keep right";
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  /*
+   * used by old locus style
+   */
+  public int getLocusAction() {
+    switch (cmd) {
+      case TLU:
+        return 13;
+      case TU:
+        return 12;
+      case TSHL:
+        return 5;
+      case TL:
+        return 4;
+      case TSLL:
+        return 3;
+      case KL:
+        return 9; // ?
+      case C:
+        return 1;
+      case KR:
+        return 10; // ?
+      case TSLR:
+        return 6;
+      case TR:
+        return 7;
+      case TSHR:
+        return 8;
+      case TRU:
+        return 14;
+      case RNDB:
+        return 26 + roundaboutExit;
+      case RNLB:
+        return 26 - roundaboutExit;
+      case EL:
+        return 9;
+      case ER:
+        return 10;
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  /*
+   * used by orux style
+   */
+  public int getOruxAction() {
+    switch (cmd) {
+      case TLU:
+        return 1003;
+      case TU:
+        return 1003;
+      case TSHL:
+        return 1019;
+      case TL:
+        return 1000;
+      case TSLL:
+        return 1017;
+      case KL:
+        return 1015; // ?
+      case C:
+        return 1002;
+      case KR:
+        return 1014; // ?
+      case TSLR:
+        return 1016;
+      case TR:
+        return 1001;
+      case TSHR:
+        return 1018;
+      case TRU:
+        return 1003;
+      case RNDB:
+        return 1008 + roundaboutExit;
+      case RNLB:
+        return 1008 + roundaboutExit;
+      case EL:
+        return 1015;
+      case ER:
+        return 1014;
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  /*
+   * used by cruiser, equivalent to getCommandString() - osmand style - when osmand changes the voice hint  constants
+   */
+  public String getCruiserCommandString() {
+    switch (cmd) {
+      case TLU:
+        return "TLU";
+      case TU:
+        return "TU";
+      case TSHL:
+        return "TSHL";
+      case TL:
+        return "TL";
+      case TSLL:
+        return "TSLL";
+      case KL:
+        return "KL";
+      case C:
+        return "C";
+      case KR:
+        return "KR";
+      case TSLR:
+        return "TSLR";
+      case TR:
+        return "TR";
+      case TSHR:
+        return "TSHR";
+      case TRU:
+        return "TRU";
+      case RNDB:
+        return "RNDB" + roundaboutExit;
+      case RNLB:
+        return "RNLB" + (-roundaboutExit);
+      case BL:
+        return "BL";
+      case EL:
+        return "EL";
+      case ER:
+        return "ER";
+      case OFFR:
+        return "OFFR";
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  /*
+   * used by cruiser, equivalent to getMessageString() - osmand style - when osmand changes the voice hint  constants
+   */
+  public String getCruiserMessageString() {
+    switch (cmd) {
+      case TLU:
+        return "u-turn left";
+      case TU:
+        return "u-turn";
+      case TSHL:
+        return "sharp left";
+      case TL:
+        return "left";
+      case TSLL:
+        return "slight left";
+      case KL:
+        return "keep left";
+      case C:
+        return "straight";
+      case KR:
+        return "keep right";
+      case TSLR:
+        return "slight right";
+      case TR:
+        return "right";
+      case TSHR:
+        return "sharp right";
+      case TRU:
+        return "u-turn right";
+      case RNDB:
+        return "take exit " + roundaboutExit;
+      case RNLB:
+        return "take exit " + (-roundaboutExit);
+      case BL:
+        return "beeline";
+      case EL:
+        return "exit left";
+      case ER:
+        return "exit right";
+      case OFFR:
+        return "offroad";
+      default:
+        throw new IllegalArgumentException("unknown command: " + cmd);
+    }
+  }
+
+  public void calcCommand() {
+    if (badWays != null) {
+      for (MessageData badWay : badWays) {
+        if (badWay.isBadOneway()) {
+          continue;
         }
-        return this.oldWay.time;
+        if (lowerBadWayAngle < badWay.turnangle && badWay.turnangle < goodWay.turnangle) {
+          lowerBadWayAngle = badWay.turnangle;
+        }
+        if (higherBadWayAngle > badWay.turnangle && badWay.turnangle > goodWay.turnangle) {
+          higherBadWayAngle = badWay.turnangle;
+        }
+      }
     }
 
-    boolean isRoundabout() {
-        return this.roundaboutExit != 0;
-    }
+    float cmdAngle = angle;
 
-    public void addBadWay(MessageData badWay) {
-        if (badWay == null) {
-            return;
-        }
-        if (this.badWays == null) {
-            this.badWays = new ArrayList();
-        }
-        this.badWays.add(badWay);
+    // fall back to local angle if otherwise inconsistent
+    //if ( lowerBadWayAngle > angle || higherBadWayAngle < angle )
+    //{
+    //cmdAngle = goodWay.turnangle;
+    //}
+    if (angle == Float.MAX_VALUE) {
+      cmdAngle = goodWay.turnangle;
     }
+    if (cmd == BL) return;
 
-    public int getJsonCommandIndex(int timode) {
-        switch (this.cmd) {
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            case 3:
-                return 3;
-            case 4:
-                return 4;
-            case 5:
-                return 5;
-            case 6:
-                return 6;
-            case 7:
-                return 7;
-            case 8:
-                return 8;
-            case 9:
-                return 9;
-            case 10:
-                return 10;
-            case 11:
-                return 11;
-            case 12:
-                return 12;
-            case 13:
-                return 13;
-            case 14:
-                return 14;
-            case 15:
-                return 15;
-            case 16:
-                return 16;
-            case 17:
-                return (timode == 2 || timode == 9) ? 17 : 8;
-            case 18:
-                return (timode == 2 || timode == 9) ? 18 : 9;
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-        }
-    }
-
-    public int getExitNumber() {
-        return this.roundaboutExit;
-    }
-
-    public String getCommandString(int timode) {
-        switch (this.cmd) {
-            case 1:
-                return "C";
-            case 2:
-                return "TL";
-            case 3:
-                return "TSLL";
-            case 4:
-                return "TSHL";
-            case 5:
-                return "TR";
-            case 6:
-                return "TSLR";
-            case 7:
-                return "TSHR";
-            case 8:
-                return "KL";
-            case 9:
-                return "KR";
-            case 10:
-                return "TU";
-            case 11:
-                return "TRU";
-            case 12:
-                return "OFFR";
-            case 13:
-                return "RNDB" + this.roundaboutExit;
-            case 14:
-                return "RNLB" + (-this.roundaboutExit);
-            case 15:
-                return "TU";
-            case 16:
-                return "BL";
-            case 17:
-                return (timode == 2 || timode == 9) ? "EL" : "KL";
-            case 18:
-                return (timode == 2 || timode == 9) ? "ER" : "KR";
-            case 100:
-                return "END";
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-        }
-    }
-
-    public String getCommandString(int c, int timode) {
-        switch (c) {
-            case 1:
-                return "C";
-            case 2:
-                return "TL";
-            case 3:
-                return "TSLL";
-            case 4:
-                return "TSHL";
-            case 5:
-                return "TR";
-            case 6:
-                return "TSLR";
-            case 7:
-                return "TSHR";
-            case 8:
-                return "KL";
-            case 9:
-                return "KR";
-            case 10:
-                return "TLU";
-            case 11:
-                return "TRU";
-            case 12:
-                return "OFFR";
-            case 13:
-                return "RNDB" + this.roundaboutExit;
-            case 14:
-                return "RNLB" + (-this.roundaboutExit);
-            case 15:
-                return "TU";
-            case 16:
-                return "BL";
-            case 17:
-                return (timode == 2 || timode == 9) ? "EL" : "KL";
-            case 18:
-                return (timode == 2 || timode == 9) ? "ER" : "KR";
-            default:
-                return "unknown command: " + c;
-        }
-    }
-
-    public String getSymbolString(int timode) {
-        switch (this.cmd) {
-            case 1:
-                return "Straight";
-            case 2:
-                return "Left";
-            case 3:
-                return "TSLL";
-            case 4:
-                return "TSHL";
-            case 5:
-                return "Right";
-            case 6:
-                return "TSLR";
-            case 7:
-                return "TSHR";
-            case 8:
-                return "TSLL";
-            case 9:
-                return "TSLR";
-            case 10:
-                return "TU";
-            case 11:
-                return "TU";
-            case 12:
-                return "OFFR";
-            case 13:
-                return "RNDB" + this.roundaboutExit;
-            case 14:
-                return "RNLB" + (-this.roundaboutExit);
-            case 15:
-                return "TU";
-            case 16:
-                return "BL";
-            case 17:
-                return (timode == 2 || timode == 9) ? "EL" : "KL";
-            case 18:
-                return (timode == 2 || timode == 9) ? "ER" : "KR";
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-        }
-    }
-
-    public String getLocusSymbolString() {
-        switch (this.cmd) {
-            case 1:
-                return "straight";
-            case 2:
-                return "left";
-            case 3:
-                return "left_slight";
-            case 4:
-                return "left_sharp";
-            case 5:
-                return "right";
-            case 6:
-                return "right_slight";
-            case 7:
-                return "right_sharp";
-            case 8:
-                return "stay_left";
-            case 9:
-                return "stay_right";
-            case 10:
-                return "u-turn_left";
-            case 11:
-                return "u-turn_right";
-            case 12:
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-            case 13:
-                return "roundabout_e" + this.roundaboutExit;
-            case 14:
-                return "roundabout_e" + (-this.roundaboutExit);
-            case 15:
-                return "u-turn";
-            case 16:
-                return "beeline";
-            case 17:
-                return "exit_left";
-            case 18:
-                return "exit_right";
-        }
-    }
-
-    public String getMessageString(int timode) {
-        switch (this.cmd) {
-            case 1:
-                return "straight";
-            case 2:
-                return "left";
-            case 3:
-                return "slight left";
-            case 4:
-                return "sharp left";
-            case 5:
-                return "right";
-            case 6:
-                return "slight right";
-            case 7:
-                return "sharp right";
-            case 8:
-                return "keep left";
-            case 9:
-                return "keep right";
-            case 10:
-                return "u-turn";
-            case 11:
-                return "u-turn";
-            case 12:
-            case 16:
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-            case 13:
-                return "Take exit " + this.roundaboutExit;
-            case 14:
-                return "Take exit " + (-this.roundaboutExit);
-            case 15:
-                return "u-turn";
-            case 17:
-                return (timode == 2 || timode == 9) ? "exit left" : "keep left";
-            case 18:
-                return (timode == 2 || timode == 9) ? "exit right" : "keep right";
-        }
-    }
-
-    public int getLocusAction() {
-        switch (this.cmd) {
-            case 1:
-                return 1;
-            case 2:
-                return 4;
-            case 3:
-                return 3;
-            case 4:
-                return 5;
-            case 5:
-                return 7;
-            case 6:
-                return 6;
-            case 7:
-                return 8;
-            case 8:
-                return 9;
-            case 9:
-                return 10;
-            case 10:
-                return 13;
-            case 11:
-                return 14;
-            case 12:
-            case 16:
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-            case 13:
-                return this.roundaboutExit + 26;
-            case 14:
-                return 26 - this.roundaboutExit;
-            case 15:
-                return 12;
-            case 17:
-                return 9;
-            case 18:
-                return 10;
-        }
-    }
-
-    public int getOruxAction() {
-        switch (this.cmd) {
-            case 1:
-                return PointerIconCompat.TYPE_HAND;
-            case 2:
-                return 1000;
-            case 3:
-                return PointerIconCompat.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
-            case 4:
-                return PointerIconCompat.TYPE_ZOOM_OUT;
-            case 5:
-                return 1001;
-            case 6:
-                return PointerIconCompat.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
-            case 7:
-                return PointerIconCompat.TYPE_ZOOM_IN;
-            case 8:
-                return PointerIconCompat.TYPE_VERTICAL_DOUBLE_ARROW;
-            case 9:
-                return PointerIconCompat.TYPE_HORIZONTAL_DOUBLE_ARROW;
-            case 10:
-                return PointerIconCompat.TYPE_HELP;
-            case 11:
-                return PointerIconCompat.TYPE_HELP;
-            case 12:
-            case 16:
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-            case 13:
-                return this.roundaboutExit + PointerIconCompat.TYPE_TEXT;
-            case 14:
-                return this.roundaboutExit + PointerIconCompat.TYPE_TEXT;
-            case 15:
-                return PointerIconCompat.TYPE_HELP;
-            case 17:
-                return PointerIconCompat.TYPE_VERTICAL_DOUBLE_ARROW;
-            case 18:
-                return PointerIconCompat.TYPE_HORIZONTAL_DOUBLE_ARROW;
-        }
-    }
-
-    public String getCruiserCommandString() {
-        switch (this.cmd) {
-            case 1:
-                return "C";
-            case 2:
-                return "TL";
-            case 3:
-                return "TSLL";
-            case 4:
-                return "TSHL";
-            case 5:
-                return "TR";
-            case 6:
-                return "TSLR";
-            case 7:
-                return "TSHR";
-            case 8:
-                return "KL";
-            case 9:
-                return "KR";
-            case 10:
-                return "TLU";
-            case 11:
-                return "TRU";
-            case 12:
-                return "OFFR";
-            case 13:
-                return "RNDB" + this.roundaboutExit;
-            case 14:
-                return "RNLB" + (-this.roundaboutExit);
-            case 15:
-                return "TU";
-            case 16:
-                return "BL";
-            case 17:
-                return "EL";
-            case 18:
-                return "ER";
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-        }
-    }
-
-    public String getCruiserMessageString() {
-        switch (this.cmd) {
-            case 1:
-                return "straight";
-            case 2:
-                return "left";
-            case 3:
-                return "slight left";
-            case 4:
-                return "sharp left";
-            case 5:
-                return "right";
-            case 6:
-                return "slight right";
-            case 7:
-                return "sharp right";
-            case 8:
-                return "keep left";
-            case 9:
-                return "keep right";
-            case 10:
-                return "u-turn left";
-            case 11:
-                return "u-turn right";
-            case 12:
-                return "offroad";
-            case 13:
-                return "take exit " + this.roundaboutExit;
-            case 14:
-                return "take exit " + (-this.roundaboutExit);
-            case 15:
-                return "u-turn";
-            case 16:
-                return "beeline";
-            case 17:
-                return "exit left";
-            case 18:
-                return "exit right";
-            default:
-                throw new IllegalArgumentException("unknown command: " + this.cmd);
-        }
-    }
-
-    public void calcCommand() {
-        if (this.badWays != null) {
-            for (MessageData badWay : this.badWays) {
-                if (!badWay.isBadOneway()) {
-                    if (this.lowerBadWayAngle < badWay.turnangle && badWay.turnangle < this.goodWay.turnangle) {
-                        this.lowerBadWayAngle = badWay.turnangle;
-                    }
-                    if (this.higherBadWayAngle > badWay.turnangle && badWay.turnangle > this.goodWay.turnangle) {
-                        this.higherBadWayAngle = badWay.turnangle;
-                    }
-                }
-            }
-        }
-        float cmdAngle = this.angle;
-        if (this.angle == Float.MAX_VALUE) {
-            cmdAngle = this.goodWay.turnangle;
-        }
-        if (this.cmd == 16) {
-            return;
-        }
-        if (this.roundaboutExit > 0) {
-            this.cmd = 13;
-            return;
-        }
-        if (this.roundaboutExit < 0) {
-            this.cmd = 14;
-            return;
-        }
-        if (is180DegAngle(cmdAngle) && cmdAngle <= -179.0f && this.higherBadWayAngle == 181.0f && this.lowerBadWayAngle == -181.0f) {
-            this.cmd = 15;
-            return;
-        }
-        if (cmdAngle < -159.0f) {
-            this.cmd = 10;
-            return;
-        }
-        if (cmdAngle < -135.0f) {
-            this.cmd = 4;
-            return;
-        }
-        if (cmdAngle < -45.0f) {
-            if (cmdAngle < -95.0f && this.higherBadWayAngle < -30.0f && this.lowerBadWayAngle < -180.0f) {
-                this.cmd = 4;
-                return;
-            }
-            if (cmdAngle > -85.0f && this.lowerBadWayAngle > -180.0f && this.higherBadWayAngle > -10.0f) {
-                this.cmd = 3;
-                return;
-            }
-            if (cmdAngle < -110.0f) {
-                this.cmd = 4;
-                return;
-            } else if (cmdAngle > -60.0f) {
-                this.cmd = 3;
-                return;
-            } else {
-                this.cmd = 2;
-                return;
-            }
-        }
-        if (cmdAngle < -21.0f) {
-            if (this.cmd != 9) {
-                this.cmd = 3;
-                return;
-            }
-            return;
-        }
-        if (cmdAngle < -5.0f) {
-            if (this.lowerBadWayAngle < -100.0f && this.higherBadWayAngle < 45.0f) {
-                this.cmd = 3;
-                return;
-            }
-            if (this.lowerBadWayAngle >= -100.0f && this.higherBadWayAngle < 45.0f) {
-                this.cmd = 8;
-                return;
-            } else if (this.lowerBadWayAngle > -35.0f && this.higherBadWayAngle > 55.0f) {
-                this.cmd = 9;
-                return;
-            } else {
-                this.cmd = 1;
-                return;
-            }
-        }
-        if (cmdAngle < 5.0f) {
-            if (this.lowerBadWayAngle > -30.0f) {
-                this.cmd = 9;
-                return;
-            } else if (this.higherBadWayAngle < 30.0f) {
-                this.cmd = 8;
-                return;
-            } else {
-                this.cmd = 1;
-                return;
-            }
-        }
-        if (cmdAngle < 21.0f) {
-            if (this.lowerBadWayAngle > -45.0f && this.higherBadWayAngle > 100.0f) {
-                this.cmd = 6;
-                return;
-            }
-            if (this.lowerBadWayAngle > -45.0f && this.higherBadWayAngle <= 100.0f) {
-                this.cmd = 9;
-                return;
-            } else if (this.lowerBadWayAngle < -55.0f && this.higherBadWayAngle < 35.0f) {
-                this.cmd = 8;
-                return;
-            } else {
-                this.cmd = 1;
-                return;
-            }
-        }
-        if (cmdAngle < 45.0f) {
-            this.cmd = 6;
-            return;
-        }
-        if (cmdAngle >= 135.0f) {
-            if (cmdAngle < 159.0f) {
-                this.cmd = 7;
-                return;
-            }
-            if (is180DegAngle(cmdAngle) && cmdAngle >= 179.0f && this.higherBadWayAngle == 181.0f && this.lowerBadWayAngle == -181.0f) {
-                this.cmd = 15;
-                return;
-            } else {
-                this.cmd = 11;
-                return;
-            }
-        }
-        if (cmdAngle < 85.0f && this.higherBadWayAngle < 180.0f && this.lowerBadWayAngle < 10.0f) {
-            this.cmd = 6;
-            return;
-        }
-        if (cmdAngle > 95.0f && this.lowerBadWayAngle > 30.0f && this.higherBadWayAngle > 180.0f) {
-            this.cmd = 7;
-            return;
-        }
-        if (cmdAngle > 110.0d) {
-            this.cmd = 7;
-        } else if (cmdAngle < 60.0d) {
-            this.cmd = 6;
+    if (roundaboutExit > 0) {
+      cmd = RNDB;
+    } else if (roundaboutExit < 0) {
+      cmd = RNLB;
+    } else if (is180DegAngle(cmdAngle) && cmdAngle <= -179.f && higherBadWayAngle == 181.f && lowerBadWayAngle == -181.f) {
+      cmd = TU;
+    } else if (cmdAngle < -159.f) {
+      cmd = TLU;
+    } else if (cmdAngle < -135.f) {
+      cmd = TSHL;
+    } else if (cmdAngle < -45.f) {
+      // a TL can be pushed in either direction by a close-by alternative
+      if (cmdAngle < -95.f && higherBadWayAngle < -30.f && lowerBadWayAngle < -180.f) {
+        cmd = TSHL;
+      } else if (cmdAngle > -85.f && lowerBadWayAngle > -180.f && higherBadWayAngle > -10.f) {
+        cmd = TSLL;
+      } else {
+        if (cmdAngle < -110.f) {
+          cmd = TSHL;
+        } else if (cmdAngle > -60.f) {
+          cmd = TSLL;
         } else {
-            this.cmd = 5;
+          cmd = TL;
         }
-    }
-
-    static boolean is180DegAngle(float angle) {
-        return Math.abs(angle) <= 180.0f && Math.abs(angle) >= 179.0f;
-    }
-
-    public String formatGeometry() {
-        float oldPrio = this.oldWay == null ? 0.0f : this.oldWay.priorityclassifier;
-        StringBuilder sb = new StringBuilder(30);
-        sb.append(' ').append((int) oldPrio);
-        appendTurnGeometry(sb, this.goodWay);
-        if (this.badWays != null) {
-            for (MessageData badWay : this.badWays) {
-                sb.append(" ");
-                appendTurnGeometry(sb, badWay);
-            }
+      }
+    } else if (cmdAngle < -21.f) {
+      if (cmd != KR) { // don't overwrite KR with TSLL
+        cmd = TSLL;
+      }
+    } else if (cmdAngle < -5.f) {
+      if (lowerBadWayAngle < -100.f && higherBadWayAngle < 45.f) {
+        cmd = TSLL;
+      } else if (lowerBadWayAngle >= -100.f && higherBadWayAngle < 45.f) {
+        cmd = KL;
+      } else {
+        if (lowerBadWayAngle > -35.f && higherBadWayAngle > 55.f) {
+          cmd = KR;
+        } else {
+          cmd = C;
         }
-        return sb.toString();
-    }
-
-    private void appendTurnGeometry(StringBuilder sb, MessageData msg) {
-        sb.append("(").append((int) (((double) msg.turnangle) + 0.5d)).append(")").append(msg.priorityclassifier);
-    }
-
-    public boolean hasGiveWay() {
-        if (this.oldWay == null || this.oldWay.nodeKeyValues == null) {
-            return false;
+      }
+    } else if (cmdAngle < 5.f) {
+      if (lowerBadWayAngle > -30.f) {
+        cmd = KR;
+      } else if (higherBadWayAngle < 30.f) {
+        cmd = KL;
+      } else {
+        cmd = C;
+      }
+    } else if (cmdAngle < 21.f) {
+      // a TR can be pushed in either direction by a close-by alternative
+      if (lowerBadWayAngle > -45.f && higherBadWayAngle > 100.f) {
+        cmd = TSLR;
+      } else if (lowerBadWayAngle > -45.f && higherBadWayAngle <= 100.f) {
+        cmd = KR;
+      } else {
+        if (lowerBadWayAngle < -55.f && higherBadWayAngle < 35.f) {
+          cmd = KL;
+        } else {
+          cmd = C;
         }
-        return this.oldWay.wayKeyValues.contains("reversedirection=yes") ? (this.oldWay.nodeKeyValues.contains("highway=give_way") || this.oldWay.nodeKeyValues.contains("highway=stop")) && this.oldWay.nodeKeyValues.contains("direction=backward") : (this.oldWay.nodeKeyValues.contains("highway=give_way") || this.oldWay.nodeKeyValues.contains("highway=stop")) && !this.oldWay.nodeKeyValues.contains("direction=backward");
+      }
+    } else if (cmdAngle < 45.f) {
+      cmd = TSLR;
+    } else if (cmdAngle < 135.f) {
+      if (cmdAngle < 85.f && higherBadWayAngle < 180.f && lowerBadWayAngle < 10.f) {
+        cmd = TSLR;
+      } else if (cmdAngle > 95.f && lowerBadWayAngle > 30.f && higherBadWayAngle > 180.f) {
+        cmd = TSHR;
+      } else {
+        if (cmdAngle > 110.) {
+          cmd = TSHR;
+        } else if (cmdAngle < 60.) {
+          cmd = TSLR;
+        } else {
+          cmd = TR;
+        }
+      }
+    } else if (cmdAngle < 159.f) {
+      cmd = TSHR;
+    } else if (is180DegAngle(cmdAngle) && cmdAngle >= 179.f && higherBadWayAngle == 181.f && lowerBadWayAngle == -181.f) {
+      cmd = TU;
+    } else {
+      cmd = TRU;
     }
+  }
+
+  static boolean is180DegAngle(float angle) {
+    return (Math.abs(angle) <= 180.f && Math.abs(angle) >= 179.f);
+  }
+
+  public String formatGeometry() {
+    float oldPrio = oldWay == null ? 0.f : oldWay.priorityclassifier;
+    StringBuilder sb = new StringBuilder(30);
+    sb.append(' ').append((int) oldPrio);
+    appendTurnGeometry(sb, goodWay);
+    if (badWays != null) {
+      for (MessageData badWay : badWays) {
+        sb.append(" ");
+        appendTurnGeometry(sb, badWay);
+      }
+    }
+    return sb.toString();
+  }
+
+  private void appendTurnGeometry(StringBuilder sb, MessageData msg) {
+    sb.append("(").append((int) (msg.turnangle + 0.5)).append(")").append((int) (msg.priorityclassifier));
+  }
+
+  public boolean hasGiveWay() {
+    if (oldWay != null && oldWay.nodeKeyValues != null) {
+      if (oldWay.wayKeyValues.contains("reversedirection=yes")) {
+        return (oldWay.nodeKeyValues.contains("highway=give_way") || oldWay.nodeKeyValues.contains("highway=stop")) && oldWay.nodeKeyValues.contains("direction=backward");
+      } else {
+        return (oldWay.nodeKeyValues.contains("highway=give_way") || oldWay.nodeKeyValues.contains("highway=stop")) && !oldWay.nodeKeyValues.contains("direction=backward");
+      }
+    }
+    return false;
+
+  }
 }

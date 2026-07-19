@@ -1,9 +1,9 @@
 package btools.util;
 
-/* JADX INFO: loaded from: classes.dex */
 public abstract class LruMapNode {
-    public int hash;
-    LruMapNode next;
-    LruMapNode nextInBin;
-    LruMapNode previous;
+  LruMapNode nextInBin; // next entry for hash-bin
+  LruMapNode next; // next in lru sequence (towards mru)
+  LruMapNode previous; // previous in lru sequence (towards lru)
+
+  public int hash;
 }

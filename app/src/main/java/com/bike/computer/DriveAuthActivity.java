@@ -63,7 +63,7 @@ public final class DriveAuthActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public final boolean handle(String url) {
-        if (!StringsKt.startsWith$default(url, this.redirect, false, 2, (Object) null)) {
+        if (!StringsKt.startsWith(url, this.redirect, false)) {
             return false;
         }
         Uri uri = Uri.parse(url);
@@ -77,7 +77,7 @@ public final class DriveAuthActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.DriveAuthActivity$$ExternalSyntheticLambda1
             @Override // java.lang.Runnable
             public final void run() {
-                DriveAuthActivity.handle$lambda$5(this.f$0, code);
+                DriveAuthActivity.handle$lambda$5(DriveAuthActivity.this, code);
             }
         }).start();
         return true;
@@ -85,15 +85,14 @@ public final class DriveAuthActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void handle$lambda$5(final DriveAuthActivity this$0, String $code) {
-        final Object r;
+        Object r0;
         try {
-            Result.Companion companion = Result.INSTANCE;
             GoogleDriveClient.INSTANCE.exchangeCode(this$0, $code, this$0.redirect);
-            r = Result.m118constructorimpl(Unit.INSTANCE);
+            r0 = Unit.INSTANCE;
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            r = Result.m118constructorimpl(ResultKt.createFailure(th));
+            r0 = th;
         }
+        final Object r = r0;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.DriveAuthActivity$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
@@ -104,12 +103,12 @@ public final class DriveAuthActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void handle$lambda$5$lambda$4(Object $r, DriveAuthActivity this$0) {
-        if (Result.m125isSuccessimpl($r)) {
+        if (!($r instanceof Throwable)) {
             this$0.toast("Connected to Google Drive");
             this$0.setResult(-1);
             this$0.finish();
         }
-        Throwable it = Result.m121exceptionOrNullimpl($r);
+        Throwable it = ($r instanceof Throwable) ? (Throwable) $r : null;
         if (it != null) {
             this$0.toast("Connect failed: " + it.getMessage());
             this$0.finish();

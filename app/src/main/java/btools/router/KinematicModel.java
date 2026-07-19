@@ -1,129 +1,147 @@
+/**
+ * Container for link between two Osm nodes
+ *
+ * @author ab
+ */
 package btools.router;
+
+import java.util.Map;
 
 import btools.expressions.BExpressionContextNode;
 import btools.expressions.BExpressionContextWay;
-import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
+
 final class KinematicModel extends OsmPathModel {
-    public double cost0;
-    protected BExpressionContextNode ctxNode;
-    protected BExpressionContextWay ctxWay;
-    public double f_air;
-    public double f_recup;
-    public double f_roll;
-    private boolean initDone = false;
-    private double lastBreakingSpeed;
-    private double lastEffectiveLimit;
-    public double leftWaySpeed;
-    private int nodeIdxMaxspeed;
-    public double outside_temp;
-    public double p_standby;
-    protected Map<String, String> params;
-    public double pw;
-    public double recup_efficiency;
-    public double rightWaySpeed;
-    public double totalweight;
-    public double turnAngleDecayTime;
-    public double vmax;
-    private int wayIdxMaxspeed;
-    private int wayIdxMaxspeedExplicit;
-    private int wayIdxMinspeed;
+  public OsmPrePath createPrePath() {
+    return new KinematicPrePath();
+  }
 
-    KinematicModel() {
+  public OsmPath createPath() {
+    return new KinematicPath();
+  }
+
+  public double turnAngleDecayTime;
+  public double f_roll;
+  public double f_air;
+  public double f_recup;
+  public double p_standby;
+  public double outside_temp;
+  public double recup_efficiency;
+  public double totalweight;
+  public double vmax;
+  public double leftWaySpeed;
+  public double rightWaySpeed;
+
+  // derived values
+  public double pw; // balance power
+  public double cost0; // minimum possible cost per meter
+
+  private int wayIdxMaxspeed;
+  private int wayIdxMaxspeedExplicit;
+  private int wayIdxMinspeed;
+
+  private int nodeIdxMaxspeed;
+
+  protected BExpressionContextWay ctxWay;
+  protected BExpressionContextNode ctxNode;
+  protected Map<String, String> params;
+
+  private boolean initDone = false;
+
+  private double lastEffectiveLimit;
+  private double lastBreakingSpeed;
+
+  @Override
+  public void init(BExpressionContextWay expctxWay, BExpressionContextNode expctxNode, Map<String, String> extraParams) {
+    if (!initDone) {
+      ctxWay = expctxWay;
+      ctxNode = expctxNode;
+      wayIdxMaxspeed = ctxWay.getOutputVariableIndex("maxspeed", false);
+      wayIdxMaxspeedExplicit = ctxWay.getOutputVariableIndex("maxspeed_explicit", false);
+      wayIdxMinspeed = ctxWay.getOutputVariableIndex("minspeed", false);
+      nodeIdxMaxspeed = ctxNode.getOutputVariableIndex("maxspeed", false);
+      initDone = true;
     }
 
-    @Override // btools.router.OsmPathModel
-    public OsmPrePath createPrePath() {
-        return new KinematicPrePath();
+    params = extraParams;
+
+    turnAngleDecayTime = getParam("turnAngleDecayTime", 5.f);
+    f_roll = getParam("f_roll", 232.f);
+    f_air = getParam("f_air", 0.4f);
+    f_recup = getParam("f_recup", 400.f);
+    p_standby = getParam("p_standby", 250.f);
+    outside_temp = getParam("outside_temp", 20.f);
+    recup_efficiency = getParam("recup_efficiency", 0.7f);
+    totalweight = getParam("totalweight", 1640.f);
+    vmax = getParam("vmax", 80.f) / 3.6;
+    leftWaySpeed = getParam("leftWaySpeed", 12.f) / 3.6;
+    rightWaySpeed = getParam("rightWaySpeed", 12.f) / 3.6;
+
+    pw = 2. * f_air * vmax * vmax * vmax - p_standby;
+    cost0 = (pw + p_standby) / vmax + f_roll + f_air * vmax * vmax;
+  }
+
+  protected float getParam(String name, float defaultValue) {
+    String sval = params == null ? null : params.get(name);
+    if (sval != null) {
+      return Float.parseFloat(sval);
+    }
+    float v = ctxWay.getVariableValue(name, defaultValue);
+    if (params != null) {
+      params.put(name, "" + v);
+    }
+    return v;
+  }
+
+  public float getWayMaxspeed() {
+    return ctxWay.getBuildInVariable(wayIdxMaxspeed) / 3.6f;
+  }
+
+  public float getWayMaxspeedExplicit() {
+    return ctxWay.getBuildInVariable(wayIdxMaxspeedExplicit) / 3.6f;
+  }
+
+  public float getWayMinspeed() {
+    return ctxWay.getBuildInVariable(wayIdxMinspeed) / 3.6f;
+  }
+
+  public float getNodeMaxspeed() {
+    return ctxNode.getBuildInVariable(nodeIdxMaxspeed) / 3.6f;
+  }
+
+  /**
+   * get the effective speed limit from the way-limit and vmax/vmin
+   */
+  public double getEffectiveSpeedLimit() {
+    // performance related inline coding
+    double minspeed = getWayMinspeed();
+    double espeed = minspeed > vmax ? minspeed : vmax;
+    double maxspeed = getWayMaxspeed();
+    return maxspeed < espeed ? maxspeed : espeed;
+  }
+
+  /**
+   * get the breaking speed for current balance-power (pw) and effective speed limit (vl)
+   */
+  public double getBreakingSpeed(double vl) {
+    if (vl == lastEffectiveLimit) {
+      return lastBreakingSpeed;
     }
 
-    @Override // btools.router.OsmPathModel
-    public OsmPath createPath() {
-        return new KinematicPath();
+    double v = vl * 0.8;
+    double pw2 = pw + p_standby;
+    double e = recup_efficiency;
+    double x0 = pw2 / vl + f_air * e * vl * vl + (1. - e) * f_roll;
+    for (int i = 0; i < 5; i++) {
+      double v2 = v * v;
+      double x = pw2 / v + f_air * e * v2 - x0;
+      double dx = 2. * e * f_air * v - pw2 / v2;
+      v -= x / dx;
     }
+    lastEffectiveLimit = vl;
+    lastBreakingSpeed = v;
 
-    @Override // btools.router.OsmPathModel
-    public void init(BExpressionContextWay expctxWay, BExpressionContextNode expctxNode, Map<String, String> extraParams) {
-        if (!this.initDone) {
-            this.ctxWay = expctxWay;
-            this.ctxNode = expctxNode;
-            this.wayIdxMaxspeed = this.ctxWay.getOutputVariableIndex("maxspeed", false);
-            this.wayIdxMaxspeedExplicit = this.ctxWay.getOutputVariableIndex("maxspeed_explicit", false);
-            this.wayIdxMinspeed = this.ctxWay.getOutputVariableIndex("minspeed", false);
-            this.nodeIdxMaxspeed = this.ctxNode.getOutputVariableIndex("maxspeed", false);
-            this.initDone = true;
-        }
-        this.params = extraParams;
-        this.turnAngleDecayTime = getParam("turnAngleDecayTime", 5.0f);
-        this.f_roll = getParam("f_roll", 232.0f);
-        this.f_air = getParam("f_air", 0.4f);
-        this.f_recup = getParam("f_recup", 400.0f);
-        this.p_standby = getParam("p_standby", 250.0f);
-        this.outside_temp = getParam("outside_temp", 20.0f);
-        this.recup_efficiency = getParam("recup_efficiency", 0.7f);
-        this.totalweight = getParam("totalweight", 1640.0f);
-        this.vmax = ((double) getParam("vmax", 80.0f)) / 3.6d;
-        this.leftWaySpeed = ((double) getParam("leftWaySpeed", 12.0f)) / 3.6d;
-        this.rightWaySpeed = ((double) getParam("rightWaySpeed", 12.0f)) / 3.6d;
-        this.pw = ((((this.f_air * 2.0d) * this.vmax) * this.vmax) * this.vmax) - this.p_standby;
-        this.cost0 = ((this.pw + this.p_standby) / this.vmax) + this.f_roll + (this.f_air * this.vmax * this.vmax);
-    }
+    return v;
+  }
 
-    protected float getParam(String name, float defaultValue) {
-        String sval = this.params == null ? null : this.params.get(name);
-        if (sval != null) {
-            return Float.parseFloat(sval);
-        }
-        float v = this.ctxWay.getVariableValue(name, defaultValue);
-        if (this.params != null) {
-            this.params.put(name, new StringBuilder().append(v).toString());
-        }
-        return v;
-    }
-
-    public float getWayMaxspeed() {
-        return this.ctxWay.getBuildInVariable(this.wayIdxMaxspeed) / 3.6f;
-    }
-
-    public float getWayMaxspeedExplicit() {
-        return this.ctxWay.getBuildInVariable(this.wayIdxMaxspeedExplicit) / 3.6f;
-    }
-
-    public float getWayMinspeed() {
-        return this.ctxWay.getBuildInVariable(this.wayIdxMinspeed) / 3.6f;
-    }
-
-    public float getNodeMaxspeed() {
-        return this.ctxNode.getBuildInVariable(this.nodeIdxMaxspeed) / 3.6f;
-    }
-
-    public double getEffectiveSpeedLimit() {
-        double minspeed = getWayMinspeed();
-        double espeed = minspeed > this.vmax ? minspeed : this.vmax;
-        double maxspeed = getWayMaxspeed();
-        return maxspeed < espeed ? maxspeed : espeed;
-    }
-
-    public double getBreakingSpeed(double vl) {
-        if (vl == this.lastEffectiveLimit) {
-            return this.lastBreakingSpeed;
-        }
-        double v = 0.8d * vl;
-        double pw2 = this.pw + this.p_standby;
-        double e = this.recup_efficiency;
-        double x0 = (pw2 / vl) + (this.f_air * e * vl * vl) + ((1.0d - e) * this.f_roll);
-        int i = 0;
-        while (i < 5) {
-            double v2 = v * v;
-            double x = ((pw2 / v) + ((this.f_air * e) * v2)) - x0;
-            double dx = (((2.0d * e) * this.f_air) * v) - (pw2 / v2);
-            v -= x / dx;
-            i++;
-            e = e;
-        }
-        this.lastEffectiveLimit = vl;
-        this.lastBreakingSpeed = v;
-        return v;
-    }
 }

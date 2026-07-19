@@ -23,6 +23,7 @@ import kotlin.sequences.SequencesKt;
 import kotlin.text.StringsKt;
 import kotlinx.coroutines.DebugKt;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /* JADX INFO: compiled from: Prefs.kt */
@@ -32,7 +33,7 @@ public final class Prefs {
     private static final String P = "bike_prefs";
     public static final Prefs INSTANCE = new Prefs();
     private static final List<DashBlock> DEFAULT = ArraysKt.toList(DashBlock.values());
-    private static final List<String> DEFAULT_PAGE_KEYS = CollectionsKt.listOf((Object[]) new String[]{Pages.SUMMARY, "DATA0", Pages.MAP, Pages.HR, Pages.ELEV});
+    private static final List<String> DEFAULT_PAGE_KEYS = CollectionsKt.listOf(new String[]{Pages.SUMMARY, "DATA0", Pages.MAP, Pages.HR, Pages.ELEV});
 
     private Prefs() {
     }
@@ -42,7 +43,7 @@ public final class Prefs {
     }
 
     private final List<DashTile> defaultTiles() {
-        return CollectionsKt.listOf((Object[]) new DashTile[]{new DashTile(Metric.SPEED, 0, 0, 2, 1), new DashTile(Metric.HR, 2, 0, 2, 1), new DashTile(Metric.DISTANCE, 0, 1, 2, 1), new DashTile(Metric.RIDE_TIME, 2, 1, 2, 1), new DashTile(Metric.ELEVATION, 0, 2, 2, 1), new DashTile(Metric.GRADE, 2, 2, 2, 1)});
+        return CollectionsKt.listOf(new DashTile[]{new DashTile(Metric.SPEED, 0, 0, 2, 1), new DashTile(Metric.HR, 2, 0, 2, 1), new DashTile(Metric.DISTANCE, 0, 1, 2, 1), new DashTile(Metric.RIDE_TIME, 2, 1, 2, 1), new DashTile(Metric.ELEVATION, 0, 2, 2, 1), new DashTile(Metric.GRADE, 2, 2, 2, 1)});
     }
 
     /* JADX WARN: Removed duplicated region for block: B:26:0x00e4  */
@@ -64,8 +65,6 @@ public final class Prefs {
             }
         }
         try {
-            Result.Companion companion = Result.INSTANCE;
-            Prefs prefs = this;
             JSONArray arr = new JSONArray(s);
             Iterable $this$map$iv = RangesKt.until(0, arr.length());
             Collection destination$iv$iv = new ArrayList(CollectionsKt.collectionSizeOrDefault($this$map$iv, 10));
@@ -74,26 +73,14 @@ public final class Prefs {
                 int item$iv$iv = ((IntIterator) it).nextInt();
                 JSONObject o = arr.getJSONObject(item$iv$iv);
                 String string = o.getString("m");
-                String s2 = s;
-                try {
-                    Intrinsics.checkNotNullExpressionValue(string, "getString(...)");
-                    destination$iv$iv.add(new DashTile(Metric.valueOf(string), o.getInt("c"), o.getInt("r"), o.getInt("w"), o.getInt("h")));
-                    s = s2;
-                } catch (Throwable th) {
-                    th = th;
-                    Result.Companion companion2 = Result.INSTANCE;
-                    objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-                    list = (List) (!Result.m124isFailureimpl(objM118constructorimpl) ? null : objM118constructorimpl);
-                    if (list != null) {
-                    }
-                    return defaultTiles();
-                }
+                Intrinsics.checkNotNullExpressionValue(string, "getString(...)");
+                destination$iv$iv.add(new DashTile(Metric.valueOf(string), o.getInt("c"), o.getInt("r"), o.getInt("w"), o.getInt("h")));
             }
-            objM118constructorimpl = Result.m118constructorimpl((List) destination$iv$iv);
+            objM118constructorimpl = (List) destination$iv$iv;
         } catch (Throwable th2) {
-            th = th2;
+            objM118constructorimpl = null;
         }
-        list = (List) (!Result.m124isFailureimpl(objM118constructorimpl) ? null : objM118constructorimpl);
+        list = (List) objM118constructorimpl;
         if (list != null) {
             List<DashTile> listDefaultTiles = list;
             if (listDefaultTiles.isEmpty()) {
@@ -115,7 +102,11 @@ public final class Prefs {
         List<DashTile> $this$forEach$iv = tiles;
         for (Object element$iv : $this$forEach$iv) {
             DashTile it = (DashTile) element$iv;
-            arr.put(new JSONObject().put("m", it.getMetric().name()).put("c", it.getCol()).put("r", it.getRow()).put("w", it.getW()).put("h", it.getH()));
+            try {
+                arr.put(new JSONObject().put("m", it.getMetric().name()).put("c", it.getCol()).put("r", it.getRow()).put("w", it.getW()).put("h", it.getH()));
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
         sp(c).edit().putString("dash_tiles_" + pageKey, arr.toString()).apply();
     }
@@ -230,8 +221,6 @@ public final class Prefs {
             return SetsKt.emptySet();
         }
         try {
-            Result.Companion companion = Result.INSTANCE;
-            Prefs prefs = this;
             JSONArray a = new JSONArray(s);
             Iterable $this$map$iv = RangesKt.until(0, a.length());
             Collection destination$iv$iv = new ArrayList(CollectionsKt.collectionSizeOrDefault($this$map$iv, 10));
@@ -240,14 +229,9 @@ public final class Prefs {
                 int item$iv$iv = ((IntIterator) it).nextInt();
                 destination$iv$iv.add(a.getString(item$iv$iv));
             }
-            objM118constructorimpl = Result.m118constructorimpl(CollectionsKt.toSet((List) destination$iv$iv));
+            objM118constructorimpl = CollectionsKt.toSet((List) destination$iv$iv);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        Set setEmptySet = SetsKt.emptySet();
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
-            objM118constructorimpl = setEmptySet;
+            objM118constructorimpl = SetsKt.emptySet();
         }
         return (Set) objM118constructorimpl;
     }
@@ -280,7 +264,7 @@ public final class Prefs {
         Iterable iterableSplit$default;
         Intrinsics.checkNotNullParameter(c, "c");
         String string = sp(c).getString("page_order", null);
-        if (string == null || (iterableSplit$default = StringsKt.split$default((CharSequence) string, new String[]{","}, false, 0, 6, (Object) null)) == null) {
+        if (string == null || (iterableSplit$default = StringsKt.split((CharSequence) string, new String[]{","}, false, 0)) == null) {
             return DEFAULT_PAGE_KEYS;
         }
         Iterable $this$filter$iv = iterableSplit$default;
@@ -298,7 +282,7 @@ public final class Prefs {
     public final void setPageOrder(Context c, List<String> list) {
         Intrinsics.checkNotNullParameter(c, "c");
         Intrinsics.checkNotNullParameter(list, "list");
-        sp(c).edit().putString("page_order", CollectionsKt.joinToString$default(list, ",", null, null, 0, null, null, 62, null)).apply();
+        sp(c).edit().putString("page_order", CollectionsKt.joinToString(list, ",", "", "", -1, "...", null)).apply();
     }
 
     public final boolean pageEnabled(Context c, String key) {
@@ -308,7 +292,7 @@ public final class Prefs {
             return true;
         }
         String string = sp(c).getString("pages_disabled", "");
-        return !StringsKt.split$default((CharSequence) (string != null ? string : ""), new String[]{","}, false, 0, 6, (Object) null).contains(key);
+        return !StringsKt.split((CharSequence) (string != null ? string : ""), new String[]{","}, false, 0).contains(key);
     }
 
     public final void setPageEnabled(Context c, String key, boolean on) {
@@ -318,7 +302,7 @@ public final class Prefs {
             return;
         }
         String string = sp(c).getString("pages_disabled", "");
-        Iterable $this$filter$iv = StringsKt.split$default((CharSequence) (string != null ? string : ""), new String[]{","}, false, 0, 6, (Object) null);
+        Iterable $this$filter$iv = StringsKt.split((CharSequence) (string != null ? string : ""), new String[]{","}, false, 0);
         Collection destination$iv$iv = new ArrayList();
         for (Object element$iv$iv : $this$filter$iv) {
             String it = (String) element$iv$iv;
@@ -332,7 +316,7 @@ public final class Prefs {
         } else {
             dis.add(key);
         }
-        sp(c).edit().putString("pages_disabled", CollectionsKt.joinToString$default(dis, ",", null, null, 0, null, null, 62, null)).apply();
+        sp(c).edit().putString("pages_disabled", CollectionsKt.joinToString(dis, ",", "", "", -1, "...", null)).apply();
     }
 
     public final List<String> enabledPagesInOrder(Context c) {
@@ -350,19 +334,21 @@ public final class Prefs {
 
     public final String pageSignature(Context c) {
         Intrinsics.checkNotNullParameter(c, "c");
-        return CollectionsKt.joinToString$default(enabledPagesInOrder(c), ",", null, null, 0, null, null, 62, null);
+        return CollectionsKt.joinToString(enabledPagesInOrder(c), ",", "", "", -1, "...", null);
     }
 
     public final String addDataPage(Context c) {
         Intrinsics.checkNotNullParameter(c, "c");
         List<String> mutableList = CollectionsKt.toMutableList((Collection) pageOrder(c));
-        Sequence $this$first$iv = SequencesKt.generateSequence(0, (Function1<? super int, ? extends int>) new Function1() { // from class: com.bike.computer.Prefs$$ExternalSyntheticLambda0
+        Sequence $this$first$iv = SequencesKt.generateSequence(0, (Function1) new Function1() { // from class: com.bike.computer.Prefs$$ExternalSyntheticLambda0
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
                 return Prefs.addDataPage$lambda$10(((Integer) obj).intValue());
             }
         });
-        for (Object element$iv : $this$first$iv) {
+        Iterator $first$iter = $this$first$iv.iterator();
+        while ($first$iter.hasNext()) {
+            Object element$iv = $first$iter.next();
             if (!mutableList.contains(Pages.INSTANCE.key(((Number) element$iv).intValue()))) {
                 int id = ((Number) element$iv).intValue();
                 String key = Pages.INSTANCE.key(id);
@@ -551,19 +537,14 @@ public final class Prefs {
         if (s == null) {
             return DEFAULT;
         }
-        Iterable $this$mapNotNull$iv = StringsKt.split$default((CharSequence) s, new String[]{","}, false, 0, 6, (Object) null);
+        Iterable $this$mapNotNull$iv = StringsKt.split((CharSequence) s, new String[]{","}, false, 0);
         Collection destination$iv$iv = new ArrayList();
         for (Object element$iv$iv$iv : $this$mapNotNull$iv) {
             String it = (String) element$iv$iv$iv;
             Prefs prefs = INSTANCE;
             try {
-                Result.Companion companion = Result.INSTANCE;
-                objM118constructorimpl = Result.m118constructorimpl(DashBlock.valueOf(it));
+                objM118constructorimpl = DashBlock.valueOf(it);
             } catch (Throwable th) {
-                Result.Companion companion2 = Result.INSTANCE;
-                objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-            }
-            if (Result.m124isFailureimpl(objM118constructorimpl)) {
                 objM118constructorimpl = null;
             }
             DashBlock dashBlock = (DashBlock) objM118constructorimpl;
@@ -588,11 +569,11 @@ public final class Prefs {
     public final void setDashboard(Context c, List<? extends DashBlock> list) {
         Intrinsics.checkNotNullParameter(c, "c");
         Intrinsics.checkNotNullParameter(list, "list");
-        sp(c).edit().putString("dash_blocks", CollectionsKt.joinToString$default(list, ",", null, null, 0, null, new Function1() { // from class: com.bike.computer.Prefs$$ExternalSyntheticLambda1
+        sp(c).edit().putString("dash_blocks", CollectionsKt.joinToString(list, ",", "", "", -1, "...", new Function1() { // from class: com.bike.computer.Prefs$$ExternalSyntheticLambda1
             @Override // kotlin.jvm.functions.Function1
             public final Object invoke(Object obj) {
                 return Prefs.setDashboard$lambda$21((DashBlock) obj);
             }
-        }, 30, null)).apply();
+        })).apply();
     }
 }

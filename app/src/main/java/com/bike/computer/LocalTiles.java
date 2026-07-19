@@ -42,14 +42,14 @@ public final class LocalTiles implements Interceptor {
         Intrinsics.checkNotNullParameter(fontsDir, "fontsDir");
         this.fontsDir = fontsDir;
         this.TAG = "BikeTiles";
-        this.PBF = MediaType.INSTANCE.get("application/x-protobuf");
+        this.PBF = MediaType.get("application/x-protobuf");
         SQLiteDatabase sQLiteDatabaseOpenDatabase = SQLiteDatabase.openDatabase(mbtilesPath, null, 1);
         Intrinsics.checkNotNullExpressionValue(sQLiteDatabaseOpenDatabase, "openDatabase(...)");
         this.db = sQLiteDatabaseOpenDatabase;
     }
 
     @Override // okhttp3.Interceptor
-    public Response intercept(Interceptor.Chain chain) {
+    public Response intercept(Interceptor.Chain chain) throws java.io.IOException {
         Intrinsics.checkNotNullParameter(chain, "chain");
         Request req = chain.request();
         if (!Intrinsics.areEqual(req.url().host(), "bike.local")) {
@@ -72,7 +72,7 @@ public final class LocalTiles implements Interceptor {
         if (i < 6) {
             Log.i(this.TAG, "serve " + req.url().encodedPath() + " -> " + (body != null ? body.length : -1) + " bytes");
         }
-        return new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(body != null ? ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION : 404).message(body != null ? "OK" : "Not Found").body(ResponseBody.INSTANCE.create(body == null ? new byte[0] : body, this.PBF)).build();
+        return new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(body != null ? ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION : 404).message(body != null ? "OK" : "Not Found").body(ResponseBody.create(body == null ? new byte[0] : body, this.PBF)).build();
     }
 
     private final byte[] tile(List<String> segs) {
@@ -100,23 +100,24 @@ public final class LocalTiles implements Interceptor {
         if (b.length < 2 || (b[0] & UByte.MAX_VALUE) != 31 || (b[1] & UByte.MAX_VALUE) != 139) {
             return b;
         }
-        GZIPInputStream gZIPInputStream = new GZIPInputStream(new ByteArrayInputStream(b));
         try {
+            GZIPInputStream gZIPInputStream = new GZIPInputStream(new ByteArrayInputStream(b));
             GZIPInputStream g = gZIPInputStream;
             ByteArrayOutputStream out = new ByteArrayOutputStream(b.length * 5);
-            ByteStreamsKt.copyTo$default(g, out, 0, 2, null);
+            ByteStreamsKt.copyTo(g, out, 8192);
             byte[] byteArray = out.toByteArray();
             Intrinsics.checkNotNullExpressionValue(byteArray, "toByteArray(...)");
             CloseableKt.closeFinally(gZIPInputStream, null);
             return byteArray;
-        } finally {
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private final byte[] font(HttpUrl url) {
         String stack = url.pathSegments().get(1);
         String range = url.pathSegments().get(2);
-        Iterable $this$map$iv = StringsKt.split$default((CharSequence) stack, new String[]{","}, false, 0, 6, (Object) null);
+        Iterable $this$map$iv = StringsKt.split((CharSequence) stack, new String[]{","}, false, 0);
         Collection destination$iv$iv = new ArrayList(CollectionsKt.collectionSizeOrDefault($this$map$iv, 10));
         for (Object item$iv$iv : $this$map$iv) {
             String it = (String) item$iv$iv;

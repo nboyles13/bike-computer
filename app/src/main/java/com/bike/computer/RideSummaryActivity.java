@@ -65,7 +65,7 @@ public final class RideSummaryActivity extends Activity {
             doneBtn.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda18
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    this.f$0.done(true);
+                    RideSummaryActivity.this.done(true);
                 }
             });
         } else {
@@ -74,7 +74,7 @@ public final class RideSummaryActivity extends Activity {
             back.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda19
                 @Override // android.view.View.OnClickListener
                 public final void onClick(View view) {
-                    this.f$0.finish();
+                    RideSummaryActivity.this.finish();
                 }
             });
         }
@@ -95,7 +95,7 @@ public final class RideSummaryActivity extends Activity {
         $this$onCreate_u24lambda_u243.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda20
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                RideSummaryActivity.onCreate$lambda$3$lambda$2(this.f$0, ride, view);
+                RideSummaryActivity.onCreate$lambda$3$lambda$2(RideSummaryActivity.this, ride, view);
             }
         });
         String str = this.dateFmt.format(new Date(ride.getStartMs()));
@@ -116,7 +116,7 @@ public final class RideSummaryActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda21
             @Override // java.lang.Runnable
             public final void run() {
-                RideSummaryActivity.onCreate$lambda$10(f, this, $this$onCreate_u24lambda_u244, ride);
+                RideSummaryActivity.onCreate$lambda$10(f, RideSummaryActivity.this, $this$onCreate_u24lambda_u244, ride);
             }
         }).start();
     }
@@ -132,32 +132,26 @@ public final class RideSummaryActivity extends Activity {
         Code decompiled incorrectly, please refer to instructions dump.
     */
     public static final void onCreate$lambda$10(File $f, final RideSummaryActivity this$0, final TextView $loading, final RideSummary $ride) {
-        String str;
-        Object objM118constructorimpl;
-        Object objM118constructorimpl2;
+        String str = "";
         if ($f != null) {
             try {
-                Result.Companion companion = Result.INSTANCE;
-                objM118constructorimpl2 = Result.m118constructorimpl(FilesKt.readText$default($f, null, 1, null));
+                str = FilesKt.readText($f, kotlin.text.Charsets.UTF_8);
             } catch (Throwable th) {
-                Result.Companion companion2 = Result.INSTANCE;
-                objM118constructorimpl2 = Result.m118constructorimpl(ResultKt.createFailure(th));
+                str = null;
             }
-            str = (String) (Result.m124isFailureimpl(objM118constructorimpl2) ? null : objM118constructorimpl2);
             if (str == null) {
                 str = "";
             }
         }
         String gpxText = str;
+        Object objM118constructorimpl;
         try {
-            Result.Companion companion3 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(GpxRoute.INSTANCE.parse(gpxText));
+            objM118constructorimpl = GpxRoute.INSTANCE.parse(gpxText);
         } catch (Throwable th2) {
-            Result.Companion companion4 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th2));
+            objM118constructorimpl = null;
         }
         List listEmptyList = CollectionsKt.emptyList();
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
+        if (objM118constructorimpl == null) {
             objM118constructorimpl = listEmptyList;
         }
         final List pts = (List) objM118constructorimpl;
@@ -166,7 +160,7 @@ public final class RideSummaryActivity extends Activity {
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda16
             @Override // java.lang.Runnable
             public final void run() {
-                RideSummaryActivity.onCreate$lambda$10$lambda$9(this.f$0, $loading, pts, $ride, zones, maxHr);
+                RideSummaryActivity.onCreate$lambda$10$lambda$9(this$0, $loading, pts, $ride, zones, maxHr);
             }
         });
     }
@@ -247,7 +241,7 @@ public final class RideSummaryActivity extends Activity {
         acts.add(new Function0() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda2
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return RideSummaryActivity.showRideMenu$lambda$14(this.f$0, ride);
+                return RideSummaryActivity.showRideMenu$lambda$14(RideSummaryActivity.this, ride);
             }
         });
         if (f != null) {
@@ -255,7 +249,7 @@ public final class RideSummaryActivity extends Activity {
             acts.add(new Function0() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda3
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return RideSummaryActivity.showRideMenu$lambda$15(this.f$0, ride, f);
+                    return RideSummaryActivity.showRideMenu$lambda$15(RideSummaryActivity.this, ride, f);
                 }
             });
             if (Prefs.INSTANCE.driveConnected(this)) {
@@ -264,7 +258,7 @@ public final class RideSummaryActivity extends Activity {
                     acts.add(new Function0() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda4
                         @Override // kotlin.jvm.functions.Function0
                         public final Object invoke() {
-                            return RideSummaryActivity.showRideMenu$lambda$16(this.f$0);
+                            return RideSummaryActivity.showRideMenu$lambda$16(RideSummaryActivity.this);
                         }
                     });
                 } else {
@@ -272,7 +266,7 @@ public final class RideSummaryActivity extends Activity {
                     acts.add(new Function0() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda5
                         @Override // kotlin.jvm.functions.Function0
                         public final Object invoke() {
-                            return RideSummaryActivity.showRideMenu$lambda$17(this.f$0, ride, f);
+                            return RideSummaryActivity.showRideMenu$lambda$17(RideSummaryActivity.this, ride, f);
                         }
                     });
                 }
@@ -281,7 +275,7 @@ public final class RideSummaryActivity extends Activity {
             acts.add(new Function0() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda6
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return RideSummaryActivity.showRideMenu$lambda$18(this.f$0, f);
+                    return RideSummaryActivity.showRideMenu$lambda$18(RideSummaryActivity.this, f);
                 }
             });
         }
@@ -289,11 +283,11 @@ public final class RideSummaryActivity extends Activity {
         acts.add(new Function0() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda7
             @Override // kotlin.jvm.functions.Function0
             public final Object invoke() {
-                return RideSummaryActivity.showRideMenu$lambda$19(this.f$0, ride);
+                return RideSummaryActivity.showRideMenu$lambda$19(RideSummaryActivity.this, ride);
             }
         });
         ArrayList $this$toTypedArray$iv = labels;
-        new AlertDialog.Builder(this, android.R.style.Theme.Material.Dialog.Alert).setTitle("Ride options").setItems((CharSequence[]) $this$toTypedArray$iv.toArray(new String[0]), new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda8
+        new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert).setTitle("Ride options").setItems((CharSequence[]) $this$toTypedArray$iv.toArray(new String[0]), new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda8
             @Override // android.content.DialogInterface.OnClickListener
             public final void onClick(DialogInterface dialogInterface, int i) {
                 RideSummaryActivity.showRideMenu$lambda$20(acts, dialogInterface, i);
@@ -356,15 +350,15 @@ public final class RideSummaryActivity extends Activity {
         input.setTextColor(-1);
         input.setHintTextColor(Color.parseColor("#FF6E6E6E"));
         input.setPadding(dp(16), dp(12), dp(16), dp(12));
-        new AlertDialog.Builder(this, android.R.style.Theme.Material.Dialog.Alert).setTitle("Rename ride").setMessage("Give this ride its own name. This is separate from any route it followed.").setView(input).setPositiveButton("Save", new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda13
+        new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert).setTitle("Rename ride").setMessage("Give this ride its own name. This is separate from any route it followed.").setView(input).setPositiveButton("Save", new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda13
             @Override // android.content.DialogInterface.OnClickListener
             public final void onClick(DialogInterface dialogInterface, int i) {
-                RideSummaryActivity.promptRename$lambda$22(input, ride, this, dialogInterface, i);
+                RideSummaryActivity.promptRename$lambda$22(input, ride, RideSummaryActivity.this, dialogInterface, i);
             }
         }).setNeutralButton("Clear name", new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda14
             @Override // android.content.DialogInterface.OnClickListener
             public final void onClick(DialogInterface dialogInterface, int i) {
-                RideSummaryActivity.promptRename$lambda$23(ride, this, dialogInterface, i);
+                RideSummaryActivity.promptRename$lambda$23(ride, RideSummaryActivity.this, dialogInterface, i);
             }
         }).setNegativeButton("Cancel", (DialogInterface.OnClickListener) null).show();
     }
@@ -405,10 +399,10 @@ public final class RideSummaryActivity extends Activity {
     }
 
     private final void confirmDelete(final RideSummary ride) {
-        new AlertDialog.Builder(this, android.R.style.Theme.Material.Dialog.Alert).setTitle("Delete ride?").setMessage("Removes this ride from your history and deletes its GPX track. This can't be undone.").setPositiveButton("Delete", new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda9
+        new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert).setTitle("Delete ride?").setMessage("Removes this ride from your history and deletes its GPX track. This can't be undone.").setPositiveButton("Delete", new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda9
             @Override // android.content.DialogInterface.OnClickListener
             public final void onClick(DialogInterface dialogInterface, int i) {
-                RideSummaryActivity.confirmDelete$lambda$26(ride, this, dialogInterface, i);
+                RideSummaryActivity.confirmDelete$lambda$26(ride, RideSummaryActivity.this, dialogInterface, i);
             }
         }).setNegativeButton("Cancel", (DialogInterface.OnClickListener) null).show();
     }
@@ -429,7 +423,7 @@ public final class RideSummaryActivity extends Activity {
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda0
             @Override // java.lang.Runnable
             public final void run() {
-                RideSummaryActivity.confirmDelete$lambda$26$lambda$25$lambda$24(this.f$0);
+                RideSummaryActivity.confirmDelete$lambda$26$lambda$25$lambda$24(this$0);
             }
         });
     }
@@ -445,7 +439,7 @@ public final class RideSummaryActivity extends Activity {
         new Thread(new Runnable() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda22
             @Override // java.lang.Runnable
             public final void run() {
-                RideSummaryActivity.uploadToDrive$lambda$31(this.f$0, f, ride);
+                RideSummaryActivity.uploadToDrive$lambda$31(RideSummaryActivity.this, f, ride);
             }
         }).start();
     }
@@ -453,13 +447,13 @@ public final class RideSummaryActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void uploadToDrive$lambda$31(final RideSummaryActivity this$0, File $f, final RideSummary $ride) {
         final Object r;
+        Object objTmp;
         try {
-            Result.Companion companion = Result.INSTANCE;
-            r = Result.m118constructorimpl(GoogleDriveClient.INSTANCE.uploadGpx(this$0, $f));
+            objTmp = GoogleDriveClient.INSTANCE.uploadGpx(this$0, $f);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            r = Result.m118constructorimpl(ResultKt.createFailure(th));
+            objTmp = th;
         }
+        r = objTmp;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda17
             @Override // java.lang.Runnable
             public final void run() {
@@ -470,12 +464,12 @@ public final class RideSummaryActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void uploadToDrive$lambda$31$lambda$30(Object $r, RideSummary $ride, RideSummaryActivity this$0) {
-        if (Result.m125isSuccessimpl($r)) {
+        if (!($r instanceof Throwable)) {
             RideHistory.INSTANCE.markUploaded($ride.getStartMs());
             this$0.toast((String) $r);
             this$0.recreate();
         }
-        Throwable it = Result.m121exceptionOrNullimpl($r);
+        Throwable it = $r instanceof Throwable ? (Throwable) $r : null;
         if (it != null) {
             this$0.toast("Upload failed: " + it.getMessage());
         }
@@ -710,10 +704,10 @@ public final class RideSummaryActivity extends Activity {
         input.setSelectAllOnFocus(true);
         input.setTextColor(-1);
         input.setPadding(dp(16), dp(12), dp(16), dp(12));
-        new AlertDialog.Builder(this, android.R.style.Theme.Material.Dialog.Alert).setTitle("Save as route").setMessage("Saves this ride's track as a route you can navigate again (from the home screen or Settings ▸ Routes).").setView(input).setPositiveButton("Save", new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda11
+        new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert).setTitle("Save as route").setMessage("Saves this ride's track as a route you can navigate again (from the home screen or Settings ▸ Routes).").setView(input).setPositiveButton("Save", new DialogInterface.OnClickListener() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda11
             @Override // android.content.DialogInterface.OnClickListener
             public final void onClick(DialogInterface dialogInterface, int i) {
-                RideSummaryActivity.promptSaveAsRoute$lambda$43(input, this, f, dialogInterface, i);
+                RideSummaryActivity.promptSaveAsRoute$lambda$43(input, RideSummaryActivity.this, f, dialogInterface, i);
             }
         }).setNegativeButton("Cancel", (DialogInterface.OnClickListener) null).show();
     }
@@ -728,7 +722,7 @@ public final class RideSummaryActivity extends Activity {
             new Thread(new Runnable() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda12
                 @Override // java.lang.Runnable
                 public final void run() {
-                    RideSummaryActivity.promptSaveAsRoute$lambda$43$lambda$42(this.f$0, $f, name);
+                    RideSummaryActivity.promptSaveAsRoute$lambda$43$lambda$42(this$0, $f, name);
                 }
             }).start();
         }
@@ -737,15 +731,15 @@ public final class RideSummaryActivity extends Activity {
     /* JADX INFO: Access modifiers changed from: private */
     public static final void promptSaveAsRoute$lambda$43$lambda$42(final RideSummaryActivity this$0, File $f, final String $name) {
         final Object r;
+        Object objTmp;
         try {
-            Result.Companion companion = Result.INSTANCE;
             File dir = new File("/sdcard/BikeComputer/routes");
             dir.mkdirs();
-            r = Result.m118constructorimpl(FilesKt.copyTo$default($f, new File(dir, $name + ".gpx"), true, 0, 4, null));
+            objTmp = FilesKt.copyTo($f, new File(dir, $name + ".gpx"), true, 8192);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            r = Result.m118constructorimpl(ResultKt.createFailure(th));
+            objTmp = th;
         }
+        r = objTmp;
         this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.RideSummaryActivity$$ExternalSyntheticLambda10
             @Override // java.lang.Runnable
             public final void run() {
@@ -756,10 +750,10 @@ public final class RideSummaryActivity extends Activity {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static final void promptSaveAsRoute$lambda$43$lambda$42$lambda$41(Object $r, RideSummaryActivity this$0, String $name) {
-        if (Result.m125isSuccessimpl($r)) {
+        if (!($r instanceof Throwable)) {
             this$0.toast("Saved route “" + $name + "”");
         }
-        Throwable it = Result.m121exceptionOrNullimpl($r);
+        Throwable it = $r instanceof Throwable ? (Throwable) $r : null;
         if (it != null) {
             this$0.toast("Save failed: " + it.getMessage());
         }

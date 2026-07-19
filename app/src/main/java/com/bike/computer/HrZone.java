@@ -17,7 +17,7 @@ public enum HrZone {
     private final long color;
     private final String label;
     private final int lowerPct;
-    private static final /* synthetic */ EnumEntries $ENTRIES = EnumEntriesKt.enumEntries($VALUES);
+    private static final /* synthetic */ EnumEntries $ENTRIES = EnumEntriesKt.enumEntries(values());
 
     HrZone(String label, int lowerPct, long color) {
         this.label = label;

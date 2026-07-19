@@ -1,396 +1,488 @@
+/**********************************************************************************************
+ Copyright (C) 2018 Norbert Truchsess norbert.truchsess@t-online.de
+
+ The following methods are based on work of Dan Sunday published at:
+ http://geomalgorithms.com/a03-_inclusion.html
+
+ cn_PnPoly, wn_PnPoly, inSegment, intersect2D_2Segments
+ **********************************************************************************************/
 package btools.router;
 
-import btools.util.CheapRuler;
 import java.util.ArrayList;
 import java.util.List;
 
-/* JADX INFO: loaded from: classes.dex */
+import btools.util.CheapRuler;
+
 public class OsmNogoPolygon extends OsmNodeNamed {
-    public final boolean isClosed;
-    public final List<Point> points = new ArrayList();
+  public final static class Point {
+    public final int y;
+    public final int x;
 
-    public static final class Point {
-        public final int x;
-        public final int y;
+    Point(final int lon, final int lat) {
+      x = lon;
+      y = lat;
+    }
+  }
 
-        Point(int lon, int lat) {
-            this.x = lon;
-            this.y = lat;
-        }
+  public final List<Point> points = new ArrayList<>();
+
+  public final boolean isClosed;
+
+  public OsmNogoPolygon(boolean closed) {
+    this.isClosed = closed;
+    this.isNogo = true;
+    this.name = "";
+  }
+
+  public final void addVertex(int lon, int lat) {
+    points.add(new Point(lon, lat));
+  }
+
+  /**
+   * calcBoundingCircle is inspired by the algorithm described on
+   * http://geomalgorithms.com/a08-_containers.html
+   * (fast computation of bounding circly in c). It is not as fast (the original
+   * algorithm runs in linear time), as it may do more iterations but it takes
+   * into account the coslat-factor being used for the linear approximation that
+   * is also used in other places of brouter does change when moving the centerpoint
+   * with each iteration.
+   * This is done to ensure the calculated radius being used
+   * in RoutingContext.calcDistance will actually contain the whole polygon.
+   * <p>
+   * For reasonable distributed vertices the implemented algorithm runs in O(n*ln(n)).
+   * As this is only run once on initialization of OsmNogoPolygon this methods
+   * overall usage of cpu is neglegible in comparism to the cpu-usage of the
+   * actual routing algoritm.
+   */
+  public void calcBoundingCircle() {
+    int cxmin, cxmax, cymin, cymax;
+    cxmin = cymin = Integer.MAX_VALUE;
+    cxmax = cymax = Integer.MIN_VALUE;
+
+    // first calculate a starting center point as center of boundingbox
+    for (int i = 0; i < points.size(); i++) {
+      final Point p = points.get(i);
+      if (p.x < cxmin) {
+        cxmin = p.x;
+      }
+      if (p.x > cxmax) {
+        cxmax = p.x;
+      }
+      if (p.y < cymin) {
+        cymin = p.y;
+      }
+      if (p.y > cymax) {
+        cymax = p.y;
+      }
     }
 
-    public OsmNogoPolygon(boolean closed) {
-        this.isClosed = closed;
-        this.isNogo = true;
-        this.name = "";
-    }
+    int cx = (cxmax + cxmin) / 2; // center of circle
+    int cy = (cymax + cymin) / 2;
 
-    public final void addVertex(int lon, int lat) {
-        this.points.add(new Point(lon, lat));
-    }
+    double[] lonlat2m = CheapRuler.getLonLatToMeterScales(cy); // conversion-factors at the center of circle
+    double dlon2m = lonlat2m[0];
+    double dlat2m = lonlat2m[1];
 
-    public void calcBoundingCircle() {
-        int cxmin;
-        OsmNogoPolygon osmNogoPolygon = this;
-        int cxmin2 = Integer.MAX_VALUE;
-        int cymin = Integer.MAX_VALUE;
-        int cxmax = Integer.MIN_VALUE;
-        int cymax = Integer.MIN_VALUE;
-        for (int i = 0; i < osmNogoPolygon.points.size(); i++) {
-            Point p = osmNogoPolygon.points.get(i);
-            if (p.x < cxmin2) {
-                cxmin2 = p.x;
-            }
-            if (p.x > cxmax) {
-                cxmax = p.x;
-            }
-            if (p.y < cymin) {
-                cymin = p.y;
-            }
-            if (p.y > cymax) {
-                cymax = p.y;
-            }
-        }
-        int i2 = cxmax + cxmin2;
-        int cx = i2 / 2;
-        int cy = (cymax + cymin) / 2;
-        double[] lonlat2m = CheapRuler.getLonLatToMeterScales(cy);
-        double dlon2m = lonlat2m[0];
-        double dlat2m = lonlat2m[1];
-        double rad = 0.0d;
-        double dmax = 0.0d;
-        int cx2 = -1;
-        while (true) {
-            int i_max = cx2;
-            int i3 = 0;
-            while (true) {
-                cxmin = cxmin2;
-                if (i3 >= osmNogoPolygon.points.size()) {
-                    break;
-                }
-                Point p2 = osmNogoPolygon.points.get(i3);
-                int cymin2 = cymin;
-                int cymin3 = p2.x;
-                int cxmax2 = cxmax;
-                double x1 = ((double) (cx - cymin3)) * dlon2m;
-                int cymax2 = cymax;
-                int cymax3 = p2.y;
-                double dlon2m2 = dlon2m;
-                double dlon2m3 = cy - cymax3;
-                double y1 = dlon2m3 * dlat2m;
-                double dist = Math.sqrt((x1 * x1) + (y1 * y1));
-                if (dist > rad && dist > dmax) {
-                    dmax = dist;
-                    i_max = i3;
-                }
-                i3++;
-                cxmin2 = cxmin;
-                cymin = cymin2;
-                cxmax = cxmax2;
-                cymax = cymax2;
-                dlon2m = dlon2m2;
-            }
-            int cymin4 = cymin;
-            int cxmax3 = cxmax;
-            int cymax4 = cymax;
-            if (i_max >= 0) {
-                double dd = (1.0d - (rad / dmax)) * 0.5d;
-                Point p3 = osmNogoPolygon.points.get(i_max);
-                int cx3 = cx + ((int) ((((double) (p3.x - cx)) * dd) + 0.5d));
-                cy += (int) ((((double) (p3.y - cy)) * dd) + 0.5d);
-                double[] lonlat2m2 = CheapRuler.getLonLatToMeterScales(cy);
-                dlon2m = lonlat2m2[0];
-                dlat2m = lonlat2m2[1];
-                double x12 = ((double) (cx3 - p3.x)) * dlon2m;
-                double y12 = ((double) (cy - p3.y)) * dlat2m;
-                double dSqrt = Math.sqrt((x12 * x12) + (y12 * y12));
-                rad = dSqrt;
-                dmax = dSqrt;
-                cx = cx3;
-                cxmin2 = cxmin;
-                cymin = cymin4;
-                cxmax = cxmax3;
-                cymax = cymax4;
-                cx2 = -1;
-                osmNogoPolygon = this;
-            } else {
-                osmNogoPolygon.ilon = cx;
-                osmNogoPolygon.ilat = cy;
-                osmNogoPolygon.radius = (1.001d * rad) + 1.0d;
-                return;
-            }
-        }
-    }
+    double rad = 0;  // radius
 
-    public boolean intersects(int i, int i2, int i3, int i4) {
-        Point point = new Point(i, i2);
-        Point point2 = new Point(i3, i4);
-        int size = this.points.size() - 1;
-        Point point3 = this.points.get(this.isClosed ? size : 0);
-        for (int i5 = !this.isClosed ? 1 : 0; i5 <= size; i5++) {
-            Point point4 = this.points.get(i5);
-            if (intersect2D_2Segments(point, point2, point3, point4) > 0) {
-                return true;
-            }
-            point3 = point4;
+    double dmax = 0; // length of vector from center to point
+    int i_max = -1;
+
+    do {
+      // now identify the point outside of the circle that has the greatest distance
+      for (int i = 0; i < points.size(); i++) {
+        final Point p = points.get(i);
+
+        // to get precisely the same results as in RoutingContext.calcDistance()
+        // it's crucial to use the factors of the center!
+        final double x1 = (cx - p.x) * dlon2m;
+        final double y1 = (cy - p.y) * dlat2m;
+        final double dist = Math.sqrt(x1 * x1 + y1 * y1);
+
+        if (dist <= rad) {
+          continue;
         }
+        if (dist > dmax) {
+          // new maximum distance found
+          dmax = dist;
+          i_max = i;
+        }
+      }
+      if (i_max < 0) {
+        break; // leave loop when no point outside the circle is found any more.
+      }
+      final double dd = 0.5 * (1 - rad / dmax);
+
+      final Point p = points.get(i_max); // calculate new radius to just include this point
+      cx += (int) (dd * (p.x - cx) + 0.5); // shift center toward point
+      cy += (int) (dd * (p.y - cy) + 0.5);
+
+      // get new factors at shifted centerpoint
+      lonlat2m = CheapRuler.getLonLatToMeterScales(cy);
+      dlon2m = lonlat2m[0];
+      dlat2m = lonlat2m[1];
+
+      final double x1 = (cx - p.x) * dlon2m;
+      final double y1 = (cy - p.y) * dlat2m;
+      dmax = rad = Math.sqrt(x1 * x1 + y1 * y1);
+      i_max = -1;
+    }
+    while (true);
+
+    ilon = cx;
+    ilat = cy;
+    radius = rad * 1.001 + 1.0; // ensure the outside-of-enclosing-circle test in RoutingContext.calcDistance() is not passed by segments ending very close to the radius due to limited numerical precision
+  }
+
+  /**
+   * tests whether a segment defined by lon and lat of two points does either
+   * intersect the polygon or any of the endpoints (or both) are enclosed by
+   * the polygon. For this test the winding-number algorithm is
+   * being used. That means a point being within an overlapping region of the
+   * polygon is also taken as being 'inside' the polygon.
+   *
+   * @param lon0 longitude of start point
+   * @param lat0 latitude of start point
+   * @param lon1 longitude of end point
+   * @param lat1 latitude of start point
+   * @return true if segment or any of it's points are 'inside' of polygon
+   */
+  public boolean intersects(int lon0, int lat0, int lon1, int lat1) {
+    final Point p0 = new Point(lon0, lat0);
+    final Point p1 = new Point(lon1, lat1);
+    int i_last = points.size() - 1;
+    Point p2 = points.get(isClosed ? i_last : 0);
+    for (int i = isClosed ? 0 : 1; i <= i_last; i++) {
+      Point p3 = points.get(i);
+      // does it intersect with at least one of the polygon's segments?
+      if (intersect2D_2Segments(p0, p1, p2, p3) > 0) {
+        return true;
+      }
+      p2 = p3;
+    }
+    return false;
+  }
+
+  public boolean isOnPolyline(long px, long py) {
+    int i_last = points.size() - 1;
+    Point p1 = points.get(0);
+    for (int i = 1; i <= i_last; i++) {
+      final Point p2 = points.get(i);
+      if (isOnLine(px, py, p1.x, p1.y, p2.x, p2.y)) {
+        return true;
+      }
+      p1 = p2;
+    }
+    return false;
+  }
+
+  public static boolean isOnLine(long px, long py, long p0x, long p0y, long p1x, long p1y) {
+    final double v10x = px - p0x;
+    final double v10y = py - p0y;
+    final double v12x = p1x - p0x;
+    final double v12y = p1y - p0y;
+
+    if (v10x == 0) { // P0->P1 vertical?
+      if (v10y == 0) { // P0 == P1?
+        return true;
+      }
+      if (v12x != 0) { // P1->P2 not vertical?
         return false;
+      }
+      return (v12y / v10y) >= 1; // P1->P2 at least as long as P1->P0?
     }
-
-    public boolean isOnPolyline(long px, long py) {
-        int i_last = this.points.size() - 1;
-        Point p1 = this.points.get(0);
-        for (int i = 1; i <= i_last; i++) {
-            Point p2 = this.points.get(i);
-            if (isOnLine(px, py, p1.x, p1.y, p2.x, p2.y)) {
-                return true;
-            }
-            p1 = p2;
-        }
+    if (v10y == 0) { // P0->P1 horizontal?
+      if (v12y != 0) { // P1->P2 not horizontal?
         return false;
+      }
+      // if ( P10x == 0 ) // P0 == P1? already tested
+      return (v12x / v10x) >= 1; // P1->P2 at least as long as P1->P0?
+    }
+    final double kx = v12x / v10x;
+    if (kx < 1) {
+      return false;
+    }
+    return kx == v12y / v10y;
+  }
+
+/* Copyright 2001 softSurfer, 2012 Dan Sunday, 2018 Norbert Truchsess
+   This code may be freely used and modified for any purpose providing that
+   this copyright notice is included with it. SoftSurfer makes no warranty for
+   this code, and cannot be held liable for any real or imagined damage
+   resulting from its use. Users of this code must verify correctness for
+   their application. */
+
+  /**
+   * winding number test for a point in a polygon
+   *
+   * @param px longitude of the point to check
+   * @param py latitude of the point to check
+   * @return a boolean whether the point is within the polygon or not.
+   */
+  public boolean isWithin(final long px, final long py) {
+    int wn = 0; // the winding number counter
+
+    // loop through all edges of the polygon
+    final int i_last = points.size() - 1;
+    final Point p0 = points.get(isClosed ? i_last : 0);
+    long p0x = p0.x; // need to use long to avoid overflow in products
+    long p0y = p0.y;
+
+    for (int i = isClosed ? 0 : 1; i <= i_last; i++) { // edge from v[i] to v[i+1]
+      final Point p1 = points.get(i);
+
+      final long p1x = p1.x;
+      final long p1y = p1.y;
+
+      if (isOnLine(px, py, p0x, p0y, p1x, p1y)) {
+        return true;
+      }
+
+      if (p0y <= py)  // start y <= p.y
+      {
+        if (p1y > py) { // an upward crossing, p left of edge
+          if (((p1x - p0x) * (py - p0y) - (px - p0x) * (p1y - p0y)) > 0) {
+            ++wn;     // have a valid up intersect
+          }
+        }
+      } else { // start y > p.y (no test needed)
+        if (p1y <= py) { // a downward crossing, p right of edge
+          if (((p1x - p0x) * (py - p0y) - (px - p0x) * (p1y - p0y)) < 0) {
+            --wn;      // have a valid down intersect
+          }
+        }
+      }
+      p0x = p1x;
+      p0y = p1y;
+    }
+    return wn != 0;
+  }
+
+  /**
+   * Compute the length of the segment within the polygon.
+   *
+   * @param lon1 Integer longitude of the first point of the segment.
+   * @param lat1 Integer latitude of the first point of the segment.
+   * @param lon2 Integer longitude of the last point of the segment.
+   * @param lat2 Integer latitude of the last point of the segment.
+   * @return The length, in meters, of the portion of the segment which is
+   * included in the polygon.
+   */
+  public double distanceWithinPolygon(int lon1, int lat1, int lon2, int lat2) {
+    double distance = 0.;
+
+    // Extremities of the segments
+    final Point p1 = new Point(lon1, lat1);
+    final Point p2 = new Point(lon2, lat2);
+
+    Point previousIntersectionOnSegment = null;
+    if (isWithin(lon1, lat1)) {
+      // Start point of the segment is within the polygon, this is the first
+      // "intersection".
+      previousIntersectionOnSegment = p1;
     }
 
-    public static boolean isOnLine(long px, long py, long p0x, long p0y, long p1x, long p1y) {
-        double v10x = px - p0x;
-        double v10y = py - p0y;
-        double v12x = p1x - p0x;
-        double v12y = p1y - p0y;
-        if (v10x == 0.0d) {
-            if (v10y == 0.0d) {
-                return true;
-            }
-            return v12x == 0.0d && v12y / v10y >= 1.0d;
+    // Loop over edges of the polygon to find intersections
+    int i_last = points.size() - 1;
+    for (int i = (isClosed ? 0 : 1), j = (isClosed ? i_last : 0); i <= i_last; j = i++) {
+      Point edgePoint1 = points.get(j);
+      Point edgePoint2 = points.get(i);
+      int intersectsEdge = intersect2D_2Segments(p1, p2, edgePoint1, edgePoint2);
+
+      if (isClosed && intersectsEdge == 1) {
+        // Intersects with a (closed) polygon edge on a single point
+        // Distance is zero when crossing a polyline.
+        // Let's find this intersection point
+        int xdiffSegment = lon1 - lon2;
+        int xdiffEdge = edgePoint1.x - edgePoint2.x;
+        int ydiffSegment = lat1 - lat2;
+        int ydiffEdge = edgePoint1.y - edgePoint2.y;
+        int div = xdiffSegment * ydiffEdge - xdiffEdge * ydiffSegment;
+        long dSegment = (long) lon1 * (long) lat2 - (long) lon2 * (long) lat1;
+        long dEdge = (long) edgePoint1.x * (long) edgePoint2.y - (long) edgePoint2.x * (long) edgePoint1.y;
+        // Coordinates of the intersection
+        Point intersection = new Point(
+          (int) ((dSegment * xdiffEdge - dEdge * xdiffSegment) / div),
+          (int) ((dSegment * ydiffEdge - dEdge * ydiffSegment) / div)
+        );
+        if (
+          previousIntersectionOnSegment != null
+            && isWithin(
+            (intersection.x + previousIntersectionOnSegment.x) >> 1,
+            (intersection.y + previousIntersectionOnSegment.y) >> 1
+          )
+        ) {
+          // There was a previous match within the polygon and this part of the
+          // segment is within the polygon.
+          distance += CheapRuler.distance(
+            previousIntersectionOnSegment.x, previousIntersectionOnSegment.y,
+            intersection.x, intersection.y
+          );
         }
-        if (v10y == 0.0d) {
-            return v12y == 0.0d && v12x / v10x >= 1.0d;
-        }
-        double kx = v12x / v10x;
-        return kx >= 1.0d && kx == v12y / v10y;
+        previousIntersectionOnSegment = intersection;
+      } else if (intersectsEdge == 2) {
+        // Segment and edge overlaps
+        // FIXME: Could probably be done in a smarter way
+        distance += Math.min(
+          CheapRuler.distance(p1.x, p1.y, p2.x, p2.y),
+          Math.min(
+            CheapRuler.distance(edgePoint1.x, edgePoint1.y, edgePoint2.x, edgePoint2.y),
+            Math.min(
+              CheapRuler.distance(p1.x, p1.y, edgePoint2.x, edgePoint2.y),
+              CheapRuler.distance(edgePoint1.x, edgePoint1.y, p2.x, p2.y)
+            )
+          )
+        );
+        // FIXME: We could store intersection.
+        previousIntersectionOnSegment = null;
+      }
     }
 
-    public boolean isWithin(long j, long j2) {
-        int size = this.points.size() - 1;
-        Point point = this.points.get(this.isClosed ? size : 0);
-        int i = 0;
-        long j3 = point.x;
-        long j4 = point.y;
-        int i2 = !this.isClosed ? 1 : 0;
-        while (i2 <= size) {
-            Point point2 = this.points.get(i2);
-            long j5 = point2.x;
-            long j6 = point2.y;
-            Point point3 = point;
-            int i3 = i2;
-            if (isOnLine(j, j2, j3, j4, j5, j6)) {
-                return true;
-            }
-            if (j4 <= j2) {
-                if (j6 > j2 && ((j5 - j3) * (j2 - j4)) - ((j - j3) * (j6 - j4)) > 0) {
-                    i++;
-                }
-            } else if (j6 <= j2 && ((j5 - j3) * (j2 - j4)) - ((j - j3) * (j6 - j4)) < 0) {
-                i--;
-            }
-            j3 = j5;
-            j4 = j6;
-            i2 = i3 + 1;
-            point = point3;
-        }
-        return i != 0;
+    if (
+      previousIntersectionOnSegment != null
+        && isWithin(lon2, lat2)
+    ) {
+      // Last point is within the polygon, add the remaining missing distance.
+      distance += CheapRuler.distance(
+        previousIntersectionOnSegment.x, previousIntersectionOnSegment.y,
+        lon2, lat2
+      );
+    }
+    return distance;
+  }
+
+/* Copyright 2001 softSurfer, 2012 Dan Sunday, 2018 Norbert Truchsess
+   This code may be freely used and modified for any purpose providing that
+   this copyright notice is included with it. SoftSurfer makes no warranty for
+   this code, and cannot be held liable for any real or imagined damage
+   resulting from its use. Users of this code must verify correctness for
+   their application. */
+
+  /**
+   * inSegment(): determine if a point is inside a segment
+   *
+   * @param p      a point
+   * @param seg_p0 starting point of segment
+   * @param seg_p1 ending point of segment
+   * @return 1 = P is inside S
+   * 0 = P is not inside S
+   */
+  private static boolean inSegment(final Point p, final Point seg_p0, final Point seg_p1) {
+    final int sp0x = seg_p0.x;
+    final int sp1x = seg_p1.x;
+
+    if (sp0x != sp1x) { // S is not vertical
+      final int px = p.x;
+      if (sp0x <= px && px <= sp1x) {
+        return true;
+      }
+      if (sp0x >= px && px >= sp1x) {
+        return true;
+      }
+    } else // S is vertical, so test y coordinate
+    {
+      final int sp0y = seg_p0.y;
+      final int sp1y = seg_p1.y;
+      final int py = p.y;
+
+      if (sp0y <= py && py <= sp1y) {
+        return true;
+      }
+      if (sp0y >= py && py >= sp1y) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+/* Copyright 2001 softSurfer, 2012 Dan Sunday, 2018 Norbert Truchsess
+   This code may be freely used and modified for any purpose providing that
+   this copyright notice is included with it. SoftSurfer makes no warranty for
+   this code, and cannot be held liable for any real or imagined damage
+   resulting from its use. Users of this code must verify correctness for
+   their application. */
+
+  /**
+   * intersect2D_2Segments(): find the 2D intersection of 2 finite segments
+   *
+   * @param s1p0 start point of segment 1
+   * @param s1p1 end point of segment 1
+   * @param s2p0 start point of segment 2
+   * @param s2p1 end point of segment 2
+   * @return 0=disjoint (no intersect)
+   * 1=intersect in unique point I0
+   * 2=overlap in segment from I0 to I1
+   */
+  private static int intersect2D_2Segments(final Point s1p0, final Point s1p1, final Point s2p0, final Point s2p1) {
+    final long ux = s1p1.x - s1p0.x; // vector u = S1P1-S1P0 (segment 1)
+    final long uy = s1p1.y - s1p0.y;
+    final long vx = s2p1.x - s2p0.x; // vector v = S2P1-S2P0 (segment 2)
+    final long vy = s2p1.y - s2p0.y;
+    final long wx = s1p0.x - s2p0.x; // vector w = S1P0-S2P0 (from start of segment 2 to start of segment 1
+    final long wy = s1p0.y - s2p0.y;
+
+    final double d = ux * vy - uy * vx;
+
+    // test if  they are parallel (includes either being a point)
+    if (d == 0)           // S1 and S2 are parallel
+    {
+      if ((ux * wy - uy * wx) != 0 || (vx * wy - vy * wx) != 0) {
+        return 0; // they are NOT collinear
+      }
+
+      // they are collinear or degenerate
+      // check if they are degenerate  points
+      final boolean du = ((ux == 0) && (uy == 0));
+      final boolean dv = ((vx == 0) && (vy == 0));
+      if (du && dv)            // both segments are points
+      {
+        return (wx == 0 && wy == 0) ? 0 : 1; // return 0 if they are distinct points
+      }
+      if (du)                     // S1 is a single point
+      {
+        return inSegment(s1p0, s2p0, s2p1) ? 1 : 0; // is it part of S2?
+      }
+      if (dv)                     // S2 a single point
+      {
+        return inSegment(s2p0, s1p0, s1p1) ? 1 : 0;  // is it part of S1?
+      }
+      // they are collinear segments - get  overlap (or not)
+      double t0, t1;                    // endpoints of S1 in eqn for S2
+      final int w2x = s1p1.x - s2p0.x; // vector w2 = S1P1-S2P0 (from start of segment 2 to end of segment 1)
+      final int w2y = s1p1.y - s2p0.y;
+      if (vx != 0) {
+        t0 = wx / vx;
+        t1 = w2x / vx;
+      } else {
+        t0 = wy / vy;
+        t1 = w2y / vy;
+      }
+      if (t0 > t1)                   // must have t0 smaller than t1
+      {
+        final double t = t0;     // swap if not
+        t0 = t1;
+        t1 = t;
+      }
+      if (t0 > 1 || t1 < 0) {
+        return 0;      // NO overlap
+      }
+      t0 = t0 < 0 ? 0 : t0;               // clip to min 0
+      t1 = t1 > 1 ? 1 : t1;               // clip to max 1
+
+      return (t0 == t1) ? 1 : 2;        // return 1 if intersect is a point
     }
 
-    public double distanceWithinPolygon(int i, int i2, int i3, int i4) {
-        OsmNogoPolygon osmNogoPolygon;
-        Point point;
-        int i5;
-        Point point2;
-        double dMin;
-        double dDistance;
-        OsmNogoPolygon osmNogoPolygon2 = this;
-        int i6 = i;
-        int i7 = i2;
-        int i8 = i3;
-        int i9 = i4;
-        double d = 0.0d;
-        Point point3 = new Point(i6, i7);
-        Point point4 = new Point(i8, i9);
-        Point point5 = null;
-        if (osmNogoPolygon2.isWithin(i6, i7)) {
-            point5 = point3;
-        }
-        int size = osmNogoPolygon2.points.size() - 1;
-        int i10 = !osmNogoPolygon2.isClosed ? 1 : 0;
-        int i11 = osmNogoPolygon2.isClosed ? size : 0;
-        while (i10 <= size) {
-            Point point6 = osmNogoPolygon2.points.get(i11);
-            Point point7 = osmNogoPolygon2.points.get(i10);
-            int iIntersect2D_2Segments = intersect2D_2Segments(point3, point4, point6, point7);
-            int i12 = size;
-            if (!osmNogoPolygon2.isClosed || iIntersect2D_2Segments != 1) {
-                osmNogoPolygon = osmNogoPolygon2;
-                double d2 = d;
-                point = point3;
-                Point point8 = point4;
-                i5 = i10;
-                Point point9 = point6;
-                Point point10 = point7;
-                if (iIntersect2D_2Segments != 2) {
-                    point2 = point8;
-                    dMin = d2;
-                } else {
-                    Point point11 = point;
-                    point2 = point8;
-                    Point point12 = point9;
-                    Point point13 = point10;
-                    dMin = d2 + Math.min(CheapRuler.distance(point11.x, point11.y, point2.x, point2.y), Math.min(CheapRuler.distance(point12.x, point12.y, point13.x, point13.y), Math.min(CheapRuler.distance(point11.x, point11.y, point13.x, point13.y), CheapRuler.distance(point12.x, point12.y, point2.x, point2.y))));
-                    point5 = null;
-                }
-                i10 = i5 + 1;
-                i11 = i5;
-                i7 = i2;
-                i9 = i4;
-                point4 = point2;
-                size = i12;
-                point3 = point;
-                d = dMin;
-                osmNogoPolygon2 = osmNogoPolygon;
-                i6 = i;
-                i8 = i3;
-            } else {
-                int i13 = i6 - i8;
-                i5 = i10;
-                int i14 = point6.x - point7.x;
-                int i15 = i7 - i9;
-                Point point14 = point4;
-                point = point3;
-                int i16 = point6.y - point7.y;
-                int i17 = (i13 * i16) - (i14 * i15);
-                double d3 = d;
-                long j = (((long) i6) * ((long) i9)) - (((long) i8) * ((long) i7));
-                long j2 = (((long) point6.x) * ((long) point7.y)) - (((long) point7.x) * ((long) point6.y));
-                Point point15 = new Point((int) (((((long) i14) * j) - (((long) i13) * j2)) / ((long) i17)), (int) (((((long) i16) * j) - (((long) i15) * j2)) / ((long) i17)));
-                if (point5 != null) {
-                    osmNogoPolygon = this;
-                    if (osmNogoPolygon.isWithin((point15.x + point5.x) >> 1, (point15.y + point5.y) >> 1)) {
-                        dDistance = d3 + CheapRuler.distance(point5.x, point5.y, point15.x, point15.y);
-                    }
-                    point5 = point15;
-                    dMin = dDistance;
-                    point2 = point14;
-                    i10 = i5 + 1;
-                    i11 = i5;
-                    i7 = i2;
-                    i9 = i4;
-                    point4 = point2;
-                    size = i12;
-                    point3 = point;
-                    d = dMin;
-                    osmNogoPolygon2 = osmNogoPolygon;
-                    i6 = i;
-                    i8 = i3;
-                } else {
-                    osmNogoPolygon = this;
-                }
-                dDistance = d3;
-                point5 = point15;
-                dMin = dDistance;
-                point2 = point14;
-                i10 = i5 + 1;
-                i11 = i5;
-                i7 = i2;
-                i9 = i4;
-                point4 = point2;
-                size = i12;
-                point3 = point;
-                d = dMin;
-                osmNogoPolygon2 = osmNogoPolygon;
-                i6 = i;
-                i8 = i3;
-            }
-        }
-        OsmNogoPolygon osmNogoPolygon3 = osmNogoPolygon2;
-        double d4 = d;
-        if (point5 != null && osmNogoPolygon3.isWithin(i3, i4)) {
-            return d4 + CheapRuler.distance(point5.x, point5.y, i3, i4);
-        }
-        return d4;
+    // the segments are skew and may intersect in a point
+    // get the intersect parameter for S1
+
+    final double sI = (vx * wy - vy * wx) / d;
+    if (sI < 0 || sI > 1)               // no intersect with S1
+    {
+      return 0;
     }
 
-    private static boolean inSegment(Point p, Point seg_p0, Point seg_p1) {
-        int sp0x = seg_p0.x;
-        int sp1x = seg_p1.x;
-        if (sp0x != sp1x) {
-            int px = p.x;
-            if (sp0x <= px && px <= sp1x) {
-                return true;
-            }
-            if (sp0x >= px && px >= sp1x) {
-                return true;
-            }
-            return false;
-        }
-        int sp0y = seg_p0.y;
-        int sp1y = seg_p1.y;
-        int py = p.y;
-        if (sp0y <= py && py <= sp1y) {
-            return true;
-        }
-        if (sp0y >= py && py >= sp1y) {
-            return true;
-        }
-        return false;
-    }
-
-    /* JADX WARN: Multi-variable type inference failed */
-    private static int intersect2D_2Segments(Point point, Point point2, Point point3, Point point4) {
-        double d;
-        double d2;
-        long j = point2.x - point.x;
-        long j2 = point2.y - point.y;
-        long j3 = point4.x - point3.x;
-        long j4 = point4.y - point3.y;
-        long j5 = point.x - point3.x;
-        long j6 = point.y - point3.y;
-        double d3 = (j * j4) - (j2 * j3);
-        if (d3 != 0.0d) {
-            double d4 = ((j3 * j6) - (j4 * j5)) / d3;
-            if (d4 < 0.0d || d4 > 1.0d) {
-                return 0;
-            }
-            double d5 = ((j * j6) - (j2 * j5)) / d3;
-            return (d5 < 0.0d || d5 > 1.0d) ? 0 : 1;
-        }
-        if ((j * j6) - (j2 * j5) != 0 || (j3 * j6) - (j4 * j5) != 0) {
-            return 0;
-        }
-        Object[] objArr = j == 0 && j2 == 0;
-        Object[] objArr2 = j3 == 0 && j4 == 0;
-        if (objArr == true && objArr2 == true) {
-            return (j5 == 0 && j6 == 0) ? 0 : 1;
-        }
-        if (objArr == true) {
-            return inSegment(point, point3, point4) ? 1 : 0;
-        }
-        if (objArr2 == true) {
-            return inSegment(point3, point, point2) ? 1 : 0;
-        }
-        int i = point2.x - point3.x;
-        int i2 = point2.y - point3.y;
-        if (j3 != 0) {
-            d2 = ((long) i) / j3;
-            d = j5 / j3;
-        } else {
-            d = j6 / j4;
-            d2 = ((long) i2) / j4;
-        }
-        if (d > d2) {
-            double d6 = d;
-            d = d2;
-            d2 = d6;
-        }
-        if (d > 1.0d || d2 < 0.0d) {
-            return 0;
-        }
-        return (d >= 0.0d ? d : 0.0d) == (d2 <= 1.0d ? d2 : 1.0d) ? 1 : 2;
-    }
+    // get the intersect parameter for S2
+    final double tI = (ux * wy - uy * wx) / d;
+    return (tI < 0 || tI > 1) ? 0 : 1; // return 0 if no intersect with S2
+  }
 }

@@ -1,78 +1,100 @@
+/**
+ * Container for an osm node
+ *
+ * @author ab
+ */
 package btools.router;
 
+import btools.mapaccess.MatchedWaypoint;
 import btools.mapaccess.OsmNode;
 import btools.util.CheapRuler;
 
-/* JADX INFO: loaded from: classes.dex */
 public class OsmNodeNamed extends OsmNode {
-    public boolean isNogo;
-    public String name;
-    public double nogoWeight;
-    public double radius;
-    public byte wpttype;
+  public String name;
+  public double radius; // radius of nogopoint (in meters)
+  public double nogoWeight;  // weight for nogopoint
+  public boolean isNogo = false;
+  public byte wpttype = MatchedWaypoint.WAYPOINT_TYPE_SHAPING; // set default type
 
-    public OsmNodeNamed() {
-        this.isNogo = false;
-        this.wpttype = (byte) 1;
-    }
+  public OsmNodeNamed() {
+  }
 
-    public OsmNodeNamed(OsmNode n) {
-        super(n.ilon, n.ilat);
-        this.isNogo = false;
-        this.wpttype = (byte) 1;
-    }
+  public OsmNodeNamed(OsmNode n) {
+    super(n.ilon, n.ilat);
+  }
 
-    @Override // btools.mapaccess.OsmNode
-    public String toString() {
-        if (Double.isNaN(this.nogoWeight)) {
-            return this.ilon + "," + this.ilat + "," + this.name;
-        }
-        return this.ilon + "," + this.ilat + "," + this.name + "," + this.nogoWeight;
+  @Override
+  public String toString() {
+    if (Double.isNaN(nogoWeight)) {
+      return ilon + "," + ilat + "," + name;
+    } else {
+      return ilon + "," + ilat + "," + name + "," + nogoWeight;
     }
+  }
 
-    public double distanceWithinRadius(int lon1, int lat1, int lon2, int lat2, double totalSegmentLength) {
-        int lat12 = lat1;
-        int lat22 = lat2;
-        double[] lonlat2m = CheapRuler.getLonLatToMeterScales((lat12 + lat22) >> 1);
-        int lon12 = lon1;
-        boolean isFirstPointWithinCircle = CheapRuler.distance(lon12, lat12, this.ilon, this.ilat) < this.radius;
-        int lon22 = lon2;
-        boolean isLastPointWithinCircle = CheapRuler.distance(lon22, lat22, this.ilon, this.ilat) < this.radius;
-        if (isFirstPointWithinCircle) {
-            if (isLastPointWithinCircle) {
-                return totalSegmentLength;
-            }
-            lon22 = lon1;
-            lon12 = lon2;
-            lat22 = lat1;
-            lat12 = lat2;
-            isLastPointWithinCircle = isFirstPointWithinCircle;
-        }
-        int tmp = lon22 - lon12;
-        double initialToProject = (((((double) (tmp * (this.ilon - lon12))) * lonlat2m[0]) * lonlat2m[0]) + ((((double) ((lat22 - lat12) * (this.ilat - lat12))) * lonlat2m[1]) * lonlat2m[1])) / totalSegmentLength;
-        double initialToCenter = CheapRuler.distance(this.ilon, this.ilat, lon12, lat12);
-        double halfDistanceWithin = Math.sqrt((this.radius * this.radius) - ((initialToCenter * initialToCenter) - (initialToProject * initialToProject)));
-        if (isLastPointWithinCircle) {
-            return (totalSegmentLength - initialToProject) + halfDistanceWithin;
-        }
-        return 2.0d * halfDistanceWithin;
-    }
+  public double distanceWithinRadius(int lon1, int lat1, int lon2, int lat2, double totalSegmentLength) {
+    double[] lonlat2m = CheapRuler.getLonLatToMeterScales((lat1 + lat2) >> 1);
 
-    public static OsmNodeNamed decodeNogo(String s) {
-        OsmNodeNamed n = new OsmNodeNamed();
-        int idx1 = s.indexOf(44);
-        n.ilon = Integer.parseInt(s.substring(0, idx1));
-        int idx2 = s.indexOf(44, idx1 + 1);
-        n.ilat = Integer.parseInt(s.substring(idx1 + 1, idx2));
-        int idx3 = s.indexOf(44, idx2 + 1);
-        if (idx3 == -1) {
-            n.name = s.substring(idx2 + 1);
-            n.nogoWeight = Double.NaN;
-        } else {
-            n.name = s.substring(idx2 + 1, idx3);
-            n.nogoWeight = Double.parseDouble(s.substring(idx3 + 1));
-        }
-        n.isNogo = true;
-        return n;
+    boolean isFirstPointWithinCircle = CheapRuler.distance(lon1, lat1, ilon, ilat) < radius;
+    boolean isLastPointWithinCircle = CheapRuler.distance(lon2, lat2, ilon, ilat) < radius;
+    // First point is within the circle
+    if (isFirstPointWithinCircle) {
+      // Last point is within the circle
+      if (isLastPointWithinCircle) {
+        return totalSegmentLength;
+      }
+      // Last point is not within the circle
+      // Just swap points and go on with first first point not within the
+      // circle now.
+      // Swap longitudes
+      int tmp = lon2;
+      lon2 = lon1;
+      lon1 = tmp;
+      // Swap latitudes
+      tmp = lat2;
+      lat2 = lat1;
+      lat1 = tmp;
+      // Fix boolean values
+      isLastPointWithinCircle = isFirstPointWithinCircle;
+      isFirstPointWithinCircle = false;
     }
+    // Distance between the initial point and projection of center of
+    // the circle on the current segment.
+    double initialToProject = (
+      (lon2 - lon1) * (ilon - lon1) * lonlat2m[0] * lonlat2m[0]
+        + (lat2 - lat1) * (ilat - lat1) * lonlat2m[1] * lonlat2m[1]
+    ) / totalSegmentLength;
+    // Distance between the initial point and the center of the circle.
+    double initialToCenter = CheapRuler.distance(ilon, ilat, lon1, lat1);
+    // Half length of the segment within the circle
+    double halfDistanceWithin = Math.sqrt(
+      radius * radius - (
+        initialToCenter * initialToCenter -
+          initialToProject * initialToProject
+      )
+    );
+    // Last point is within the circle
+    if (isLastPointWithinCircle) {
+      return halfDistanceWithin + (totalSegmentLength - initialToProject);
+    }
+    return 2 * halfDistanceWithin;
+  }
+
+  public static OsmNodeNamed decodeNogo(String s) {
+    OsmNodeNamed n = new OsmNodeNamed();
+    int idx1 = s.indexOf(',');
+    n.ilon = Integer.parseInt(s.substring(0, idx1));
+    int idx2 = s.indexOf(',', idx1 + 1);
+    n.ilat = Integer.parseInt(s.substring(idx1 + 1, idx2));
+    int idx3 = s.indexOf(',', idx2 + 1);
+    if (idx3 == -1) {
+      n.name = s.substring(idx2 + 1);
+      n.nogoWeight = Double.NaN;
+    } else {
+      n.name = s.substring(idx2 + 1, idx3);
+      n.nogoWeight = Double.parseDouble(s.substring(idx3 + 1));
+    }
+    n.isNogo = true;
+    return n;
+  }
 }

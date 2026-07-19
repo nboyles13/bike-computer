@@ -1,48 +1,53 @@
 package btools.codec;
 
-/* JADX INFO: loaded from: classes.dex */
+/**
+ * Special integer fifo suitable for 3-pass encoding
+ */
 public class IntegerFifo3Pass {
-    private int[] a;
-    private int pass;
-    private int pos;
-    private int size;
+  private int[] a;
+  private int size;
+  private int pos;
 
-    public IntegerFifo3Pass(int capacity) {
-        this.a = capacity < 4 ? new int[4] : new int[capacity];
-    }
+  private int pass;
 
-    public void init() {
-        this.pass++;
-        this.pos = 0;
-    }
+  public IntegerFifo3Pass(int capacity) {
+    a = capacity < 4 ? new int[4] : new int[capacity];
+  }
 
-    public void add(int value) {
-        if (this.pass == 2) {
-            if (this.size == this.a.length) {
-                int[] aa = new int[this.size * 2];
-                System.arraycopy(this.a, 0, aa, 0, this.size);
-                this.a = aa;
-            }
-            int[] aa2 = this.a;
-            int i = this.size;
-            this.size = i + 1;
-            aa2[i] = value;
-        }
-    }
+  /**
+   * Starts a new encoding pass and resets the reading pointer
+   * from the stats collected in pass2 and writes that to the given context
+   */
+  public void init() {
+    pass++;
+    pos = 0;
+  }
 
-    public int getNext() {
-        if (this.pass != 3) {
-            return 1;
-        }
-        int i = this.pos;
-        this.pos = i + 1;
-        return get(i);
+  /**
+   * writes to the fifo in pass2
+   */
+  public void add(int value) {
+    if (pass == 2) {
+      if (size == a.length) {
+        int[] aa = new int[2 * size];
+        System.arraycopy(a, 0, aa, 0, size);
+        a = aa;
+      }
+      a[size++] = value;
     }
+  }
 
-    private int get(int idx) {
-        if (idx >= this.size) {
-            throw new IndexOutOfBoundsException("list size=" + this.size + " idx=" + idx);
-        }
-        return this.a[idx];
+  /**
+   * reads from the fifo in pass3 (in pass1/2 returns just 1)
+   */
+  public int getNext() {
+    return pass == 3 ? get(pos++) : 1;
+  }
+
+  private int get(int idx) {
+    if (idx >= size) {
+      throw new IndexOutOfBoundsException("list size=" + size + " idx=" + idx);
     }
+    return a[idx];
+  }
 }

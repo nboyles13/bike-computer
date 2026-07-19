@@ -53,20 +53,17 @@ public final class GpxSummary {
         Regex regex = nameRe;
         String name = f.getName();
         Intrinsics.checkNotNullExpressionValue(name, "getName(...)");
-        MatchResult m = Regex.find$default(regex, name, 0, 2, null);
+        MatchResult m = regex.find(name, 0);
         if (m == null) {
             return null;
         }
         try {
-            Result.Companion companion = Result.INSTANCE;
-            GpxSummary gpxSummary = this;
             Date date = fnameFmt.parse(m.getGroupValues().get(1));
-            objM118constructorimpl = Result.m118constructorimpl(date != null ? Long.valueOf(date.getTime()) : null);
+            objM118constructorimpl = date != null ? Long.valueOf(date.getTime()) : null;
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
+            objM118constructorimpl = null;
         }
-        return (Long) (Result.m124isFailureimpl(objM118constructorimpl) ? null : objM118constructorimpl);
+        return (Long) objM118constructorimpl;
     }
 
     /* JADX WARN: Removed duplicated region for block: B:44:0x013e  */
@@ -102,14 +99,8 @@ public final class GpxSummary {
         }
         long start2 = lStartMsFromName.longValue();
         try {
-            Result.Companion companion = Result.INSTANCE;
-            GpxSummary gpxSummary = this;
-            objM118constructorimpl = Result.m118constructorimpl(FilesKt.readText$default(f, null, 1, null));
+            objM118constructorimpl = FilesKt.readText(f, kotlin.text.Charsets.UTF_8);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
             objM118constructorimpl = null;
         }
         String text = (String) objM118constructorimpl;
@@ -119,7 +110,7 @@ public final class GpxSummary {
         int powCnt2 = 0;
         double lastLat = Double.NaN;
         int hrCnt3 = 2;
-        Iterator it = Regex.findAll$default(trkptRe, text, 0, 2, null).iterator();
+        Iterator it = trkptRe.findAll(text, 0).iterator();
         int hrCnt4 = 0;
         long lastTime = 0;
         long hrSum = 0;
@@ -153,23 +144,13 @@ public final class GpxSummary {
                     Iterator it2 = it;
                     int hrMax2 = hrMax;
                     double prevSpd2 = prevSpd;
-                    MatchResult it3 = Regex.find$default(timeRe, body2, 0, hrCnt3, null);
+                    MatchResult it3 = timeRe.find(body2, 0);
                     if (it3 != null) {
                         GpxSummary gpxSummary2 = INSTANCE;
                         try {
-                            Result.Companion companion3 = Result.INSTANCE;
-                        } catch (Throwable th2) {
-                            th = th2;
-                        }
-                        try {
                             Date date = iso.parse(it3.getGroupValues().get(1));
-                            objM118constructorimpl2 = Result.m118constructorimpl(date != null ? Long.valueOf(date.getTime()) : null);
+                            objM118constructorimpl2 = date != null ? Long.valueOf(date.getTime()) : null;
                         } catch (Throwable th3) {
-                            th = th3;
-                            Result.Companion companion4 = Result.INSTANCE;
-                            objM118constructorimpl2 = Result.m118constructorimpl(ResultKt.createFailure(th));
-                        }
-                        if (Result.m124isFailureimpl(objM118constructorimpl2)) {
                             objM118constructorimpl2 = null;
                         }
                         Long l = (Long) objM118constructorimpl2;
@@ -218,7 +199,7 @@ public final class GpxSummary {
                         if (t > 0) {
                             lastT = t;
                         }
-                        MatchResult matchResultFind$default = Regex.find$default(eleRe, body, 0, 2, null);
+                        MatchResult matchResultFind$default = eleRe.find(body, 0);
                         if (matchResultFind$default != null && (groupValues3 = matchResultFind$default.getGroupValues()) != null && (str3 = groupValues3.get(1)) != null && (doubleOrNull = StringsKt.toDoubleOrNull(str3)) != null) {
                             double e = doubleOrNull.doubleValue();
                             if (Double.isNaN(eleRef)) {
@@ -230,7 +211,7 @@ public final class GpxSummary {
                             }
                             eleRef = e;
                         }
-                        MatchResult matchResultFind$default2 = Regex.find$default(hrRe, body, 0, 2, null);
+                        MatchResult matchResultFind$default2 = hrRe.find(body, 0);
                         if (matchResultFind$default2 == null || (groupValues2 = matchResultFind$default2.getGroupValues()) == null || (str2 = groupValues2.get(1)) == null || (intOrNull2 = StringsKt.toIntOrNull(str2)) == null) {
                             hrMax = hrMax2;
                         } else {
@@ -245,7 +226,7 @@ public final class GpxSummary {
                             }
                             hrCnt = hrCnt2;
                         }
-                        MatchResult matchResultFind$default3 = Regex.find$default(powRe, body, 0, 2, null);
+                        MatchResult matchResultFind$default3 = powRe.find(body, 0);
                         if (matchResultFind$default3 == null || (groupValues = matchResultFind$default3.getGroupValues()) == null || (str = groupValues.get(1)) == null || (intOrNull = StringsKt.toIntOrNull(str)) == null) {
                             powCnt3 = powCnt4;
                             powMax2 = powMax3;
@@ -321,14 +302,8 @@ public final class GpxSummary {
         Object objM118constructorimpl;
         Intrinsics.checkNotNullParameter(f, "f");
         try {
-            Result.Companion companion = Result.INSTANCE;
-            GpxSummary gpxSummary = this;
-            objM118constructorimpl = Result.m118constructorimpl(FilesKt.readText$default(f, null, 1, null));
+            objM118constructorimpl = FilesKt.readText(f, kotlin.text.Charsets.UTF_8);
         } catch (Throwable th) {
-            Result.Companion companion2 = Result.INSTANCE;
-            objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-        }
-        if (Result.m124isFailureimpl(objM118constructorimpl)) {
             objM118constructorimpl = "";
         }
         return zoneTimes((String) objM118constructorimpl, maxHr);
@@ -345,26 +320,21 @@ public final class GpxSummary {
         int i = 0;
         int i2 = 2;
         Long l = null;
-        for (MatchResult m : Regex.findAll$default(trkptRe, text, 0, 2, null)) {
+        for (MatchResult m : kotlin.sequences.SequencesKt.asIterable(trkptRe.findAll(text, 0))) {
             String body = m.getGroupValues().get(3);
-            MatchResult it = Regex.find$default(timeRe, body, i, i2, l);
+            MatchResult it = timeRe.find(body, i);
             if (it != null) {
                 GpxSummary gpxSummary = INSTANCE;
                 try {
-                    Result.Companion companion = Result.INSTANCE;
                     Date date = iso.parse(it.getGroupValues().get(1));
-                    objM118constructorimpl = Result.m118constructorimpl(date != null ? Long.valueOf(date.getTime()) : l);
+                    objM118constructorimpl = date != null ? Long.valueOf(date.getTime()) : l;
                 } catch (Throwable th) {
-                    Result.Companion companion2 = Result.INSTANCE;
-                    objM118constructorimpl = Result.m118constructorimpl(ResultKt.createFailure(th));
-                }
-                if (Result.m124isFailureimpl(objM118constructorimpl)) {
                     objM118constructorimpl = l;
                 }
                 Long l2 = (Long) objM118constructorimpl;
                 if (l2 != null) {
                     long t = l2.longValue();
-                    MatchResult matchResultFind$default = Regex.find$default(hrRe, body, 0, i2, l);
+                    MatchResult matchResultFind$default = hrRe.find(body, 0);
                     int hr = (matchResultFind$default == null || (groupValues = matchResultFind$default.getGroupValues()) == null || (str = groupValues.get(1)) == null || (intOrNull = StringsKt.toIntOrNull(str)) == null) ? 0 : intOrNull.intValue();
                     if (lastT > 0 && t > lastT && hr > 0) {
                         long dt = RangesKt.coerceAtMost(t - lastT, 10000L);

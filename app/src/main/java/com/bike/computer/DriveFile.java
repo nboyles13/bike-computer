@@ -20,15 +20,7 @@ public final /* data */ class DriveFile {
         return driveFile.copy(str, str2);
     }
 
-    /* JADX INFO: renamed from: component1, reason: from getter */
-    public final String getId() {
-        return this.id;
-    }
 
-    /* JADX INFO: renamed from: component2, reason: from getter */
-    public final String getName() {
-        return this.name;
-    }
 
     public final DriveFile copy(String id, String name) {
         Intrinsics.checkNotNullParameter(id, "id");

@@ -46,14 +46,14 @@ public final class RidesActivity extends Activity {
         $this$onCreate_u24lambda_u241.setOnClickListener(new View.OnClickListener() { // from class: com.bike.computer.RidesActivity$$ExternalSyntheticLambda1
             @Override // android.view.View.OnClickListener
             public final void onClick(View view) {
-                this.f$0.finish();
+                RidesActivity.this.finish();
             }
         });
         build();
         new Thread(new Runnable() { // from class: com.bike.computer.RidesActivity$$ExternalSyntheticLambda2
             @Override // java.lang.Runnable
             public final void run() {
-                RidesActivity.onCreate$lambda$3(this.f$0);
+                RidesActivity.onCreate$lambda$3(RidesActivity.this);
             }
         }).start();
     }
@@ -64,7 +64,7 @@ public final class RidesActivity extends Activity {
             this$0.runOnUiThread(new Runnable() { // from class: com.bike.computer.RidesActivity$$ExternalSyntheticLambda0
                 @Override // java.lang.Runnable
                 public final void run() {
-                    RidesActivity.onCreate$lambda$3$lambda$2(this.f$0);
+                    RidesActivity.onCreate$lambda$3$lambda$2(this$0);
                 }
             });
         }
@@ -107,11 +107,11 @@ public final class RidesActivity extends Activity {
         Map<String, RideSummary> mapRouteBests = RideHistory.INSTANCE.routeBests();
         if (!mapRouteBests.isEmpty()) {
             header("Best times");
-            Iterable $this$sortedBy$iv = mapRouteBests.keySet();
-            for (String route : CollectionsKt.sortedWith($this$sortedBy$iv, new Comparator() { // from class: com.bike.computer.RidesActivity$build$$inlined$sortedBy$1
+            Iterable<String> $this$sortedBy$iv = mapRouteBests.keySet();
+            for (String route : CollectionsKt.sortedWith($this$sortedBy$iv, new Comparator<String>() { // from class: com.bike.computer.RidesActivity$build$$inlined$sortedBy$1
                 /* JADX WARN: Multi-variable type inference failed */
                 @Override // java.util.Comparator
-                public final int compare(T t, T t2) {
+                public final int compare(String t, String t2) {
                     String it = (String) t;
                     String lowerCase = it.toLowerCase(Locale.ROOT);
                     Intrinsics.checkNotNullExpressionValue(lowerCase, "toLowerCase(...)");
@@ -128,7 +128,7 @@ public final class RidesActivity extends Activity {
                 row(route, n + " ride" + (n == 1 ? "" : "s"), fmtDur(best.getMovingMs()), "🏆", new Function0() { // from class: com.bike.computer.RidesActivity$$ExternalSyntheticLambda4
                     @Override // kotlin.jvm.functions.Function0
                     public final Object invoke() {
-                        return RidesActivity.build$lambda$5(this.f$0, best);
+                        return RidesActivity.build$lambda$5(RidesActivity.this, best);
                     }
                 });
             }
@@ -146,7 +146,7 @@ public final class RidesActivity extends Activity {
             row(title, sub, right, null, new Function0() { // from class: com.bike.computer.RidesActivity$$ExternalSyntheticLambda5
                 @Override // kotlin.jvm.functions.Function0
                 public final Object invoke() {
-                    return RidesActivity.build$lambda$6(this.f$0, r);
+                    return RidesActivity.build$lambda$6(RidesActivity.this, r);
                 }
             });
         }

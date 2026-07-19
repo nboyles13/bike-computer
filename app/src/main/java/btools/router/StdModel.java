@@ -1,30 +1,36 @@
+/**
+ * Container for link between two Osm nodes
+ *
+ * @author ab
+ */
 package btools.router;
 
-import btools.expressions.BExpressionContextNode;
-import btools.expressions.BExpressionContextWay;
 import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
+import btools.expressions.BExpressionContext;
+import btools.expressions.BExpressionContextNode;
+import btools.expressions.BExpressionContextWay;
+
+
 final class StdModel extends OsmPathModel {
-    protected BExpressionContextNode ctxNode;
-    protected BExpressionContextWay ctxWay;
+  public OsmPrePath createPrePath() {
+    return null;
+  }
 
-    StdModel() {
-    }
+  public OsmPath createPath() {
+    return new StdPath();
+  }
 
-    @Override // btools.router.OsmPathModel
-    public OsmPrePath createPrePath() {
-        return null;
-    }
+  protected BExpressionContextWay ctxWay;
+  protected BExpressionContextNode ctxNode;
 
-    @Override // btools.router.OsmPathModel
-    public OsmPath createPath() {
-        return new StdPath();
-    }
 
-    @Override // btools.router.OsmPathModel
-    public void init(BExpressionContextWay expctxWay, BExpressionContextNode expctxNode, Map<String, String> keyValues) {
-        this.ctxWay = expctxWay;
-        this.ctxNode = expctxNode;
-    }
+  @Override
+  public void init(BExpressionContextWay expctxWay, BExpressionContextNode expctxNode, Map<String, String> keyValues) {
+    ctxWay = expctxWay;
+    ctxNode = expctxNode;
+
+    BExpressionContext expctxGlobal = expctxWay; // just one of them...
+
+  }
 }
