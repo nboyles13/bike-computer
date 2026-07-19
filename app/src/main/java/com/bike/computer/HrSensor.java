@@ -142,7 +142,11 @@ public final class HrSensor {
                     }
                     Log.i(HrSensor.this.TAG, "MATCH -> connecting " + result.getDevice().getAddress());
                     HrSensor.this.onStatus.invoke("connecting " + result.getDevice().getAddress());
-                    HrSensor.this.gatt = result.getDevice().connectGatt(HrSensor.this.ctx, false, HrSensor.this.gattCb, 2);
+                    try {
+                        HrSensor.this.gatt = result.getDevice().connectGatt(HrSensor.this.ctx, false, HrSensor.this.gattCb, 2);
+                    } catch (SecurityException e) {
+                        HrSensor.this.onStatus.invoke("no BT permission");
+                    }
                 }
             }
 
@@ -314,11 +318,19 @@ public final class HrSensor {
 
     /* JADX INFO: Access modifiers changed from: private */
     public final void startScan() {
+        if (!Ble.canScan(this.ctx)) {
+            this.onStatus.invoke("no BT permission");
+            return;
+        }
         this.onStatus.invoke("scanning");
         ScanSettings settings = new ScanSettings.Builder().setScanMode(2).build();
         BluetoothLeScanner scanner = getScanner();
         if (scanner != null) {
-            scanner.startScan((List<ScanFilter>) null, settings, this.scanCb);
+            try {
+                scanner.startScan((List<ScanFilter>) null, settings, this.scanCb);
+            } catch (SecurityException e) {
+                this.onStatus.invoke("no BT permission");
+            }
         }
     }
 

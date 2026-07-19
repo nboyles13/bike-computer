@@ -137,7 +137,11 @@ public final class CyclingSensor {
                         scanner.stopScan(this);
                     }
                     CyclingSensor.this.onStatus.invoke("connecting " + result.getDevice().getAddress());
-                    CyclingSensor.this.gatt = result.getDevice().connectGatt(CyclingSensor.this.ctx, false, CyclingSensor.this.gattCb, 2);
+                    try {
+                        CyclingSensor.this.gatt = result.getDevice().connectGatt(CyclingSensor.this.ctx, false, CyclingSensor.this.gattCb, 2);
+                    } catch (SecurityException e) {
+                        CyclingSensor.this.onStatus.invoke("no BT permission");
+                    }
                 }
             }
 
@@ -236,10 +240,18 @@ public final class CyclingSensor {
             this.onStatus.invoke("BT off");
             return;
         }
+        if (!Ble.canScan(this.ctx)) {
+            this.onStatus.invoke("no BT permission");
+            return;
+        }
         ScanSettings settings = new ScanSettings.Builder().setScanMode(2).build();
         BluetoothLeScanner scanner = getScanner();
         if (scanner != null) {
-            scanner.startScan((List<ScanFilter>) null, settings, this.scanCb);
+            try {
+                scanner.startScan((List<ScanFilter>) null, settings, this.scanCb);
+            } catch (SecurityException e) {
+                this.onStatus.invoke("no BT permission");
+            }
         }
     }
 
