@@ -14,3 +14,10 @@
 # App keeps live OAuth secrets in shared_prefs at runtime — never commit any
 # extracted app-data dumps or key material.
 secrets.properties
+
+# Belt-and-suspenders: never commit extracted app-data / device state
+**/shared_prefs/
+*bike_prefs*.xml
+appdata/
+BikeComputer_data/
+/decompiled/
