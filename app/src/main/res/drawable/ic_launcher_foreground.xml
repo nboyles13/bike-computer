@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="108dp"
+    android:width="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#ff0ea5e9"
+        android:pathData="M33,64 L48,64 L43.61,74.61 Z M33,64 L43.61,53.39 L48,64 Z"/>
+    <path
+        android:fillColor="#ff0369a1"
+        android:pathData="M33,64 L43.61,74.61 L33,79 Z M33,64 L33,79 L22.39,74.61 Z"/>
+    <path
+        android:fillColor="#ff38bdf8"
+        android:pathData="M33,64 L22.39,74.61 L18,64 Z M33,64 L33,49 L43.61,53.39 Z"/>
+    <path
+        android:fillColor="#ff7dd3fc"
+        android:pathData="M33,64 L18,64 L22.39,53.39 Z M33,64 L22.39,53.39 L33,49 Z"/>
+    <path
+        android:fillColor="#ff0ea5e9"
+        android:pathData="M75,64 L90,64 L85.61,74.61 Z M75,64 L85.61,53.39 L90,64 Z"/>
+    <path
+        android:fillColor="#ff0369a1"
+        android:pathData="M75,64 L85.61,74.61 L75,79 Z M75,64 L75,79 L64.39,74.61 Z"/>
+    <path
+        android:fillColor="#ff38bdf8"
+        android:pathData="M75,64 L64.39,74.61 L60,64 Z M75,64 L75,49 L85.61,53.39 Z"/>
+    <path
+        android:fillColor="#ff7dd3fc"
+        android:pathData="M75,64 L60,64 L64.39,53.39 Z M75,64 L64.39,53.39 L75,49 Z"/>
+    <path
+        android:fillColor="#fffbbf24"
+        android:pathData="M33,64 L54,64 L44,40 Z"/>
+    <path
+        android:fillColor="#fff97316"
+        android:pathData="M44,40 L70,44 L54,64 Z"/>
+    <path
+        android:fillColor="#fffb7185"
+        android:pathData="M67,44 L72,44 L75,64 Z"/>
+    <path
+        android:fillColor="#fffb7185"
+        android:pathData="M64,40 L74,40 L70,46 Z"/>
+    <path
+        android:fillColor="#fffbbf24"
+        android:pathData="M39,37 L48,38 L44,43 Z"/>
+    <path
+        android:fillColor="#ff0c1622"
+        android:pathData="M33,64 m-2.2,0 a2.2,2.2 0 1,0 4.4,0 a2.2,2.2 0 1,0 -4.4,0 M75,64 m-2.2,0 a2.2,2.2 0 1,0 4.4,0 a2.2,2.2 0 1,0 -4.4,0"/>
+</vector>

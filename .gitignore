@@ -1,0 +1,16 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.keystore
+*.jks
+
+# App keeps live OAuth secrets in shared_prefs at runtime — never commit any
+# extracted app-data dumps or key material.
+secrets.properties

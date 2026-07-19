@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="androidx_startup">androidx.startup</string>
+    <string name="call_notification_answer_action">Answer</string>
+    <string name="call_notification_answer_video_action">Video</string>
+    <string name="call_notification_decline_action">Decline</string>
+    <string name="call_notification_hang_up_action">Hang Up</string>
+    <string name="call_notification_incoming_text">Incoming call</string>
+    <string name="call_notification_ongoing_text">Ongoing call</string>
+    <string name="call_notification_screening_text">Screening an incoming call</string>
+    <string name="maplibre_attributionErrorNoBrowser">No web browser installed on device, can\'t open web page.</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Maps SDK for Android</string>
+    <string name="maplibre_attributionsIconContentDescription">Attribution icon. Activate to show attribution dialog.</string>
+    <string name="maplibre_compassContentDescription">Map compass. Activate to reset the map rotation to North.</string>
+    <string name="maplibre_mapActionDescription">Showing a Map created with MapLibre. Scroll by dragging two fingers. Zoom by pinching two fingers.</string>
+    <string name="maplibre_myLocationViewContentDescription">Location View. This shows your location on the map.</string>
+    <string name="maplibre_offline_error_region_definition_invalid">Provided OfflineRegionDefinition doesn\'t fit the world bounds: %s</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+</resources>

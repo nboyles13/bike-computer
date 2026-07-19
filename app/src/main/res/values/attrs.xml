@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="alpha" format="float">
+    </attr>
+    <attr name="fastScrollEnabled" format="boolean">
+    </attr>
+    <attr name="fastScrollHorizontalThumbDrawable" format="reference">
+    </attr>
+    <attr name="fastScrollHorizontalTrackDrawable" format="reference">
+    </attr>
+    <attr name="fastScrollVerticalThumbDrawable" format="reference">
+    </attr>
+    <attr name="fastScrollVerticalTrackDrawable" format="reference">
+    </attr>
+    <attr name="font" format="reference">
+    </attr>
+    <attr name="fontProviderAuthority" format="string">
+    </attr>
+    <attr name="fontProviderCerts" format="reference">
+    </attr>
+    <attr name="fontProviderFetchStrategy">
+        <enum name="blocking" value="0" />
+        <enum name="async" value="1" />
+    </attr>
+    <attr name="fontProviderFetchTimeout" format="integer">
+        <enum name="forever" value="-1" />
+    </attr>
+    <attr name="fontProviderPackage" format="string">
+    </attr>
+    <attr name="fontProviderQuery" format="string">
+    </attr>
+    <attr name="fontProviderSystemFontFamily" format="string">
+    </attr>
+    <attr name="fontStyle">
+        <enum name="normal" value="0" />
+        <enum name="italic" value="1" />
+    </attr>
+    <attr name="fontVariationSettings" format="string">
+    </attr>
+    <attr name="fontWeight" format="integer">
+    </attr>
+    <attr name="lStar" format="float">
+    </attr>
+    <attr name="layoutManager" format="string">
+    </attr>
+    <attr name="maplibre_accuracyAlpha" format="float">
+    </attr>
+    <attr name="maplibre_accuracyAnimationEnabled" format="boolean">
+    </attr>
+    <attr name="maplibre_accuracyColor" format="color">
+    </attr>
+    <attr name="maplibre_apiBaseUri" format="string">
+    </attr>
+    <attr name="maplibre_apiBaseUrl" format="string">
+    </attr>
+    <attr name="maplibre_backgroundDrawable" format="reference">
+    </attr>
+    <attr name="maplibre_backgroundDrawableStale" format="reference">
+    </attr>
+    <attr name="maplibre_backgroundStaleTintColor" format="color">
+    </attr>
+    <attr name="maplibre_backgroundTintColor" format="color">
+    </attr>
+    <attr name="maplibre_bearingDrawable" format="reference">
+    </attr>
+    <attr name="maplibre_bearingTintColor" format="color">
+    </attr>
+    <attr name="maplibre_bl_arrowDirection">
+        <enum name="left" value="0" />
+        <enum name="right" value="1" />
+        <enum name="top" value="2" />
+        <enum name="bottom" value="3" />
+    </attr>
+    <attr name="maplibre_bl_arrowHeight" format="reference|dimension">
+    </attr>
+    <attr name="maplibre_bl_arrowPosition" format="reference|dimension">
+    </attr>
+    <attr name="maplibre_bl_arrowWidth" format="reference|dimension">
+    </attr>
+    <attr name="maplibre_bl_bubbleColor" format="reference|color">
+    </attr>
+    <attr name="maplibre_bl_cornersRadius" format="reference|dimension">
+    </attr>
+    <attr name="maplibre_bl_strokeColor" format="reference|color">
+    </attr>
+    <attr name="maplibre_bl_strokeWidth" format="reference|dimension">
+    </attr>
+    <attr name="maplibre_cameraBearing" format="float">
+    </attr>
+    <attr name="maplibre_cameraPitchMax" format="float">
+    </attr>
+    <attr name="maplibre_cameraPitchMin" format="float">
+    </attr>
+    <attr name="maplibre_cameraTargetLat" format="float">
+    </attr>
+    <attr name="maplibre_cameraTargetLng" format="float">
+    </attr>
+    <attr name="maplibre_cameraTilt" format="float">
+    </attr>
+    <attr name="maplibre_cameraZoom" format="float">
+    </attr>
+    <attr name="maplibre_cameraZoomMax" format="float">
+    </attr>
+    <attr name="maplibre_cameraZoomMin" format="float">
+    </attr>
+    <attr name="maplibre_compassAnimationEnabled" format="boolean">
+    </attr>
+    <attr name="maplibre_cross_source_collisions" format="boolean">
+    </attr>
+    <attr name="maplibre_elevation" format="dimension">
+    </attr>
+    <attr name="maplibre_enableStaleState" format="boolean">
+    </attr>
+    <attr name="maplibre_enableTilePrefetch" format="boolean">
+    </attr>
+    <attr name="maplibre_enableZMediaOverlay" format="boolean">
+    </attr>
+    <attr name="maplibre_foregroundDrawable" format="reference">
+    </attr>
+    <attr name="maplibre_foregroundDrawableStale" format="reference">
+    </attr>
+    <attr name="maplibre_foregroundLoadColor" format="color">
+    </attr>
+    <attr name="maplibre_foregroundStaleTintColor" format="color">
+    </attr>
+    <attr name="maplibre_foregroundTintColor" format="color">
+    </attr>
+    <attr name="maplibre_gpsDrawable" format="reference">
+    </attr>
+    <attr name="maplibre_iconPaddingBottom" format="integer">
+    </attr>
+    <attr name="maplibre_iconPaddingLeft" format="integer">
+    </attr>
+    <attr name="maplibre_iconPaddingRight" format="integer">
+    </attr>
+    <attr name="maplibre_iconPaddingTop" format="integer">
+    </attr>
+    <attr name="maplibre_layer_above" format="string">
+    </attr>
+    <attr name="maplibre_layer_below" format="string">
+    </attr>
+    <attr name="maplibre_localIdeographEnabled" format="boolean">
+    </attr>
+    <attr name="maplibre_localIdeographFontFamilies" format="reference">
+    </attr>
+    <attr name="maplibre_localIdeographFontFamily" format="string">
+    </attr>
+    <attr name="maplibre_maxZoomIconScale" format="float">
+    </attr>
+    <attr name="maplibre_minZoomIconScale" format="float">
+    </attr>
+    <attr name="maplibre_pixelRatio" format="float">
+    </attr>
+    <attr name="maplibre_prefetchZoomDelta" format="integer">
+    </attr>
+    <attr name="maplibre_pulsingLocationCircleAlpha" format="float">
+    </attr>
+    <attr name="maplibre_pulsingLocationCircleColor" format="color">
+    </attr>
+    <attr name="maplibre_pulsingLocationCircleDuration" format="float">
+    </attr>
+    <attr name="maplibre_pulsingLocationCircleEnabled" format="boolean">
+    </attr>
+    <attr name="maplibre_pulsingLocationCircleFadeEnabled" format="boolean">
+    </attr>
+    <attr name="maplibre_pulsingLocationCircleInterpolator" format="string">
+    </attr>
+    <attr name="maplibre_pulsingLocationCircleRadius" format="float">
+    </attr>
+    <attr name="maplibre_renderTextureMode" format="boolean">
+    </attr>
+    <attr name="maplibre_renderTextureTranslucentSurface" format="boolean">
+    </attr>
+    <attr name="maplibre_staleStateTimeout" format="integer" min="0">
+    </attr>
+    <attr name="maplibre_trackingAnimationDurationMultiplier" format="float">
+    </attr>
+    <attr name="maplibre_trackingGesturesManagement" format="boolean">
+    </attr>
+    <attr name="maplibre_trackingInitialMoveThreshold" format="dimension">
+    </attr>
+    <attr name="maplibre_trackingMultiFingerMoveThreshold" format="dimension">
+    </attr>
+    <attr name="maplibre_uiAttribution" format="boolean">
+    </attr>
+    <attr name="maplibre_uiAttributionGravity">
+        <flag name="top" value="0x30" />
+        <flag name="bottom" value="0x50" />
+        <flag name="left" value="0x3" />
+        <flag name="right" value="0x5" />
+        <flag name="center_vertical" value="0x10" />
+        <flag name="fill_vertical" value="0x70" />
+        <flag name="center_horizontal" value="0x1" />
+        <flag name="fill_horizontal" value="0x7" />
+        <flag name="center" value="0x11" />
+        <flag name="fill" value="0x77" />
+        <flag name="clip_vertical" value="0x80" />
+        <flag name="clip_horizontal" value="0x8" />
+        <flag name="start" value="0x800003" />
+        <flag name="end" value="0x800005" />
+    </attr>
+    <attr name="maplibre_uiAttributionMarginBottom" format="dimension">
+    </attr>
+    <attr name="maplibre_uiAttributionMarginLeft" format="dimension">
+    </attr>
+    <attr name="maplibre_uiAttributionMarginRight" format="dimension">
+    </attr>
+    <attr name="maplibre_uiAttributionMarginTop" format="dimension">
+    </attr>
+    <attr name="maplibre_uiAttributionTintColor" format="color">
+    </attr>
+    <attr name="maplibre_uiCompass" format="boolean">
+    </attr>
+    <attr name="maplibre_uiCompassDrawable" format="reference">
+    </attr>
+    <attr name="maplibre_uiCompassFadeFacingNorth" format="boolean">
+    </attr>
+    <attr name="maplibre_uiCompassGravity">
+        <flag name="top" value="0x30" />
+        <flag name="bottom" value="0x50" />
+        <flag name="left" value="0x3" />
+        <flag name="right" value="0x5" />
+        <flag name="center_vertical" value="0x10" />
+        <flag name="fill_vertical" value="0x70" />
+        <flag name="center_horizontal" value="0x1" />
+        <flag name="fill_horizontal" value="0x7" />
+        <flag name="center" value="0x11" />
+        <flag name="fill" value="0x77" />
+        <flag name="clip_vertical" value="0x80" />
+        <flag name="clip_horizontal" value="0x8" />
+        <flag name="start" value="0x800003" />
+        <flag name="end" value="0x800005" />
+    </attr>
+    <attr name="maplibre_uiCompassMarginBottom" format="dimension">
+    </attr>
+    <attr name="maplibre_uiCompassMarginLeft" format="dimension">
+    </attr>
+    <attr name="maplibre_uiCompassMarginRight" format="dimension">
+    </attr>
+    <attr name="maplibre_uiCompassMarginTop" format="dimension">
+    </attr>
+    <attr name="maplibre_uiDoubleTapGestures" format="boolean">
+    </attr>
+    <attr name="maplibre_uiHorizontalScrollGestures" format="boolean">
+    </attr>
+    <attr name="maplibre_uiLogo" format="boolean">
+    </attr>
+    <attr name="maplibre_uiLogoGravity">
+        <flag name="top" value="0x30" />
+        <flag name="bottom" value="0x50" />
+        <flag name="left" value="0x3" />
+        <flag name="right" value="0x5" />
+        <flag name="center_vertical" value="0x10" />
+        <flag name="fill_vertical" value="0x70" />
+        <flag name="center_horizontal" value="0x1" />
+        <flag name="fill_horizontal" value="0x7" />
+        <flag name="center" value="0x11" />
+        <flag name="fill" value="0x77" />
+        <flag name="clip_vertical" value="0x80" />
+        <flag name="clip_horizontal" value="0x8" />
+        <flag name="start" value="0x800003" />
+        <flag name="end" value="0x800005" />
+    </attr>
+    <attr name="maplibre_uiLogoMarginBottom" format="dimension">
+    </attr>
+    <attr name="maplibre_uiLogoMarginLeft" format="dimension">
+    </attr>
+    <attr name="maplibre_uiLogoMarginRight" format="dimension">
+    </attr>
+    <attr name="maplibre_uiLogoMarginTop" format="dimension">
+    </attr>
+    <attr name="maplibre_uiQuickZoomGestures" format="boolean">
+    </attr>
+    <attr name="maplibre_uiRotateGestures" format="boolean">
+    </attr>
+    <attr name="maplibre_uiScrollGestures" format="boolean">
+    </attr>
+    <attr name="maplibre_uiTiltGestures" format="boolean">
+    </attr>
+    <attr name="maplibre_uiZoomGestures" format="boolean">
+    </attr>
+    <attr name="nestedScrollViewStyle" format="reference">
+    </attr>
+    <attr name="queryPatterns" format="reference">
+    </attr>
+    <attr name="recyclerViewStyle" format="reference">
+    </attr>
+    <attr name="reverseLayout" format="boolean">
+    </attr>
+    <attr name="shortcutMatchRequired" format="boolean">
+    </attr>
+    <attr name="spanCount" format="integer">
+    </attr>
+    <attr name="stackFromEnd" format="boolean">
+    </attr>
+    <attr name="ttcIndex" format="integer">
+    </attr>
+</resources>
