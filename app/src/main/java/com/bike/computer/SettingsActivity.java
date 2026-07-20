@@ -257,6 +257,9 @@ public final class SettingsActivity extends Activity {
                 }
             });
         }
+        if (page == null) {
+            return;
+        }
         switch (page.hashCode()) {
             case -1927763606:
                 if (page.equals("Home & system")) {

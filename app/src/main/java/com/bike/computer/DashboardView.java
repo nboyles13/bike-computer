@@ -363,7 +363,6 @@ public final class DashboardView extends ViewGroup {
     }
 
     private final void pack(DashTile priority) {
-        int c = 0;
         HashSet occ = new HashSet();
         if (priority != null) {
             priority.setW(RangesKt.coerceIn(priority.getW(), 1, 4));
@@ -389,19 +388,23 @@ public final class DashboardView extends ViewGroup {
                 t.setW(w);
                 t.setH(h);
                 int r = 0;
-                while (true) {
-                    int i = 4 - w;
-                    if (0 <= i) {
-                        while (!pack$fits(occ, c, r, w, h)) {
-                            c = c != i ? c + 1 : 0;
+                int col = 0;
+                boolean placed = false;
+                while (!placed) {
+                    for (int cc = 0; cc <= 4 - w; cc++) {
+                        if (pack$fits(occ, cc, r, w, h)) {
+                            col = cc;
+                            placed = true;
+                            break;
                         }
-                        break;
                     }
-                    r++;
+                    if (!placed) {
+                        r++;
+                    }
                 }
-                t.setCol(c);
+                t.setCol(col);
                 t.setRow(r);
-                pack$reserve(occ, c, r, w, h);
+                pack$reserve(occ, col, r, w, h);
             }
         }
     }
