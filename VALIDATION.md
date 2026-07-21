@@ -70,5 +70,5 @@ Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `v
 | RidesActivity | D | RidesActivity.kt | validated | |
 | RideSummaryActivity | D | RideSummaryActivity.kt | validated | |
 | RideService | D | RideService.kt | validated | foreground service; reads RideSummary fields |
-| SettingsActivity | D | SettingsActivity.kt | recompiled | 1662 lines |
+| SettingsActivity | D | SettingsActivity.kt | validated | 1662 lines |
 | MainActivity | D | MainActivity.kt | recompiled | 3099 lines, 16 WARN; absorbs MainActivity$conn$1 |
