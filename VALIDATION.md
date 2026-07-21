@@ -45,7 +45,7 @@ Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `v
 | DashboardViewKt | A | — | validated | dead file-facade (only a private unused const) → removed |
 | RideSummary | D | RideSummary.kt | recompiled | data class; deferred — consumers use package-private fields |
 | DashTile | D | DashTile.kt | recompiled | data class; deferred — consumers use synthetic copy$default |
-| Sneaky | D | — | recompiled | clean Java helper; remove once all callers are Kotlin |
+| Sneaky | — | — | validated | removed — dead code once all callers became Kotlin (use `use{}`) |
 | Ble | D | Ble.kt | recompiled | clean Java helper; port once all callers are Kotlin |
 | LocalTiles | B | LocalTiles.kt | validated | |
 | GpxRoute | B | GpxRoute.kt | validated | |
@@ -59,11 +59,11 @@ Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `v
 | ElevationView | B | ElevationView.kt | validated | View |
 | RouteThumb | B | RouteThumb.kt | validated | View |
 | LedController | B | LedController.kt | validated | |
-| Prefs | C | Prefs.kt | recompiled | 91 Intrinsics, Result blocks |
-| GoogleDriveClient | C | GoogleDriveClient.kt | recompiled | 6 WARN, raw Drive REST |
-| CyclingSensor | C | CyclingSensor.kt | recompiled | BLE, type-inference WARNs |
-| HrSensor | C | HrSensor.kt | recompiled | BLE |
-| DashboardView | C | DashboardView.kt | recompiled | ⚠ past grid-pack infinite loop |
+| Prefs | C | Prefs.kt | validated | 91 Intrinsics, Result blocks |
+| GoogleDriveClient | C | GoogleDriveClient.kt | validated | 6 WARN, raw Drive REST |
+| CyclingSensor | C | CyclingSensor.kt | validated | BLE, type-inference WARNs |
+| HrSensor | C | HrSensor.kt | validated | BLE |
+| DashboardView | C | DashboardView.kt | validated | ⚠ past grid-pack infinite loop |
 | WelcomeActivity | D | WelcomeActivity.kt | recompiled | absorbs WelcomeActivity$conn$1 |
 | DriveAuthActivity | D | DriveAuthActivity.kt | recompiled | |
 | DestinationSearchActivity | D | DestinationSearchActivity.kt | recompiled | |
