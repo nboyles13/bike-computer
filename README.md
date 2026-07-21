@@ -17,23 +17,28 @@ Features (from the recovered v0.2 build):
 ## ⚠️ Provenance — this is recovered source
 
 The original Kotlin sources were lost when the dev machine was wiped (2026-07-19). This tree
-was **reconstructed by decompiling the installed APK with jadx**, so:
+was **reconstructed by decompiling the installed APK with jadx**, then:
 
-- The `com.bike.computer` app classes are **Java decompiled from Kotlin bytecode**, not the
-  original `.kt` files. They read correctly and preserve the logic; ~525 decompiler artifacts
-  were **hand-fixed so the project now compiles and runs** (see git history).
-- The vendored `btools/` routing engine was replaced with **authentic upstream BRouter 1.7.9**
-  source (the version pinned in `OsmTrack.version`) — the decompiled routing core was corrupt.
-- **Status:** builds to a debug APK and passes an on-device smoke test — all screens launch and
-  render (2026-07-20 QA). Still best-effort faithful to decompiled behavior; a longer-term
-  migration to idiomatic Kotlin, class by class, remains the goal.
-- Active work is on branch **`recovery-buildable`**.
+- The `com.bike.computer` app classes were **Java decompiled from Kotlin bytecode**, hand-fixed
+  to compile, and have now been **fully re-authored back into idiomatic Kotlin, class by class,
+  each validated against the jadx baseline + APK** (see `VALIDATION.md` and git history). No
+  decompiled Java, `@Metadata`, `Intrinsics`, or `$$ExternalSyntheticLambda` artifacts remain.
+- Porting surfaced and fixed several genuine decompiler bugs (jadx had flagged them "decompiled
+  incorrectly"): an HR-graph integer-division/​bounds bug, three corrupt `copy$default` masks
+  (rename / critical-shutdown / normal ride-stop all mis-saving fields), and lost `when` branches
+  (page titles, turn maneuvers) — all restored to the original intent.
+- The vendored `btools/` routing engine is **authentic upstream BRouter 1.7.9** source (the
+  version pinned in `OsmTrack.version`) — the decompiled routing core was corrupt. (Two small
+  app-authored helpers, `btools/router/NavHint` + `HintAccess`, remain Java in that package.)
+- **Status:** the whole app is validated Kotlin and builds to a debug APK (`./gradlew
+  :app:assembleDebug`). A fresh on-device smoke test on the XZ1 is the last step before merge.
+- Work is on branch **`recovery-buildable`**.
 
 ## Project layout
 
 ```
 app/src/main/
-  java/com/bike/computer/   45 app classes (recovered, hand-fixed)
+  java/com/bike/computer/   43 app classes, validated idiomatic Kotlin (.kt)
   java/btools/              BRouter routing engine, upstream v1.7.9 (104 files, not on Maven;
                             offline-only server/ + most of mapcreator/ removed, HgtReader kept)
   java/org/openstreetmap/   vendored OSM PBF reader used by BRouter (16 files)
