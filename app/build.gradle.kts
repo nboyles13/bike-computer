@@ -1,6 +1,17 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+}
+
+// Release signing config, loaded from the gitignored keystore.properties at the repo
+// root. Without that file (e.g. a fresh clone lacking the key) the release build stays
+// unsigned, but debug builds are unaffected.
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) FileInputStream(keystorePropsFile).use { load(it) }
 }
 
 android {
@@ -21,6 +32,17 @@ android {
         manifestPlaceholders["appLabel"] = "Harmin"
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystorePropsFile.exists()) {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
@@ -36,6 +58,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Release applicationId is the base `com.bike.computer` (no .recovery
+            // suffix) so it replaces the production install. Signed with the release
+            // key when keystore.properties is present.
+            if (keystorePropsFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 

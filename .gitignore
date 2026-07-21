@@ -15,6 +15,10 @@ build/
 # extracted app-data dumps or key material.
 secrets.properties
 
+# Release signing credentials — the *.jks key is already ignored above; this holds
+# its passwords. Never commit either; back them up off-machine.
+keystore.properties
+
 # Belt-and-suspenders: never commit extracted app-data / device state
 **/shared_prefs/
 *bike_prefs*.xml
