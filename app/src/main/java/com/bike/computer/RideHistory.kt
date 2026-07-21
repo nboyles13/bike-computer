@@ -29,7 +29,7 @@ object RideHistory {
 
     fun byStart(startMs: Long): RideSummary? = all().firstOrNull { it.startMs == startMs }
 
-    fun rename(startMs: Long, name: String) {
+    fun rename(startMs: Long, name: String?) {
         // NOTE: the decompiled copy$default mask was corrupt (kept the old name and only reset
         // `uploaded`, leaving the `name` argument as dead code — a jadx artifact). Restored to the
         // original intent: set the ride's name, keep everything else.
