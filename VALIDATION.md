@@ -10,6 +10,21 @@ Vendored `btools/` + `org/openstreetmap/` are authentic upstream BRouter/OSM sou
 
 **Baseline:** `./gradlew :app:assembleDebug` BUILD SUCCESSFUL on the Java tree (2026-07-21).
 
+## ✅ COMPLETE — all 45 app classes validated
+
+Every `com.bike.computer` class is now idiomatic Kotlin; **zero** decompiled Java, `@Metadata`,
+`Intrinsics`, or `$$ExternalSyntheticLambda` artifacts remain. `./gradlew :app:assembleDebug` builds
+green (49 MB APK). Two clean helpers (`DashboardViewKt`, `Sneaky`) were removed as dead code; the
+`*$conn$1` service-connection files were folded into their activities. **Genuine decompiler bugs
+found and fixed to original intent** (🐛 below): HrGraphView graph-collapse + smoothing bounds;
+RideHistory.rename / RideService.doShutdown / MainActivity.stopRec corrupt `copy$default` masks;
+plus lost `when` branches restored (Pages.fixedTitle, MainActivity.maneuver).
+
+Out of scope but noted: `btools/router/NavHint.java` + `HintAccess.java` are app-authored
+decompiled-Kotlin that live in the vendored `btools` package (stripped of `@Metadata`); left as Java.
+
+Remaining: final on-device smoke test on the Sony XZ1 Compact (`adb install -r`), then README update.
+
 Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `validated`.
 
 ## Learnings that shape the migration
@@ -43,10 +58,10 @@ Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `v
 | GpxSummary | A | GpxSummary.kt | validated | object; faithful re-port of the "decompiled incorrectly" summarize() parser |
 | ImmersiveKt | A | Immersive.kt | validated | file-facade → `Activity.enterImmersive()` extension |
 | DashboardViewKt | A | — | validated | dead file-facade (only a private unused const) → removed |
-| RideSummary | D | RideSummary.kt | recompiled | data class; deferred — consumers use package-private fields |
-| DashTile | D | DashTile.kt | recompiled | data class; deferred — consumers use synthetic copy$default |
+| RideSummary | D | RideSummary.kt | validated | data class; deferred — consumers use package-private fields |
+| DashTile | D | DashTile.kt | validated | data class; deferred — consumers use synthetic copy$default |
 | Sneaky | — | — | validated | removed — dead code once all callers became Kotlin (use `use{}`) |
-| Ble | D | Ble.kt | recompiled | clean Java helper; port once all callers are Kotlin |
+| Ble | D | Ble.kt | validated | clean Java helper; port once all callers are Kotlin |
 | LocalTiles | B | LocalTiles.kt | validated | |
 | GpxRoute | B | GpxRoute.kt | validated | |
 | GmapsRoute | B | GmapsRoute.kt | validated | |
@@ -71,4 +86,4 @@ Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `v
 | RideSummaryActivity | D | RideSummaryActivity.kt | validated | |
 | RideService | D | RideService.kt | validated | foreground service; reads RideSummary fields |
 | SettingsActivity | D | SettingsActivity.kt | validated | 1662 lines |
-| MainActivity | D | MainActivity.kt | recompiled | 3099 lines, 16 WARN; absorbs MainActivity$conn$1 |
+| MainActivity | D | MainActivity.kt | validated | 3092 lines; folds conn$1 + PageAdapter. 🐛 FIXED: corrupt copy$default mask (stopRec saved rides with gpx=null); restored maneuver() U-turn/roundabout branches lost in decompile |
