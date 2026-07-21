@@ -47,18 +47,18 @@ Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `v
 | DashTile | D | DashTile.kt | recompiled | data class; deferred — consumers use synthetic copy$default |
 | Sneaky | D | — | recompiled | clean Java helper; remove once all callers are Kotlin |
 | Ble | D | Ble.kt | recompiled | clean Java helper; port once all callers are Kotlin |
-| LocalTiles | B | LocalTiles.kt | recompiled | |
-| GpxRoute | B | GpxRoute.kt | recompiled | |
-| GmapsRoute | B | GmapsRoute.kt | recompiled | |
-| Geocoder | B | Geocoder.kt | recompiled | |
-| StreetNames | B | StreetNames.kt | recompiled | ⚠ past decompiler bug (infinite loop) |
-| BikeRouter | B | BikeRouter.kt | recompiled | ⚠ past decompiler bug (dup waypoint) |
-| RideHistory | B | RideHistory.kt | recompiled | reads RideSummary fields |
-| RideRecorder | B | RideRecorder.kt | recompiled | |
-| HrGraphView | B | HrGraphView.kt | recompiled | View |
-| ElevationView | B | ElevationView.kt | recompiled | View |
-| RouteThumb | B | RouteThumb.kt | recompiled | View |
-| LedController | B | LedController.kt | recompiled | |
+| LocalTiles | B | LocalTiles.kt | validated | |
+| GpxRoute | B | GpxRoute.kt | validated | |
+| GmapsRoute | B | GmapsRoute.kt | validated | |
+| Geocoder | B | Geocoder.kt | validated | |
+| StreetNames | B | StreetNames.kt | validated | ⚠ past decompiler bug (infinite loop) |
+| BikeRouter | B | BikeRouter.kt | validated | ⚠ past decompiler bug (dup waypoint) |
+| RideHistory | B | RideHistory.kt | validated | 🐛 FIXED: `rename` copy$default mask was corrupt (name arg was dead code) → restored to set the name |
+| RideRecorder | B | RideRecorder.kt | validated | |
+| HrGraphView | B | HrGraphView.kt | validated | View. 🐛 FIXED: int-division in x-mapping (collapsed graph to a vertical line) + inverted bounds check in 5-tap smoothing |
+| ElevationView | B | ElevationView.kt | validated | View |
+| RouteThumb | B | RouteThumb.kt | validated | View |
+| LedController | B | LedController.kt | validated | |
 | Prefs | C | Prefs.kt | recompiled | 91 Intrinsics, Result blocks |
 | GoogleDriveClient | C | GoogleDriveClient.kt | recompiled | 6 WARN, raw Drive REST |
 | CyclingSensor | C | CyclingSensor.kt | recompiled | BLE, type-inference WARNs |

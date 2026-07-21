@@ -1490,7 +1490,7 @@ public final class SettingsActivity extends Activity {
             toast("No route points found");
             return;
         }
-        ActionBus.INSTANCE.setPendingRoute(GpxRoute.toWaypoints$default(GpxRoute.INSTANCE, list, 0.0d, 0, 6, null));
+        ActionBus.INSTANCE.setPendingRoute(GpxRoute.INSTANCE.toWaypoints(list));
         ActionBus.INSTANCE.setPendingRouteName(routeName);
         toast("Snapping route to roads…");
         startActivity(new Intent(this, (Class<?>) MainActivity.class));
