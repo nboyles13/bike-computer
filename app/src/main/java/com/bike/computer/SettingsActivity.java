@@ -71,7 +71,7 @@ public final class SettingsActivity extends Activity {
         public void onServiceConnected(ComponentName n, IBinder b) {
             SettingsActivity settingsActivity = SettingsActivity.this;
             Intrinsics.checkNotNull(b, "null cannot be cast to non-null type com.bike.computer.RideService.LocalBinder");
-            settingsActivity.ride = ((RideService.LocalBinder) b).getThis$0();
+            settingsActivity.ride = ((RideService.LocalBinder) b).getService();
             Function0 function0 = SettingsActivity.this.liveRefresh;
             if (function0 != null) {
                 function0.invoke();

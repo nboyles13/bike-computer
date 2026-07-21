@@ -20,7 +20,7 @@ public final class MainActivity$conn$1 implements ServiceConnection {
     public void onServiceConnected(ComponentName name, IBinder service) {
         MainActivity mainActivity = this.this$0;
         Intrinsics.checkNotNull(service, "null cannot be cast to non-null type com.bike.computer.RideService.LocalBinder");
-        mainActivity.ride = ((RideService.LocalBinder) service).getThis$0();
+        mainActivity.ride = ((RideService.LocalBinder) service).getService();
         RideService rideService = this.this$0.ride;
         if (rideService != null) {
             final MainActivity mainActivity2 = this.this$0;

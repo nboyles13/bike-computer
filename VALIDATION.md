@@ -65,10 +65,10 @@ Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `v
 | HrSensor | C | HrSensor.kt | validated | BLE |
 | DashboardView | C | DashboardView.kt | validated | ⚠ past grid-pack infinite loop |
 | WelcomeActivity | D | WelcomeActivity.kt | recompiled | absorbs WelcomeActivity$conn$1 |
-| DriveAuthActivity | D | DriveAuthActivity.kt | recompiled | |
-| DestinationSearchActivity | D | DestinationSearchActivity.kt | recompiled | |
-| RidesActivity | D | RidesActivity.kt | recompiled | |
+| DriveAuthActivity | D | DriveAuthActivity.kt | validated | |
+| DestinationSearchActivity | D | DestinationSearchActivity.kt | validated | |
+| RidesActivity | D | RidesActivity.kt | validated | |
 | RideSummaryActivity | D | RideSummaryActivity.kt | recompiled | |
-| RideService | D | RideService.kt | recompiled | foreground service; reads RideSummary fields |
+| RideService | D | RideService.kt | validated | foreground service; reads RideSummary fields |
 | SettingsActivity | D | SettingsActivity.kt | recompiled | 1662 lines |
 | MainActivity | D | MainActivity.kt | recompiled | 3099 lines, 16 WARN; absorbs MainActivity$conn$1 |

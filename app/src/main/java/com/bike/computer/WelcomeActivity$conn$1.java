@@ -24,7 +24,7 @@ public final class WelcomeActivity$conn$1 implements ServiceConnection {
         RideRecorder recorder;
         WelcomeActivity welcomeActivity = this.this$0;
         Intrinsics.checkNotNull(b, "null cannot be cast to non-null type com.bike.computer.RideService.LocalBinder");
-        welcomeActivity.ride = ((RideService.LocalBinder) b).getThis$0();
+        welcomeActivity.ride = ((RideService.LocalBinder) b).getService();
         if (Prefs.INSTANCE.wifiDisabledByApp(this.this$0)) {
             RideService rideService = this.this$0.ride;
             if (rideService == null || (recorder = rideService.getRecorder()) == null) {
