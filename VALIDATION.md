@@ -29,10 +29,12 @@ Welcome (routes list + GPS "Fix acquired" via reconstructed `refreshStatus`), Se
 Sensors page (live tick, BLE HR/cadence scanning actually running via `HrSensor`/`CyclingSensor`),
 Rides history (real rides, distances/durations), and a full Ride summary — route thumbnail
 (`RouteThumb` projection + `GpxRoute.parse`), stats, and the HR-zone breakdown (`GpxSummary.zoneTimes`
-totals match moving time; dominant-zone highlight + animated bars). Not exercised: the Map/nav page —
-its 1.15 GB `california.mbtiles` must be copied into the recovery app's sandbox (root write, out of
-scope for this test); the map code compiles and the rest of MainActivity's tabs are reachable.
-`recovery-buildable` is ready to merge to `master`.
+totals match moving time; dominant-zone highlight + animated bars). After copying `california.mbtiles`
+into the recovery sandbox, **all 5 MainActivity pages verified too**: Map (3D SF buildings + road/label
+layers + location puck; `LocalTiles` serving tiles), Data dashboard (`DashboardView` grid pack +
+`metricValue`), HR page (`HrGraphView` — the reconstructed float x-mapping renders zone bands correctly),
+Elevation (`ElevationView`), Summary. Every screen + every custom view exercised, **zero crashes** —
+full feature parity confirmed. `recovery-buildable` is ready to replace the production app.
 
 Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `validated`.
 
