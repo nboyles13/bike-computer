@@ -67,7 +67,7 @@ object Bell {
             }
             track.play()
             try {
-                Thread.sleep(buf.size.toLong() * 1000 / SR + 250L)
+                Thread.sleep(buf.size.toLong() * 1000 / SR + 300L)
             } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
             }

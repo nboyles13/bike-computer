@@ -506,7 +506,7 @@ class RideService : Service(), LocationListener {
 
     private fun buildNotification(): Notification {
         val open = PendingIntent.getActivity(
-            this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT,
+            this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE,
         )
         val mi = String.format(Locale.US, "%.2f mi", Units.miles(recorder.distanceM))
         return Notification.Builder(this, CHAN)
