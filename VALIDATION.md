@@ -23,7 +23,16 @@ plus lost `when` branches restored (Pages.fixedTitle, MainActivity.maneuver).
 Out of scope but noted: `btools/router/NavHint.java` + `HintAccess.java` are app-authored
 decompiled-Kotlin that live in the vendored `btools` package (stripped of `@Metadata`); left as Java.
 
-Remaining: final on-device smoke test on the Sony XZ1 Compact (`adb install -r`), then README update.
+**On-device smoke test — PASSED (2026-07-21, Sony XZ1 Compact, side-by-side `com.bike.computer.recovery`):**
+installed and launched clean; **zero crashes** across the session. Verified on real hardware:
+Welcome (routes list + GPS "Fix acquired" via reconstructed `refreshStatus`), Settings menu +
+Sensors page (live tick, BLE HR/cadence scanning actually running via `HrSensor`/`CyclingSensor`),
+Rides history (real rides, distances/durations), and a full Ride summary — route thumbnail
+(`RouteThumb` projection + `GpxRoute.parse`), stats, and the HR-zone breakdown (`GpxSummary.zoneTimes`
+totals match moving time; dominant-zone highlight + animated bars). Not exercised: the Map/nav page —
+its 1.15 GB `california.mbtiles` must be copied into the recovery app's sandbox (root write, out of
+scope for this test); the map code compiles and the rest of MainActivity's tabs are reachable.
+`recovery-buildable` is ready to merge to `master`.
 
 Status legend: `recompiled` (untouched decompiled Java) → `in-progress` → `validated`.
 
