@@ -19,18 +19,23 @@ Features (from the recovered v0.2 build):
 The original Kotlin sources were lost when the dev machine was wiped (2026-07-19). This tree
 was **reconstructed by decompiling the installed APK with jadx**, so:
 
-- Source files are **Java decompiled from Kotlin bytecode**, not the original `.kt` files.
-  They read correctly and preserve the logic, but are not guaranteed to compile without
-  manual fixes (jadx output is optimized for reading).
-- The plan is: **get the Java baseline building in Android Studio first**, then migrate to
-  idiomatic Kotlin incrementally, one class at a time.
+- The `com.bike.computer` app classes are **Java decompiled from Kotlin bytecode**, not the
+  original `.kt` files. They read correctly and preserve the logic; ~525 decompiler artifacts
+  were **hand-fixed so the project now compiles and runs** (see git history).
+- The vendored `btools/` routing engine was replaced with **authentic upstream BRouter 1.7.9**
+  source (the version pinned in `OsmTrack.version`) — the decompiled routing core was corrupt.
+- **Status:** builds to a debug APK and passes an on-device smoke test — all screens launch and
+  render (2026-07-20 QA). Still best-effort faithful to decompiled behavior; a longer-term
+  migration to idiomatic Kotlin, class by class, remains the goal.
+- Active work is on branch **`recovery-buildable`**.
 
 ## Project layout
 
 ```
 app/src/main/
-  java/com/bike/computer/   43 app classes (the recovered application)
-  java/btools/              vendored BRouter routing engine (150 files, not on Maven)
+  java/com/bike/computer/   45 app classes (recovered, hand-fixed)
+  java/btools/              BRouter routing engine, upstream v1.7.9 (104 files, not on Maven;
+                            offline-only server/ + most of mapcreator/ removed, HgtReader kept)
   java/org/openstreetmap/   vendored OSM PBF reader used by BRouter (16 files)
   res/                      full resource tree recovered from the APK
   AndroidManifest.xml
@@ -38,16 +43,29 @@ app/src/main/
 
 ## Building
 
-Requires Android Studio (AGP 8.7, compileSdk 35, JDK 17).
+AGP 8.7.3, Gradle 8.9 (wrapper committed), compileSdk / build-tools 35, JDK 17.
 
 ```
-# The Gradle wrapper JAR is not committed; generate it once:
-gradle wrapper --gradle-version 8.9
-./gradlew :app:assembleDebug
+./gradlew :app:assembleDebug      # -> app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Expect compile errors on the first pass — these are decompiler artifacts to fix by hand.
-Track them as you go; each fixed class is a candidate for Kotlin migration.
+Point `local.properties` (`sdk.dir=...`) at an Android SDK with platform 35 and
+`build-tools;35.0.0`. On non-standard Linux (e.g. NixOS) where the Maven-bundled `aapt2`
+won't run, set `android.aapt2FromMavenOverride=<sdk>/build-tools/35.0.0/aapt2` in
+`~/.gradle/gradle.properties`.
+
+### Side-by-side install (test build)
+
+The **debug** build sets `applicationIdSuffix = ".recovery"` and label "Harmin (Rec)", so it
+installs as `com.bike.computer.recovery` **alongside** a production `com.bike.computer`
+without replacing it. `adb install -r app-debug.apk`.
+
+### Running it (fresh install starts empty)
+
+The app needs, on first run: the location + Bluetooth (`BLUETOOTH_SCAN`/`CONNECT`) + notification
+runtime permissions; **All-files access** (it reads its MapLibre style from
+`/sdcard/BikeComputer/styles/style.json`); and the offline map DB `california.mbtiles` in its
+`files/` dir. Without the map DB / style it will otherwise crash on the map screen.
 
 ## Dependencies of note
 
