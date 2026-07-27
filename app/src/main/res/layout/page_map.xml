@@ -12,53 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp">
-        <LinearLayout
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:id="@+id/nav_banner"
-            android:background="@drawable/card_bg"
-            android:paddingLeft="18dp"
-            android:paddingTop="12dp"
-            android:paddingRight="14dp"
-            android:paddingBottom="12dp"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="8dp"
-            android:elevation="6dp">
-            <TextView
-                android:textSize="66sp"
-                android:textStyle="bold"
-                android:textColor="#ff4c8dff"
-                android:id="@+id/nav_arrow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="↑"
-                android:layout_marginEnd="18dp"/>
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-                <TextView
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:textColor="#ffffffff"
-                    android:id="@+id/nav_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Continue"/>
-                <TextView
-                    android:textSize="23sp"
-                    android:textColor="#ffb0b0b0"
-                    android:id="@+id/nav_dist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-            </LinearLayout>
-        </LinearLayout>
+        <!-- Stats: fixed at the top so they never shift when directions appear/resize -->
         <LinearLayout
             android:orientation="vertical"
             android:background="@drawable/card_bg"
@@ -235,6 +189,102 @@
                         android:autoSizeMinTextSize="24sp"
                         android:autoSizeMaxTextSize="84sp"/>
                 </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+        <!-- Directions: below the stats. Expands to full on a new step, then collapses to the
+             compact strip; re-expands as a turn approaches. -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/nav_banner"
+            android:background="@drawable/card_bg"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="8dp"
+            android:elevation="6dp">
+            <LinearLayout
+                android:id="@+id/nav_full"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="18dp"
+                android:paddingTop="12dp"
+                android:paddingRight="14dp"
+                android:paddingBottom="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textSize="66sp"
+                    android:textStyle="bold"
+                    android:textColor="#ff4c8dff"
+                    android:id="@+id/nav_arrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↑"
+                    android:layout_marginEnd="18dp"/>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+                    <TextView
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:textColor="#ffffffff"
+                        android:id="@+id/nav_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Continue"/>
+                    <TextView
+                        android:textSize="23sp"
+                        android:textColor="#ffb0b0b0"
+                        android:id="@+id/nav_dist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/nav_compact"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="16dp"
+                android:paddingTop="9dp"
+                android:paddingRight="16dp"
+                android:paddingBottom="9dp"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#ff4c8dff"
+                    android:id="@+id/nav_arrow_c"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="↑"
+                    android:layout_marginEnd="12dp"/>
+                <TextView
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#ffb0b0b0"
+                    android:id="@+id/nav_dist_c"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:layout_marginEnd="10dp"/>
+                <TextView
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#ffffffff"
+                    android:id="@+id/nav_street_c"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text=""/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -8,14 +8,45 @@
     android:paddingBottom="94dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
         android:layout_marginTop="6dp"
-        android:layout_marginBottom="4dp"
-        android:text="HEART RATE ZONES"
-        style="@style/CellLabel"/>
+        android:layout_marginBottom="4dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="HEART RATE ZONES"
+            style="@style/CellLabel"/>
+        <TextView
+            android:id="@+id/data_status_time"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="#ffffffff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:text="--:--"/>
+        <ImageView
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:src="@drawable/ic_battery"
+            android:tint="#ff30d158"
+            android:layout_marginEnd="5dp"/>
+        <TextView
+            android:id="@+id/data_status_batt"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="#ffb0b0b0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--%"/>
+    </LinearLayout>
     <LinearLayout
         android:gravity="center_vertical"
         android:orientation="horizontal"

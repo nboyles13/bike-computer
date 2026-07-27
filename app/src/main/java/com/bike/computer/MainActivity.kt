@@ -60,6 +60,11 @@ import kotlin.math.sqrt
 
 /** The main head-unit screen: swipeable pages (Map/Data/HR/Elevation/Summary), map + navigation. */
 class MainActivity : Activity() {
+    private companion object {
+        // Distance (m) below which a turn is "imminent" — the compact banner re-expands to full.
+        const val NAV_NEAR_M = 150.0
+    }
+
     private val DATA = "/sdcard/BikeComputer"
 
     private lateinit var pageMap: View
@@ -70,9 +75,14 @@ class MainActivity : Activity() {
     private lateinit var pager: ViewPager2
     private lateinit var recenterBtn: ImageView
     private lateinit var navBanner: View
+    private lateinit var navFull: View
+    private lateinit var navCompact: View
     private lateinit var navArrow: TextView
     private lateinit var navText: TextView
     private lateinit var navDist: TextView
+    private lateinit var navArrowC: TextView
+    private lateinit var navDistC: TextView
+    private lateinit var navStreetC: TextView
     private lateinit var mSpeed: TextView
     private lateinit var mHr: TextView
     private lateinit var mDist: TextView
@@ -96,6 +106,7 @@ class MainActivity : Activity() {
     private lateinit var hrLegend: LinearLayout
     private lateinit var recBtn: TextView
     private lateinit var pauseBtn: TextView
+    private lateinit var resumeBtn: TextView
     private lateinit var stopBtn: View
     private lateinit var stopFill: View
     private lateinit var stopLabel: TextView
@@ -129,9 +140,14 @@ class MainActivity : Activity() {
     private var hrPageMaxHr = 0
     private var announcedIdx = -1
     private var earlyAnnouncedIdx = -1
+    private var progressIdx = 0
+    private var navShownStep = Int.MIN_VALUE
+    private var navNearActive = false
+    private var navDTurn = Double.MAX_VALUE
     private var pageSig = ""
     private var cameraTracking = true
     private var controlsVisible = true
+    private val statusBars = ArrayList<Pair<TextView, TextView>>()
 
     private val dataPages = LinkedHashMap<String, View>()
     private val dashViews = ArrayList<DashboardView>()
@@ -161,6 +177,10 @@ class MainActivity : Activity() {
             resetStopButton()
             stopRec()
         }
+    }
+    private val navCollapseRunnable = Runnable {
+        // Keep the banner open if a turn is imminent; otherwise shrink to the compact strip.
+        if (navigating && navDTurn >= NAV_NEAR_M) setNavExpanded(false)
     }
 
     private val conn = object : ServiceConnection {
@@ -230,6 +250,10 @@ class MainActivity : Activity() {
         }
         Bell.prewarm()
         pauseBtn.setOnClickListener {
+            ride?.togglePause()
+            updateRecUi()
+        }
+        resumeBtn.setOnClickListener {
             ride?.togglePause()
             updateRecUi()
         }
@@ -307,9 +331,14 @@ class MainActivity : Activity() {
         mapView = pageMap.findViewById(R.id.mapView)
         recenterBtn = pageMap.findViewById(R.id.recenter_btn)
         navBanner = pageMap.findViewById(R.id.nav_banner)
+        navFull = pageMap.findViewById(R.id.nav_full)
+        navCompact = pageMap.findViewById(R.id.nav_compact)
         navArrow = pageMap.findViewById(R.id.nav_arrow)
         navText = pageMap.findViewById(R.id.nav_text)
         navDist = pageMap.findViewById(R.id.nav_dist)
+        navArrowC = pageMap.findViewById(R.id.nav_arrow_c)
+        navDistC = pageMap.findViewById(R.id.nav_dist_c)
+        navStreetC = pageMap.findViewById(R.id.nav_street_c)
         mSpeed = pageMap.findViewById(R.id.val_speed)
         mHr = pageMap.findViewById(R.id.val_hr)
         mDist = pageMap.findViewById(R.id.val_dist)
@@ -334,6 +363,7 @@ class MainActivity : Activity() {
         buildHrPage()
         recBtn = findViewById(R.id.rec_btn)
         pauseBtn = findViewById(R.id.pause_btn)
+        resumeBtn = findViewById(R.id.resume_btn)
         stopBtn = findViewById(R.id.stop_btn)
         stopFill = findViewById(R.id.stop_fill)
         stopLabel = findViewById(R.id.stop_label)
@@ -341,6 +371,9 @@ class MainActivity : Activity() {
         pausedBadge = findViewById(R.id.paused_badge)
         dotsBar = findViewById(R.id.dots)
         bellBtn = findViewById(R.id.bell_btn)
+        registerStatusBar(pageSummary)
+        registerStatusBar(pageHr)
+        registerStatusBar(pageElev)
     }
 
     private fun pageViewForKey(key: String): View = when (key) {
@@ -375,7 +408,35 @@ class MainActivity : Activity() {
         }
         val it = v.findViewById<DashboardView>(R.id.dash_view)
         if (it != null && !dashViews.contains(it)) dashViews.add(it)
+        // Glanceable time + battery strip; nudge the grid down to make room (shortens every box
+        // a touch).
+        (it.layoutParams as ViewGroup.MarginLayoutParams).topMargin = dp(28)
+        it.requestLayout()
+        registerStatusBar(v)
+        updateStatusBars()
         return v
+    }
+
+    /** Registers a page's time/battery strip (if present) so uiTick keeps it current. */
+    private fun registerStatusBar(root: View) {
+        val timeTv = root.findViewById<TextView>(R.id.data_status_time) ?: return
+        val battTv = root.findViewById<TextView>(R.id.data_status_batt) ?: return
+        if (statusBars.none { it.first === timeTv }) statusBars.add(timeTv to battTv)
+    }
+
+    private fun updateStatusBars() {
+        if (statusBars.isEmpty()) return
+        val time = clockFmt.format(Date())
+        val (pct, charging) = batteryInfo()
+        val batt = when {
+            pct !in 0..100 -> "--%"
+            charging -> "$pct% ⚡"
+            else -> "$pct%"
+        }
+        for ((timeTv, battTv) in statusBars) {
+            timeTv.text = time
+            battTv.text = batt
+        }
     }
 
     private fun buildPager(goToMap: Boolean) {
@@ -637,9 +698,14 @@ class MainActivity : Activity() {
         announcedIdx = -1
         earlyAnnouncedIdx = -1
         offRouteSince = 0L
+        progressIdx = 0
+        navShownStep = Int.MIN_VALUE
+        navNearActive = false
+        navDTurn = Double.MAX_VALUE
         navigating = true
         ActionBus.navigating = true
         navBanner.visibility = View.VISIBLE
+        setNavExpanded(true)
         updateRecUi()
         reCenter()
         if (initial) {
@@ -831,21 +897,48 @@ class MainActivity : Activity() {
 
     private fun updateNav(lat: Double, lon: Double) {
         if (!navigating || navPoints.isEmpty()) return
-        var nearIdx = 0
+        val n = navPoints.size
+        // Track progress forward along the route so a retracing path (out-and-back) doesn't snap
+        // the position back to an earlier, coincident point. Search a forward window from the
+        // furthest point reached so far.
+        val lo = progressIdx.coerceIn(0, n - 1)
+        val hi = minOf(n - 1, lo + 80)
+        var nearIdx = lo
         var nearD = Double.MAX_VALUE
-        for (i in navPoints.indices) {
+        for (i in lo..hi) {
             val d = hav(lat, lon, navPoints[i][1], navPoints[i][0])
             if (d < nearD) {
                 nearD = d
                 nearIdx = i
             }
         }
+        // If we've drifted far from the expected window (GPS gap / off route), recover with a full
+        // scan so we can re-anchor and let the reroute logic kick in.
+        if (nearD > 60.0) {
+            for (i in navPoints.indices) {
+                val d = hav(lat, lon, navPoints[i][1], navPoints[i][0])
+                if (d < nearD) {
+                    nearD = d
+                    nearIdx = i
+                }
+            }
+        }
+        if (nearIdx > progressIdx) progressIdx = nearIdx
         val dest = navPoints.last()
         val distToDest = hav(lat, lon, dest[1], dest[0])
-        if (distToDest < 25.0) {
+        // Only "arrive" once we've actually progressed to the end of the track — not merely passed
+        // near the finish coordinate, which happens mid-ride on an out-and-back.
+        if (distToDest < 25.0 && progressIdx >= n - 4) {
             navArrow.text = "◉"
             navText.text = "Arrived"
             navDist.text = ""
+            navArrowC.text = "◉"
+            navDistC.text = ""
+            navStreetC.text = "Arrived"
+            navDTurn = 0.0
+            navShownStep = Int.MIN_VALUE
+            ui.removeCallbacks(navCollapseRunnable)
+            setNavExpanded(true)
             if (announcedIdx != -999) {
                 announcedIdx = -999
                 Voice.cue("You have arrived")
@@ -868,11 +961,31 @@ class MainActivity : Activity() {
         val next = navSteps.firstOrNull { it.indexInTrack > nearIdx }
         if (next != null) {
             val (arrow, label) = maneuver(next.cmd)
-            navArrow.text = arrow
             val instr = if (next.street.isNotEmpty()) "$label onto ${next.street}" else label
-            navText.text = instr
             val dTurn = hav(lat, lon, next.lat, next.lon)
+            navDTurn = dTurn
+            navArrow.text = arrow
+            navText.text = instr
             navDist.text = fmtDistTo(dTurn)
+            navArrowC.text = arrow
+            navDistC.text = fmtDistTo(dTurn)
+            navStreetC.text = if (next.street.isNotEmpty()) next.street else label
+            // New upcoming step → pop to full size, then collapse to the compact strip after a
+            // few seconds.
+            if (next.indexInTrack != navShownStep) {
+                navShownStep = next.indexInTrack
+                navNearActive = false
+                popNavExpanded()
+            }
+            // Re-expand as the turn gets close; allow collapsing again once past it.
+            if (dTurn < NAV_NEAR_M) {
+                if (!navNearActive) {
+                    navNearActive = true
+                    popNavExpanded()
+                }
+            } else {
+                navNearActive = false
+            }
             if (dTurn in 80.0..220.0 && earlyAnnouncedIdx != next.indexInTrack) {
                 earlyAnnouncedIdx = next.indexInTrack
                 Voice.cue("In ${fmtDistTo(dTurn)}, $instr")
@@ -882,10 +995,30 @@ class MainActivity : Activity() {
                 Voice.cue(instr)
             }
         } else {
+            navDTurn = distToDest
             navArrow.text = "↑"
             navText.text = "Continue"
             navDist.text = fmtDistTo(distToDest)
+            navArrowC.text = "↑"
+            navDistC.text = fmtDistTo(distToDest)
+            navStreetC.text = "Continue"
+            if (navShownStep != -2) {
+                navShownStep = -2
+                navNearActive = false
+                popNavExpanded()
+            }
         }
+    }
+
+    private fun setNavExpanded(expanded: Boolean) {
+        navFull.visibility = if (expanded) View.VISIBLE else View.GONE
+        navCompact.visibility = if (expanded) View.GONE else View.VISIBLE
+    }
+
+    private fun popNavExpanded() {
+        setNavExpanded(true)
+        ui.removeCallbacks(navCollapseRunnable)
+        ui.postDelayed(navCollapseRunnable, 5000L)
     }
 
     private fun minDistToRoute(lat: Double, lon: Double): Double {
@@ -952,6 +1085,12 @@ class MainActivity : Activity() {
         navSteps = emptyList()
         navPoints = emptyList()
         routeVias = null
+        progressIdx = 0
+        navShownStep = Int.MIN_VALUE
+        navNearActive = false
+        navDTurn = Double.MAX_VALUE
+        ui.removeCallbacks(navCollapseRunnable)
+        setNavExpanded(true)
         navBanner.visibility = View.GONE
         recenterBtn.visibility =
             if (pager.currentItem != mapPageIndex || cameraTracking) View.GONE else View.VISIBLE
@@ -1028,7 +1167,9 @@ class MainActivity : Activity() {
         val recorder = ride?.recorder
         val recording = recorder?.isRecording == true
         val paused = recorder?.paused == true
-        pauseBtn.text = if (paused) "▶  Resume" else "❚❚  Pause"
+        pauseBtn.visibility = if (recording && !paused) View.VISIBLE else View.GONE
+        resumeBtn.visibility = if (recording && paused) View.VISIBLE else View.GONE
+        stopBtn.visibility = if (recording && paused) View.VISIBLE else View.GONE
         pausedBadge.visibility = if (recording && paused) View.VISIBLE else View.GONE
         recBtn.visibility = if (recording) View.GONE else View.VISIBLE
         dotsBar.visibility = View.VISIBLE
@@ -1052,7 +1193,9 @@ class MainActivity : Activity() {
     private fun syncChrome(animate: Boolean) {
         val onMap = pager.currentItem == mapPageIndex
         val recording = ride?.recorder?.isRecording == true
-        setFaded(homeBtn, controlsVisible && onMap, animate)
+        // Home stays available on the map page so the menu is always reachable, even after
+        // navigation ends or the rest of the chrome fades out.
+        setFaded(homeBtn, onMap, animate)
         setFaded(recBar, controlsVisible && recording, animate)
         setFaded(bellBtn, controlsVisible && (onMap || recording), animate, 0.8f)
     }
@@ -1091,7 +1234,6 @@ class MainActivity : Activity() {
 
     private fun beginStopHold() {
         stopHolding = true
-        stopLabel.text = "HOLD…"
         stopFill.pivotX = 0f
         stopFill.scaleX = 0f
         stopFill.animate().scaleX(1f).setDuration(1500L).setInterpolator(LinearInterpolator()).start()
@@ -1111,7 +1253,7 @@ class MainActivity : Activity() {
     private fun resetStopButton() {
         stopFill.animate().cancel()
         stopFill.animate().scaleX(0f).setDuration(150L).start()
-        stopLabel.text = "■  Hold to stop"
+        stopLabel.text = "■  Stop"
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
@@ -1273,6 +1415,7 @@ class MainActivity : Activity() {
     private fun uiTick() {
         updateRecUi()
         checkLowBattery()
+        updateStatusBars()
         val r = ride?.recorder
         val rec = r != null && r.isRecording
         val dist = r?.distanceM ?: 0.0
