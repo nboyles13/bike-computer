@@ -89,6 +89,25 @@ object Prefs {
         sp(c).edit().putString("route_url", v.trim()).apply()
     }
 
+    /** Saved "home" location (lat/lon) for offline navigate-home; null if unset. */
+    fun homeLoc(c: Context): DoubleArray? {
+        val s = sp(c).getString("home_loc", null) ?: return null
+        val parts = s.split(",")
+        val lat = parts.getOrNull(0)?.toDoubleOrNull() ?: return null
+        val lon = parts.getOrNull(1)?.toDoubleOrNull() ?: return null
+        return doubleArrayOf(lat, lon)
+    }
+
+    fun hasHome(c: Context): Boolean = homeLoc(c) != null
+
+    fun setHomeLoc(c: Context, lat: Double, lon: Double) {
+        sp(c).edit().putString("home_loc", "$lat,$lon").apply()
+    }
+
+    fun clearHomeLoc(c: Context) {
+        sp(c).edit().remove("home_loc").apply()
+    }
+
     fun starredRoutes(c: Context): Set<String> {
         val s = sp(c).getString("starred_routes", null) ?: return emptySet()
         return try {

@@ -80,6 +80,29 @@ class DestinationSearchActivity : Activity() {
         btn.setOnClickListener { doSearch(field.text.toString()) }
         container.addView(btn)
 
+        // Offline shortcut: search needs Wi-Fi (geocoding), but routing to a saved home does not.
+        if (Prefs.hasHome(this)) {
+            val homeBtn = TextView(this)
+            homeBtn.text = "🏠  Navigate home (offline)"
+            homeBtn.setTextColor(-1)
+            homeBtn.textSize = 16f
+            homeBtn.setBackgroundResource(R.drawable.card_solid)
+            homeBtn.setPadding(dp(16), dp(14), dp(16), dp(14))
+            val lp3 = LinearLayout.LayoutParams(-1, -2)
+            lp3.setMargins(dp(2), dp(4), dp(2), dp(8))
+            homeBtn.layoutParams = lp3
+            homeBtn.setOnClickListener {
+                val h = Prefs.homeLoc(this)
+                if (h != null) {
+                    ActionBus.pendingDestination = doubleArrayOf(h[0], h[1])
+                    Toast.makeText(this, "Routing home…", 0).show()
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                }
+            }
+            container.addView(homeBtn)
+        }
+
         results = LinearLayout(this)
         results.orientation = LinearLayout.VERTICAL
         container.addView(results)
@@ -139,6 +162,11 @@ class DestinationSearchActivity : Activity() {
         c.layoutParams = lp
         c.isClickable = true
         c.setOnClickListener { navigateTo(p) }
+        c.setOnLongClickListener {
+            Prefs.setHomeLoc(this, p.lat, p.lon)
+            Toast.makeText(this, "Saved as home — “${p.name.substringBefore(',')}”", 1).show()
+            true
+        }
         val t = TextView(this)
         t.text = p.name
         t.setTextColor(-1)

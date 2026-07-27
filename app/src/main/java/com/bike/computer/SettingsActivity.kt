@@ -266,6 +266,33 @@ class SettingsActivity : Activity() {
                 rebuild()
             }
         }
+        // Home location — enables one-tap offline "Navigate home" (routing is offline; only
+        // address *search* needs Wi-Fi, so a saved home avoids the geocoder entirely).
+        val home = Prefs.homeLoc(this)
+        text(
+            if (home != null) {
+                "Home is set. Use “🏠 Navigate home” on the main screen to route here — works offline."
+            } else {
+                "Set a home location for one-tap, offline “Navigate home” (no Wi-Fi needed)."
+            },
+        )
+        button("Set home to current location") {
+            val loc = ride?.lastLocation
+            if (loc == null) {
+                toast("No GPS fix yet — try again outside")
+            } else {
+                Prefs.setHomeLoc(this, loc.latitude, loc.longitude)
+                toast("Home set to current location")
+                rebuild()
+            }
+        }
+        if (home != null) {
+            button("Clear home location") {
+                Prefs.clearHomeLoc(this)
+                toast("Home cleared")
+                rebuild()
+            }
+        }
         if (Prefs.driveConnected(this)) {
             val folder = Prefs.driveRoutesFolder(this)
             text("Sync routes from Drive — either drop GPX files into your “$folder” folder, or add Google Maps links to a Sheet (below):")

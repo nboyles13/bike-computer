@@ -206,6 +206,16 @@ class WelcomeActivity : Activity() {
             menuCard("Navigate", R.drawable.ic_search) {
                 startActivity(Intent(this, DestinationSearchActivity::class.java))
             }
+            if (Prefs.hasHome(this)) {
+                menuCard("🏠  Navigate home") {
+                    val h = Prefs.homeLoc(this)
+                    if (h != null) {
+                        // Offline: route straight to saved coords (no geocoder / Wi-Fi).
+                        ActionBus.pendingDestination = doubleArrayOf(h[0], h[1])
+                        startActivity(Intent(this, MainActivity::class.java))
+                    }
+                }
+            }
             val all = File(ROUTES_DIR).listFiles { f -> f.name.endsWith(".gpx") }?.toList() ?: emptyList()
             val byName = all.associateBy { it.nameWithoutExtension }
             val starred = Prefs.starredRoutes(this).mapNotNull { byName[it] }
