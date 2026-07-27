@@ -24,6 +24,10 @@ object ActionBus {
     @Volatile
     var navStartMs: Long = 0L
 
+    // Live remaining route distance (metres), updated by the nav engine each GPS fix.
+    @Volatile
+    var navRemainingM: Double = 0.0
+
     @Volatile
     var pendingRoute: List<DoubleArray>? = null
 

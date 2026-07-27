@@ -122,28 +122,21 @@ class MainActivity : Activity() {
     private var ride: RideService? = null
 
     private var currentRouteName: String? = null
-    private var destLat = 0.0
-    private var destLon = 0.0
     private var lastFocusX = 0f
     private var lastFocusY = 0f
-    private var lastRerouteMs = 0L
     private var lastTrailSize = 0
     private var lowBattWarned = false
     private var mapPageIndex = 0
-    private var navigating = false
-    private var offRouteSince = 0L
-    private var routeVias: List<DoubleArray>? = null
     private var screenOffArmed = false
     private var stopHolding = false
     private var twoFingerActive = false
     private var mapBearing = Double.NaN
     private var hrPageMaxHr = 0
-    private var announcedIdx = -1
-    private var earlyAnnouncedIdx = -1
-    private var progressIdx = 0
+    // Nav banner (UI) expand/collapse state; the nav engine itself lives in RideService.
     private var navShownStep = Int.MIN_VALUE
     private var navNearActive = false
     private var navDTurn = Double.MAX_VALUE
+    private var lastNavVersion = -1
     private var pageSig = ""
     private var cameraTracking = true
     private var controlsVisible = true
@@ -152,8 +145,6 @@ class MainActivity : Activity() {
     private val dataPages = LinkedHashMap<String, View>()
     private val dashViews = ArrayList<DashboardView>()
     private var dots: List<TextView> = emptyList()
-    private var navSteps: List<NavHint> = emptyList()
-    private var navPoints: List<DoubleArray> = emptyList()
     private val hrTimeLbls = ArrayList<TextView>()
     private val hrPctLbls = ArrayList<TextView>()
     private val ui = Handler(Looper.getMainLooper())
@@ -180,17 +171,19 @@ class MainActivity : Activity() {
     }
     private val navCollapseRunnable = Runnable {
         // Keep the banner open if a turn is imminent; otherwise shrink to the compact strip.
-        if (navigating && navDTurn >= NAV_NEAR_M) setNavExpanded(false)
+        if (ride?.navigating == true && navDTurn >= NAV_NEAR_M) setNavExpanded(false)
     }
 
     private val conn = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder) {
             ride = (service as RideService.LocalBinder).service
             ride?.onUpdate = { runOnUiThread { onRideUpdate() } }
+            ride?.onNavUpdate = { runOnUiThread { onNavState() } }
             ride?.autoPauseEnabled = Prefs.autoPause(this@MainActivity)
             updateRecUi()
             enableLocationDot()
             onRideUpdate()
+            onNavState()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -271,7 +264,7 @@ class MainActivity : Activity() {
             true
         }
         navBanner.setOnLongClickListener {
-            if (navigating) {
+            if (ride?.navigating == true) {
                 AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert)
                     .setTitle("Navigation")
                     .setMessage("Stop turn-by-turn navigation?")
@@ -285,7 +278,6 @@ class MainActivity : Activity() {
             true
         }
         Voice.enabled = Prefs.voice(this)
-        Voice.init(this)
         val missing = perms.filter { checkSelfPermission(it) != 0 }
         if (missing.isNotEmpty()) requestPermissions(missing.toTypedArray(), 1)
         uiTick()
@@ -313,8 +305,11 @@ class MainActivity : Activity() {
             addRouteLayer(style)
             enableLocationDot()
             applyMapPower()
+            // Route source is fresh after a (re)load; force the nav line/banner to redraw.
+            lastNavVersion = -1
+            onNavState()
         }
-        m.addOnMapLongClickListener { ll -> startNavigation(ll.latitude, ll.longitude) }
+        m.addOnMapLongClickListener { ll -> startNavAt(ll.latitude, ll.longitude) }
         m.addOnCameraMoveStartedListener { reason -> if (reason == 1) onUserMovedMap() }
         mapView.setOnTouchListener { _, ev ->
             handleMapTouch(ev)
@@ -606,117 +601,17 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun startNavigation(dLat: Double, dLon: Double): Boolean {
-        val from = ride?.lastLocation
-        if (from == null) {
-            Toast.makeText(this, "No GPS fix yet", 0).show()
-            return true
-        }
-        routeVias = null
+    /** Nav now runs in RideService; ensure it's a started foreground service so it survives. */
+    private fun beginNavService() {
+        startService(Intent(this, RideService::class.java).setAction(RideService.ACTION_START_NAV))
+    }
+
+    private fun startNavAt(lat: Double, lon: Double): Boolean {
+        val r = ride ?: return true
         currentRouteName = null
-        destLat = dLat
-        destLon = dLon
-        announcedIdx = -1
-        earlyAnnouncedIdx = -1
-        offRouteSince = 0L
-        Toast.makeText(this, "Routing…", 0).show()
-        computeRoute(from.latitude, from.longitude, true)
+        beginNavService()
+        r.startNavigation(lat, lon)
         return true
-    }
-
-    private fun startRouteNavigation(vias: List<DoubleArray>) {
-        val from = ride?.lastLocation
-        if (from == null) {
-            Toast.makeText(this, "No GPS fix yet — try again in a moment", 1).show()
-            return
-        }
-        if (vias.size < 2) {
-            Toast.makeText(this, "Route has no points", 0).show()
-            return
-        }
-        routeVias = vias
-        destLat = vias.last()[1]
-        destLon = vias.last()[0]
-        announcedIdx = -1
-        earlyAnnouncedIdx = -1
-        offRouteSince = 0L
-        pager.setCurrentItem(mapPageIndex, false)
-        Toast.makeText(this, "Snapping route to roads…", 0).show()
-        computeRoute(from.latitude, from.longitude, true)
-    }
-
-    private fun reroute(fromLat: Double, fromLon: Double) {
-        Voice.cue("Rerouting")
-        Toast.makeText(this, "Off route — rerouting…", 0).show()
-        val list = routeVias
-        if (list != null) {
-            var k = 0
-            var best = Double.MAX_VALUE
-            for (i in list.indices) {
-                val d = hav(fromLat, fromLon, list[i][1], list[i][0])
-                if (d < best) {
-                    best = d
-                    k = i
-                }
-            }
-            if (k in 1 until list.size) routeVias = list.subList(k, list.size).toList()
-        }
-        computeRoute(fromLat, fromLon, false)
-    }
-
-    private fun computeRoute(fromLat: Double, fromLon: Double, initial: Boolean) {
-        lastRerouteMs = System.currentTimeMillis()
-        Thread {
-            val vias = routeVias
-            val waypoints = if (vias != null) {
-                listOf(doubleArrayOf(fromLon, fromLat)) + vias
-            } else {
-                listOf(doubleArrayOf(fromLon, fromLat), doubleArrayOf(destLon, destLat))
-            }
-            val res = BikeRouter.route("$DATA/routing", "$DATA/routing/trekking.brf", waypoints)
-            val named: List<NavHint>? = if (res != null) {
-                StreetNames.open("$filesDir/california.mbtiles")
-                res.steps.map { s ->
-                    val nm = StreetNames.nameAt(s.lat, s.lon)
-                    if (nm.isNotEmpty()) NavHint(s.lat, s.lon, s.indexInTrack, s.cmd, nm) else s
-                }
-            } else {
-                null
-            }
-            runOnUiThread { onRouteComputed(res, initial, named) }
-        }.start()
-    }
-
-    private fun onRouteComputed(res: RouteResult?, initial: Boolean, named: List<NavHint>?) {
-        if (res == null) {
-            Toast.makeText(this, if (initial) "No route found" else "Reroute failed", 1).show()
-            return
-        }
-        routeSource?.setGeoJson(LineString.fromLngLats(res.points.map { Point.fromLngLat(it[0], it[1]) }))
-        navPoints = res.points
-        navSteps = named ?: res.steps
-        announcedIdx = -1
-        earlyAnnouncedIdx = -1
-        offRouteSince = 0L
-        progressIdx = 0
-        navShownStep = Int.MIN_VALUE
-        navNearActive = false
-        navDTurn = Double.MAX_VALUE
-        navigating = true
-        ActionBus.navigating = true
-        ActionBus.navRouteName = currentRouteName
-        ActionBus.navDestLat = destLat
-        ActionBus.navDestLon = destLon
-        if (initial) ActionBus.navStartMs = System.currentTimeMillis()
-        navBanner.visibility = View.VISIBLE
-        setNavExpanded(true)
-        updateRecUi()
-        reCenter()
-        if (initial) {
-            val mi = String.format(Locale.US, "%.1f", Units.miles(res.distanceM.toDouble()))
-            Toast.makeText(this, "Route: $mi mi · ${res.steps.size} turns", 1).show()
-        }
-        ride?.lastLocation?.let { updateNav(it.latitude, it.longitude) }
     }
 
     private fun enableLocationDot() {
@@ -859,20 +754,25 @@ class MainActivity : Activity() {
     }
 
     private fun tryConsumePendingRoute() {
+        val r = ride ?: return
         val dest = ActionBus.pendingDestination
         if (dest != null) {
-            if (ride?.lastLocation == null) return
+            if (r.lastLocation == null) return
             ActionBus.pendingDestination = null
+            currentRouteName = null
+            beginNavService()
             pager.setCurrentItem(mapPageIndex, false)
-            startNavigation(dest[0], dest[1])
+            r.startNavigation(dest[0], dest[1])
             return
         }
         val pendingRoute = ActionBus.pendingRoute ?: return
-        if (ride?.lastLocation == null) return
+        if (r.lastLocation == null) return
         ActionBus.pendingRoute = null
         currentRouteName = ActionBus.pendingRouteName
         ActionBus.pendingRouteName = null
-        startRouteNavigation(pendingRoute)
+        beginNavService()
+        pager.setCurrentItem(mapPageIndex, false)
+        r.startRouteNavigation(pendingRoute, currentRouteName)
     }
 
     private fun onRideUpdate() {
@@ -894,123 +794,61 @@ class MainActivity : Activity() {
         }
         mSpeed.text = Units.fmtSpeed(r.curSpeedMps)
         mHr.text = if (r.lastHr > 0) r.lastHr.toString() else "--"
-        if (navigating) {
-            r.lastLocation?.let { updateNav(it.latitude, it.longitude) }
-        }
     }
 
-    private fun updateNav(lat: Double, lon: Double) {
-        if (!navigating || navPoints.isEmpty()) return
-        val n = navPoints.size
-        // Track progress forward along the route so a retracing path (out-and-back) doesn't snap
-        // the position back to an earlier, coincident point. Search a forward window from the
-        // furthest point reached so far.
-        val lo = progressIdx.coerceIn(0, n - 1)
-        val hi = minOf(n - 1, lo + 80)
-        var nearIdx = lo
-        var nearD = Double.MAX_VALUE
-        for (i in lo..hi) {
-            val d = hav(lat, lon, navPoints[i][1], navPoints[i][0])
-            if (d < nearD) {
-                nearD = d
-                nearIdx = i
+    /** Render the banner + route line from the nav engine's state (which lives in RideService). */
+    private fun onNavState() {
+        val r = ride
+        if (r == null || !r.navigating) {
+            if (navBanner.visibility != View.GONE) {
+                navBanner.visibility = View.GONE
+                ui.removeCallbacks(navCollapseRunnable)
+                setNavExpanded(true)
+                navShownStep = Int.MIN_VALUE
+                navNearActive = false
+                routeSource?.setGeoJson("{\"type\":\"FeatureCollection\",\"features\":[]}")
+                recenterBtn.visibility =
+                    if (pager.currentItem != mapPageIndex || cameraTracking) View.GONE else View.VISIBLE
             }
-        }
-        // If we've drifted far from the expected window (GPS gap / off route), recover with a full
-        // scan so we can re-anchor and let the reroute logic kick in.
-        if (nearD > 60.0) {
-            for (i in navPoints.indices) {
-                val d = hav(lat, lon, navPoints[i][1], navPoints[i][0])
-                if (d < nearD) {
-                    nearD = d
-                    nearIdx = i
-                }
-            }
-        }
-        if (nearIdx > progressIdx) progressIdx = nearIdx
-        val dest = navPoints.last()
-        val distToDest = hav(lat, lon, dest[1], dest[0])
-        // Only "arrive" once we've actually progressed to the end of the track — not merely passed
-        // near the finish coordinate, which happens mid-ride on an out-and-back.
-        if (distToDest < 25.0 && progressIdx >= n - 4) {
-            navArrow.text = "◉"
-            navText.text = "Arrived"
-            navDist.text = ""
-            navArrowC.text = "◉"
-            navDistC.text = ""
-            navStreetC.text = "Arrived"
-            navDTurn = 0.0
-            navShownStep = Int.MIN_VALUE
-            ui.removeCallbacks(navCollapseRunnable)
-            setNavExpanded(true)
-            if (announcedIdx != -999) {
-                announcedIdx = -999
-                Voice.cue("You have arrived")
-                ui.postDelayed({ if (navigating) cancelNav() }, 6000L)
-            }
+            lastNavVersion = r?.navVersionNum ?: -1
             return
         }
-        val offD = minDistToRoute(lat, lon)
-        val now = System.currentTimeMillis()
-        if (offD > 40.0) {
-            if (offRouteSince == 0L) offRouteSince = now
-            if (now - offRouteSince > 5000 && now - lastRerouteMs > 12000) {
-                offRouteSince = 0L
-                reroute(lat, lon)
-                return
+        // Redraw the route line + recenter when the route changes (new route / reroute).
+        if (r.navVersionNum != lastNavVersion) {
+            lastNavVersion = r.navVersionNum
+            val pts = r.navPolyline()
+            if (pts.size >= 2) {
+                routeSource?.setGeoJson(LineString.fromLngLats(pts.map { Point.fromLngLat(it[0], it[1]) }))
             }
-        } else {
-            offRouteSince = 0L
+            navBanner.visibility = View.VISIBLE
+            setNavExpanded(true)
+            navShownStep = Int.MIN_VALUE
+            navNearActive = false
+            reCenter()
         }
-        val next = navSteps.firstOrNull { it.indexInTrack > nearIdx }
-        if (next != null) {
-            val (arrow, label) = maneuver(next.cmd)
-            val instr = if (next.street.isNotEmpty()) "$label onto ${next.street}" else label
-            val dTurn = hav(lat, lon, next.lat, next.lon)
-            navDTurn = dTurn
-            navArrow.text = arrow
-            navText.text = instr
-            navDist.text = fmtDistTo(dTurn)
-            navArrowC.text = arrow
-            navDistC.text = fmtDistTo(dTurn)
-            navStreetC.text = if (next.street.isNotEmpty()) next.street else label
-            // New upcoming step → pop to full size, then collapse to the compact strip after a
-            // few seconds.
-            if (next.indexInTrack != navShownStep) {
-                navShownStep = next.indexInTrack
-                navNearActive = false
+        navBanner.visibility = View.VISIBLE
+        navArrow.text = r.navArrow
+        navText.text = r.navInstruction
+        navDist.text = r.navDistText
+        navArrowC.text = r.navArrow
+        navDistC.text = r.navDistText
+        navStreetC.text = r.navStreet
+        navDTurn = r.navDTurnM
+        if (r.navStepKey != navShownStep) {
+            navShownStep = r.navStepKey
+            navNearActive = false
+            popNavExpanded()
+        }
+        if (r.navArrived) {
+            ui.removeCallbacks(navCollapseRunnable)
+            setNavExpanded(true)
+        } else if (r.navDTurnM < NAV_NEAR_M) {
+            if (!navNearActive) {
+                navNearActive = true
                 popNavExpanded()
-            }
-            // Re-expand as the turn gets close; allow collapsing again once past it.
-            if (dTurn < NAV_NEAR_M) {
-                if (!navNearActive) {
-                    navNearActive = true
-                    popNavExpanded()
-                }
-            } else {
-                navNearActive = false
-            }
-            if (dTurn in 80.0..220.0 && earlyAnnouncedIdx != next.indexInTrack) {
-                earlyAnnouncedIdx = next.indexInTrack
-                Voice.cue("In ${fmtDistTo(dTurn)}, $instr")
-            }
-            if (dTurn < 45.0 && announcedIdx != next.indexInTrack) {
-                announcedIdx = next.indexInTrack
-                Voice.cue(instr)
             }
         } else {
-            navDTurn = distToDest
-            navArrow.text = "↑"
-            navText.text = "Continue"
-            navDist.text = fmtDistTo(distToDest)
-            navArrowC.text = "↑"
-            navDistC.text = fmtDistTo(distToDest)
-            navStreetC.text = "Continue"
-            if (navShownStep != -2) {
-                navShownStep = -2
-                navNearActive = false
-                popNavExpanded()
-            }
+            navNearActive = false
         }
     }
 
@@ -1025,82 +863,9 @@ class MainActivity : Activity() {
         ui.postDelayed(navCollapseRunnable, 5000L)
     }
 
-    private fun minDistToRoute(lat: Double, lon: Double): Double {
-        if (navPoints.size < 2) return 0.0
-        val mLat = 111320.0
-        val mLon = cos(Math.toRadians(lat)) * 111320.0
-        val px = lon * mLon
-        val py = lat * 111320.0
-        var best = Double.MAX_VALUE
-        for (i in 1 until navPoints.size) {
-            val ax = navPoints[i - 1][0] * mLon
-            val ay = navPoints[i - 1][1] * mLat
-            val bx = navPoints[i][0] * mLon
-            val by = navPoints[i][1] * mLat
-            val dx = bx - ax
-            val dy = by - ay
-            val len2 = dx * dx + dy * dy
-            val t = if (len2 == 0.0) 0.0 else (((px - ax) * dx + (py - ay) * dy) / len2).coerceIn(0.0, 1.0)
-            val ex = px - (ax + t * dx)
-            val ey = py - (ay + t * dy)
-            best = minOf(best, sqrt(ex * ex + ey * ey))
-        }
-        return best
-    }
-
-    private fun maneuver(cmd: String): Pair<String, String> = when (cmd.uppercase()) {
-        "KL" -> "↖" to "Keep left"
-        "KR" -> "↗" to "Keep right"
-        "TL" -> "↰" to "Turn left"
-        "TR" -> "↱" to "Turn right"
-        "TSHL" -> "↰" to "Sharp left"
-        "TSHR" -> "↱" to "Sharp right"
-        "TSLL" -> "↖" to "Slight left"
-        "TSLR" -> "↗" to "Slight right"
-        "RNLB", "RNDB" -> "↻" to "Roundabout"
-        "TU", "TRU", "TLU" -> "↩" to "U-turn"
-        else -> "↑" to "Continue"
-    }
-
-    private fun fmtDistTo(meters: Double): String {
-        val ft = 3.28084 * meters
-        return if (ft < 1000.0) {
-            "${(ft / 10).toInt() * 10} ft"
-        } else {
-            String.format(Locale.US, "%.1f mi", meters / 1609.344)
-        }
-    }
-
-    private fun hav(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val p1 = Math.toRadians(lat1)
-        val p2 = Math.toRadians(lat2)
-        val dp = Math.toRadians(lat2 - lat1)
-        val dl = Math.toRadians(lon2 - lon1)
-        val s1 = Math.sin(dp / 2)
-        val c = Math.cos(p1) * Math.cos(p2)
-        val s2 = Math.sin(dl / 2)
-        val a = s1 * s1 + c * s2 * s2
-        return 2 * 6371000.0 * Math.asin(Math.sqrt(a))
-    }
-
     private fun cancelNav() {
-        navigating = false
-        ActionBus.navigating = false
-        ActionBus.navRouteName = null
-        ActionBus.navStartMs = 0L
-        navSteps = emptyList()
-        navPoints = emptyList()
-        routeVias = null
-        progressIdx = 0
-        navShownStep = Int.MIN_VALUE
-        navNearActive = false
-        navDTurn = Double.MAX_VALUE
-        ui.removeCallbacks(navCollapseRunnable)
-        setNavExpanded(true)
-        navBanner.visibility = View.GONE
-        recenterBtn.visibility =
-            if (pager.currentItem != mapPageIndex || cameraTracking) View.GONE else View.VISIBLE
-        routeSource?.setGeoJson("{\"type\":\"FeatureCollection\",\"features\":[]}")
+        ride?.cancelNavigation()
+        onNavState()
     }
 
     fun startRec() {
@@ -1134,20 +899,9 @@ class MainActivity : Activity() {
         ui.removeCallbacks(hideRunnable)
         updateRecUi()
         syncChrome(false)
-        if (path != null && Prefs.driveAutoUpload(this) && Prefs.driveConnected(this)) {
-            val f = File(path)
-            Thread {
-                val outcome = runCatching { GoogleDriveClient.uploadGpx(this, f) }
-                runOnUiThread {
-                    outcome
-                        .onSuccess {
-                            RideHistory.markUploaded(startMs)
-                            Toast.makeText(this, it, 1).show()
-                        }
-                        .onFailure { Toast.makeText(this, "Drive upload failed: ${it.message}", 1).show() }
-                }
-            }.start()
-        }
+        // Drive upload is intentionally NOT attempted here — there's rarely signal when a ride
+        // ends. The ride is saved unuploaded and pushed later in the background (Welcome screen,
+        // once wifi is back). No failure toast.
         if (summary != null) {
             // NOTE: decompiled copy$default mask was corrupt (dropped the computed .gpx filename,
             // recording gpx=null) — a jadx artifact. Restored to link the saved file.
@@ -1498,7 +1252,7 @@ class MainActivity : Activity() {
         ride?.autoPauseEnabled = Prefs.autoPause(this)
         if (ActionBus.stopNav) {
             ActionBus.stopNav = false
-            if (navigating) cancelNav()
+            if (ride?.navigating == true) cancelNav()
         }
         if (Prefs.maxHr(this) != hrPageMaxHr) buildHrPage()
         if (Prefs.pageSignature(this) != pageSig) buildPager(false)
@@ -1524,6 +1278,7 @@ class MainActivity : Activity() {
         ui.removeCallbacks(screenOffRunnable)
         try {
             ride?.onUpdate = null
+            ride?.onNavUpdate = null
             unbindService(conn)
         } catch (e: Exception) {
         }
@@ -1543,7 +1298,7 @@ class MainActivity : Activity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Voice.shutdown()
+        // Voice is owned by RideService now (so nav cues persist off the map); don't shut it down.
         mapView.onDestroy()
     }
 }

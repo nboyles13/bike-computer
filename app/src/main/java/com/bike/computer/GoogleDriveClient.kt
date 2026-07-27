@@ -88,6 +88,28 @@ object GoogleDriveClient {
         }
     }
 
+    /**
+     * Uploads any saved rides not yet on Drive; silent on failure so they simply retry next time
+     * connectivity is available. Returns the number newly uploaded.
+     */
+    fun uploadPendingRides(c: Context): Int {
+        if (!Prefs.driveConnected(c) || !Prefs.driveAutoUpload(c)) return 0
+        var n = 0
+        for (s in RideHistory.all()) {
+            if (s.uploaded || s.gpx == null) continue
+            val f = File("/sdcard/BikeComputer/rides", s.gpx)
+            if (!f.exists()) continue
+            try {
+                uploadGpx(c, f)
+                RideHistory.markUploaded(s.startMs)
+                n++
+            } catch (t: Throwable) {
+                // leave unuploaded; retry later
+            }
+        }
+        return n
+    }
+
     @Throws(JSONException::class, IOException::class)
     private fun ensureFolder(c: Context, token: String): String {
         Prefs.driveFolderId(c).takeIf { it.isNotEmpty() }?.let { return it }

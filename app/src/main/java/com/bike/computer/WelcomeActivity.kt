@@ -28,6 +28,9 @@ class WelcomeActivity : Activity() {
     companion object {
         @Volatile
         private var autoSynced = false
+
+        @Volatile
+        private var uploadingPending = false
     }
 
     private lateinit var container: LinearLayout
@@ -49,6 +52,7 @@ class WelcomeActivity : Activity() {
     private var navElapsedVal: TextView? = null
     private var navRiddenVal: TextView? = null
     private var navHolding = false
+    private var shownNavigating = false
     private val navStopComplete = Runnable {
         if (navHolding) {
             navHolding = false
@@ -104,7 +108,30 @@ class WelcomeActivity : Activity() {
             build()
             tick()
             maybeAutoSync()
+            retryPendingUploads()
         }
+    }
+
+    /** Silently push any rides not yet on Drive; only a success toast, never a failure one. */
+    private fun retryPendingUploads() {
+        if (uploadingPending || !Prefs.driveConnected(this) || !Prefs.driveAutoUpload(this)) return
+        uploadingPending = true
+        Thread {
+            val n = try {
+                GoogleDriveClient.uploadPendingRides(this)
+            } catch (t: Throwable) {
+                0
+            }
+            uploadingPending = false
+            if (n > 0) {
+                runOnUiThread {
+                    if (!isFinishing) {
+                        build()
+                        toast("Uploaded $n ride${if (n == 1) "" else "s"} to Drive")
+                    }
+                }
+            }
+        }.start()
     }
 
     private fun maybeAutoSync() {
@@ -159,6 +186,8 @@ class WelcomeActivity : Activity() {
     }
 
     private fun tick() {
+        // Rebuild if a navigation session started/ended while we're on the home screen.
+        if (ActionBus.navigating != shownNavigating) build()
         refreshStatus()
         updateNavSummary()
         ui.postDelayed({ tick() }, 1000L)
@@ -169,6 +198,7 @@ class WelcomeActivity : Activity() {
         navToFinishVal = null
         navElapsedVal = null
         navRiddenVal = null
+        shownNavigating = ActionBus.navigating
         if (ActionBus.navigating) {
             // While navigating, the routes list is replaced by a live nav summary + stop control.
             buildNavSummary()
@@ -419,15 +449,14 @@ class WelcomeActivity : Activity() {
 
     private fun updateNavSummary() {
         val toFinish = navToFinishVal ?: return
-        val r = ride
-        val loc = r?.lastLocation
-        if (loc != null && (ActionBus.navDestLat != 0.0 || ActionBus.navDestLon != 0.0)) {
-            val m = hav(loc.latitude, loc.longitude, ActionBus.navDestLat, ActionBus.navDestLon)
-            toFinish.text = String.format(java.util.Locale.US, "%.2f mi", Units.miles(m))
+        // Live remaining route distance, kept current by the nav engine in RideService.
+        val remM = ActionBus.navRemainingM
+        toFinish.text = if (remM > 0.0) {
+            String.format(java.util.Locale.US, "%.2f mi", Units.miles(remM))
         } else {
-            toFinish.text = "-- mi"
+            "-- mi"
         }
-        val rec = r?.recorder
+        val rec = ride?.recorder
         val ms = when {
             rec != null && rec.isRecording -> rec.elapsedMs
             ActionBus.navStartMs > 0L -> System.currentTimeMillis() - ActionBus.navStartMs
@@ -489,9 +518,13 @@ class WelcomeActivity : Activity() {
     }
 
     private fun stopNavigation() {
+        // Nav runs in RideService; tell it to stop (also flips ActionBus.navigating off + stops the
+        // service if nothing else needs it). Fallbacks below cover the not-yet-bound case.
+        ride?.cancelNavigation()
         ActionBus.navigating = false
         ActionBus.stopNav = true
         ActionBus.navRouteName = null
+        ActionBus.navRemainingM = 0.0
         ActionBus.navStartMs = 0L
         ActionBus.pendingRoute = null
         ActionBus.pendingRouteName = null
@@ -500,18 +533,6 @@ class WelcomeActivity : Activity() {
         navRiddenVal = null
         toast("Navigation stopped")
         build()
-    }
-
-    private fun hav(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val p1 = Math.toRadians(lat1)
-        val p2 = Math.toRadians(lat2)
-        val dp = Math.toRadians(lat2 - lat1)
-        val dl = Math.toRadians(lon2 - lon1)
-        val s1 = Math.sin(dp / 2)
-        val cc = Math.cos(p1) * Math.cos(p2)
-        val s2 = Math.sin(dl / 2)
-        val a = s1 * s1 + cc * s2 * s2
-        return 2 * 6371000.0 * Math.asin(Math.sqrt(a))
     }
 
     private fun routeRow(f: File, starredNow: Boolean) {
