@@ -13,7 +13,10 @@ import android.os.IBinder
 import android.os.Looper
 import android.text.TextUtils
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
+import android.view.animation.LinearInterpolator
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -40,6 +43,18 @@ class WelcomeActivity : Activity() {
     private val ROUTES_DIR = "/sdcard/BikeComputer/routes"
     private val RECENT_COUNT = 5
     private val ui = Handler(Looper.getMainLooper())
+
+    // Live nav-summary value fields (non-null only while the summary card is shown).
+    private var navToFinishVal: TextView? = null
+    private var navElapsedVal: TextView? = null
+    private var navRiddenVal: TextView? = null
+    private var navHolding = false
+    private val navStopComplete = Runnable {
+        if (navHolding) {
+            navHolding = false
+            stopNavigation()
+        }
+    }
 
     private val conn = object : ServiceConnection {
         override fun onServiceConnected(n: ComponentName?, b: IBinder) {
@@ -145,33 +160,42 @@ class WelcomeActivity : Activity() {
 
     private fun tick() {
         refreshStatus()
+        updateNavSummary()
         ui.postDelayed({ tick() }, 1000L)
     }
 
     private fun build() {
         container.removeAllViews()
-        menuCard("Navigate", R.drawable.ic_search) {
-            startActivity(Intent(this, DestinationSearchActivity::class.java))
-        }
-        val all = File(ROUTES_DIR).listFiles { f -> f.name.endsWith(".gpx") }?.toList() ?: emptyList()
-        val byName = all.associateBy { it.nameWithoutExtension }
-        val starred = Prefs.starredRoutes(this).mapNotNull { byName[it] }
-            .sortedBy { it.nameWithoutExtension.lowercase() }
-        val starredSet = starred.map { it.nameWithoutExtension }.toSet()
-        val recent = all.filter { it.nameWithoutExtension !in starredSet }
-            .sortedByDescending { it.lastModified() }.take(RECENT_COUNT)
+        navToFinishVal = null
+        navElapsedVal = null
+        navRiddenVal = null
+        if (ActionBus.navigating) {
+            // While navigating, the routes list is replaced by a live nav summary + stop control.
+            buildNavSummary()
+        } else {
+            menuCard("Navigate", R.drawable.ic_search) {
+                startActivity(Intent(this, DestinationSearchActivity::class.java))
+            }
+            val all = File(ROUTES_DIR).listFiles { f -> f.name.endsWith(".gpx") }?.toList() ?: emptyList()
+            val byName = all.associateBy { it.nameWithoutExtension }
+            val starred = Prefs.starredRoutes(this).mapNotNull { byName[it] }
+                .sortedBy { it.nameWithoutExtension.lowercase() }
+            val starredSet = starred.map { it.nameWithoutExtension }.toSet()
+            val recent = all.filter { it.nameWithoutExtension !in starredSet }
+                .sortedByDescending { it.lastModified() }.take(RECENT_COUNT)
 
-        if (starred.isNotEmpty()) {
-            sectionLabel("STARRED")
-            for (f in starred) routeRow(f, true)
+            if (starred.isNotEmpty()) {
+                sectionLabel("STARRED")
+                for (f in starred) routeRow(f, true)
+            }
+            sectionLabel(if (starred.isEmpty()) "ROUTES" else "RECENT")
+            if (recent.isEmpty() && starred.isEmpty()) {
+                hint("No saved routes yet — add them in Settings ▸ Routes.")
+            } else if (recent.isEmpty()) {
+                hint("No other recent routes.")
+            }
+            for (f in recent) routeRow(f, false)
         }
-        sectionLabel(if (starred.isEmpty()) "ROUTES" else "RECENT")
-        if (recent.isEmpty() && starred.isEmpty()) {
-            hint("No saved routes yet — add them in Settings ▸ Routes.")
-        } else if (recent.isEmpty()) {
-            hint("No other recent routes.")
-        }
-        for (f in recent) routeRow(f, false)
 
         menuCard("🏁  Ride history") {
             startActivity(Intent(this, RidesActivity::class.java))
@@ -333,6 +357,161 @@ class WelcomeActivity : Activity() {
         b.layoutParams = lp
         b.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
         container.addView(b)
+    }
+
+    private fun buildNavSummary() {
+        sectionLabel("NAVIGATING")
+        val c = LinearLayout(this)
+        c.orientation = LinearLayout.VERTICAL
+        c.setBackgroundResource(R.drawable.card_solid)
+        c.setPadding(dp(16), dp(14), dp(16), dp(14))
+        val lp = LinearLayout.LayoutParams(-1, -2)
+        lp.setMargins(dp(4), dp(4), dp(4), dp(4))
+        c.layoutParams = lp
+
+        val title = TextView(this)
+        title.text = ActionBus.navRouteName ?: "Route to destination"
+        title.setTextColor(-1)
+        title.textSize = 18f
+        title.typeface = Typeface.create("sans-serif-medium", 1)
+        title.maxLines = 1
+        title.ellipsize = TextUtils.TruncateAt.END
+        c.addView(title)
+
+        val row = LinearLayout(this)
+        row.orientation = LinearLayout.HORIZONTAL
+        row.setPadding(0, dp(12), 0, 0)
+        val (col1, v1) = navStat("TO FINISH")
+        val (col2, v2) = navStat("ELAPSED")
+        val (col3, v3) = navStat("RIDDEN")
+        navToFinishVal = v1
+        navElapsedVal = v2
+        navRiddenVal = v3
+        row.addView(col1)
+        row.addView(col2)
+        row.addView(col3)
+        c.addView(row)
+        container.addView(c)
+
+        updateNavSummary()
+        stopNavButton()
+    }
+
+    private fun navStat(label: String): Pair<LinearLayout, TextView> {
+        val col = LinearLayout(this)
+        col.orientation = LinearLayout.VERTICAL
+        col.layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+        val l = TextView(this)
+        l.text = label
+        l.setTextColor(Color.parseColor("#FF8E8E93"))
+        l.textSize = 12f
+        l.letterSpacing = 0.05f
+        val v = TextView(this)
+        v.text = "--"
+        v.setTextColor(-1)
+        v.textSize = 25f
+        v.typeface = Typeface.create("sans-serif-medium", 0)
+        v.setPadding(0, dp(2), 0, 0)
+        col.addView(l)
+        col.addView(v)
+        return col to v
+    }
+
+    private fun updateNavSummary() {
+        val toFinish = navToFinishVal ?: return
+        val r = ride
+        val loc = r?.lastLocation
+        if (loc != null && (ActionBus.navDestLat != 0.0 || ActionBus.navDestLon != 0.0)) {
+            val m = hav(loc.latitude, loc.longitude, ActionBus.navDestLat, ActionBus.navDestLon)
+            toFinish.text = String.format(java.util.Locale.US, "%.2f mi", Units.miles(m))
+        } else {
+            toFinish.text = "-- mi"
+        }
+        val rec = r?.recorder
+        val ms = when {
+            rec != null && rec.isRecording -> rec.elapsedMs
+            ActionBus.navStartMs > 0L -> System.currentTimeMillis() - ActionBus.navStartMs
+            else -> 0L
+        }
+        navElapsedVal?.text = Units.fmtHms(ms)
+        navRiddenVal?.text = String.format(java.util.Locale.US, "%.2f mi", Units.miles(rec?.distanceM ?: 0.0))
+    }
+
+    private fun stopNavButton() {
+        val frame = FrameLayout(this)
+        frame.setBackgroundResource(R.drawable.rec_rect_bg)
+        frame.elevation = dp(4).toFloat()
+        frame.clipToOutline = true
+        val lp = LinearLayout.LayoutParams(-1, dp(56))
+        lp.setMargins(dp(4), dp(12), dp(4), dp(6))
+        frame.layoutParams = lp
+
+        val fill = View(this)
+        fill.setBackgroundResource(R.drawable.stop_fill_bg)
+        fill.layoutParams = FrameLayout.LayoutParams(-1, -1)
+        fill.pivotX = 0f
+        fill.scaleX = 0f
+
+        val label = TextView(this)
+        label.text = "■  Hold to stop navigation"
+        label.setTextColor(-1)
+        label.textSize = 16f
+        label.typeface = Typeface.create("sans-serif-medium", 1)
+        label.gravity = 17
+        label.layoutParams = FrameLayout.LayoutParams(-1, -1)
+
+        frame.addView(fill)
+        frame.addView(label)
+        container.addView(frame)
+
+        frame.setOnTouchListener { _, ev ->
+            when (ev.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    navHolding = true
+                    fill.animate().cancel()
+                    fill.pivotX = 0f
+                    fill.scaleX = 0f
+                    fill.animate().scaleX(1f).setDuration(1500L).setInterpolator(LinearInterpolator()).start()
+                    ui.removeCallbacks(navStopComplete)
+                    ui.postDelayed(navStopComplete, 1500L)
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    if (navHolding) {
+                        navHolding = false
+                        ui.removeCallbacks(navStopComplete)
+                        fill.animate().cancel()
+                        fill.animate().scaleX(0f).setDuration(150L).start()
+                    }
+                }
+            }
+            true
+        }
+    }
+
+    private fun stopNavigation() {
+        ActionBus.navigating = false
+        ActionBus.stopNav = true
+        ActionBus.navRouteName = null
+        ActionBus.navStartMs = 0L
+        ActionBus.pendingRoute = null
+        ActionBus.pendingRouteName = null
+        navToFinishVal = null
+        navElapsedVal = null
+        navRiddenVal = null
+        toast("Navigation stopped")
+        build()
+    }
+
+    private fun hav(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val p1 = Math.toRadians(lat1)
+        val p2 = Math.toRadians(lat2)
+        val dp = Math.toRadians(lat2 - lat1)
+        val dl = Math.toRadians(lon2 - lon1)
+        val s1 = Math.sin(dp / 2)
+        val cc = Math.cos(p1) * Math.cos(p2)
+        val s2 = Math.sin(dl / 2)
+        val a = s1 * s1 + cc * s2 * s2
+        return 2 * 6371000.0 * Math.asin(Math.sqrt(a))
     }
 
     private fun routeRow(f: File, starredNow: Boolean) {

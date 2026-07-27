@@ -704,6 +704,10 @@ class MainActivity : Activity() {
         navDTurn = Double.MAX_VALUE
         navigating = true
         ActionBus.navigating = true
+        ActionBus.navRouteName = currentRouteName
+        ActionBus.navDestLat = destLat
+        ActionBus.navDestLon = destLon
+        if (initial) ActionBus.navStartMs = System.currentTimeMillis()
         navBanner.visibility = View.VISIBLE
         setNavExpanded(true)
         updateRecUi()
@@ -1082,6 +1086,8 @@ class MainActivity : Activity() {
     private fun cancelNav() {
         navigating = false
         ActionBus.navigating = false
+        ActionBus.navRouteName = null
+        ActionBus.navStartMs = 0L
         navSteps = emptyList()
         navPoints = emptyList()
         routeVias = null
