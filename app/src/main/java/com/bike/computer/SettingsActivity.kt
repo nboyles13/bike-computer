@@ -19,6 +19,7 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
@@ -135,8 +136,16 @@ class SettingsActivity : Activity() {
         titleView.text = page ?: "Settings"
         backBtn.visibility = if (page == null) View.GONE else View.VISIBLE
         if (page == null) {
-            for (p in PAGES) menuRow(p) { openPage(p) }
-            menuRow("Rides") { startActivity(Intent(this, RidesActivity::class.java)) }
+            val icons = mapOf(
+                "Pages" to R.drawable.ic_pages,
+                "Recording" to R.drawable.ic_record,
+                "Sensors" to R.drawable.ic_bluetooth,
+                "Routes" to R.drawable.ic_route,
+                "Google Drive" to R.drawable.ic_cloud,
+                "Home & system" to R.drawable.ic_settings,
+            )
+            for (p in PAGES) menuRow(p, icons[p] ?: 0) { openPage(p) }
+            menuRow("Rides", R.drawable.ic_history) { startActivity(Intent(this, RidesActivity::class.java)) }
             return
         }
         when (page) {
@@ -483,9 +492,18 @@ class SettingsActivity : Activity() {
         }
     }
 
-    private fun menuRow(title: String, onClick: () -> Unit) {
+    private fun menuRow(title: String, iconRes: Int = 0, onClick: () -> Unit) {
         val c = card()
-        c.setPadding(dp(18), dp(18), dp(16), dp(18))
+        c.setPadding(dp(16), dp(16), dp(16), dp(16))
+        if (iconRes != 0) {
+            val ic = ImageView(this)
+            ic.setImageResource(iconRes)
+            ic.setColorFilter(Color.parseColor("#FFB8B8BD"))
+            val lp = LinearLayout.LayoutParams(dp(22), dp(22))
+            lp.rightMargin = dp(14)
+            ic.layoutParams = lp
+            c.addView(ic)
+        }
         val t = TextView(this)
         t.text = title
         t.setTextColor(Color.parseColor("#FFE8E8EA"))
@@ -514,13 +532,25 @@ class SettingsActivity : Activity() {
         val l = LinearLayout(this)
         l.orientation = LinearLayout.HORIZONTAL
         l.gravity = 16
-        l.setBackgroundResource(R.drawable.card_solid)
+        l.setBackgroundResource(R.drawable.card_ripple)
         l.setPadding(dp(16), dp(14), dp(16), dp(14))
         val lp = LinearLayout.LayoutParams(-1, -2)
         lp.setMargins(dp(4), dp(4), dp(4), dp(4))
         l.layoutParams = lp
         target.addView(l)
         return l
+    }
+
+    /** Tints the platform Switch to the app accent (on) / neutral grey (off) for a cohesive look. */
+    private fun tintSwitch(sw: Switch) {
+        val on = getColor(R.color.m3_primary)
+        val states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
+        sw.thumbTintList = android.content.res.ColorStateList(
+            states, intArrayOf(on, Color.parseColor("#FFBDBDBD")),
+        )
+        sw.trackTintList = android.content.res.ColorStateList(
+            states, intArrayOf(on and 0x80FFFFFF.toInt(), Color.parseColor("#55FFFFFF")),
+        )
     }
 
     private fun switchRow(label: String, initial: Boolean, onChange: (Boolean) -> Unit) {
@@ -532,7 +562,10 @@ class SettingsActivity : Activity() {
         t.layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
         val sw = Switch(this)
         sw.isChecked = initial
+        tintSwitch(sw)
         sw.setOnCheckedChangeListener { _, v -> onChange(v) }
+        // Tap anywhere on the row to toggle (Material row behaviour) + ripple feedback.
+        c.setOnClickListener { sw.toggle() }
         c.addView(t)
         c.addView(sw)
     }
