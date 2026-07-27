@@ -546,7 +546,7 @@ public abstract class BExpressionContext implements IByteArrayUnifier {
         int[] histo2 = this.lookupHistograms.get(num.intValue());
         boolean bFoundAsterix = false;
         int i = 0;
-        while (i < i) {
+        while (i < values.length) {
             BExpressionLookupValue v = values[i];
             if (v.equals("*")) {
                 bFoundAsterix = true;
