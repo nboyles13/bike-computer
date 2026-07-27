@@ -207,7 +207,7 @@ class WelcomeActivity : Activity() {
                 startActivity(Intent(this, DestinationSearchActivity::class.java))
             }
             if (Prefs.hasHome(this)) {
-                menuCard("🏠  Navigate home", chevron = false) {
+                menuCard("Navigate home", R.drawable.ic_home, chevron = false) {
                     val h = Prefs.homeLoc(this)
                     if (h != null) {
                         // Offline: route straight to saved coords (no geocoder / Wi-Fi).
@@ -237,7 +237,7 @@ class WelcomeActivity : Activity() {
             for (f in recent) routeRow(f, false)
         }
 
-        menuCard("🏁  Ride history") {
+        menuCard("Ride history", R.drawable.ic_history) {
             startActivity(Intent(this, RidesActivity::class.java))
         }
 
@@ -323,7 +323,7 @@ class WelcomeActivity : Activity() {
         val l = LinearLayout(this)
         l.orientation = LinearLayout.HORIZONTAL
         l.gravity = 16
-        l.setBackgroundResource(R.drawable.card_solid)
+        l.setBackgroundResource(R.drawable.card_ripple)
         l.setPadding(dp(16), dp(14), dp(16), dp(14))
         val lp = LinearLayout.LayoutParams(-1, -2)
         lp.setMargins(dp(4), dp(4), dp(4), dp(4))
@@ -383,16 +383,13 @@ class WelcomeActivity : Activity() {
     }
 
     private fun startButton() {
-        val bg = GradientDrawable()
-        bg.cornerRadius = dp(16).toFloat()
-        bg.setColor(Color.parseColor("#FF30D158"))
         val b = TextView(this)
         b.text = "▶   Start ride"
         b.setTextColor(-1)
         b.textSize = 21f
         b.typeface = Typeface.create("sans-serif-medium", 1)
         b.gravity = 17
-        b.background = bg
+        b.setBackgroundResource(R.drawable.btn_go_bg)
         b.setPadding(0, dp(20), 0, dp(20))
         val lp = LinearLayout.LayoutParams(-1, -2)
         lp.setMargins(dp(4), dp(16), dp(4), dp(6))
@@ -550,6 +547,12 @@ class WelcomeActivity : Activity() {
     private fun routeRow(f: File, starredNow: Boolean) {
         val c = card()
         val name = f.nameWithoutExtension
+        val ic = ImageView(this)
+        ic.setImageResource(R.drawable.ic_route)
+        ic.setColorFilter(Color.parseColor("#FFB8B8BD"))
+        val icLp = LinearLayout.LayoutParams(dp(22), dp(22))
+        icLp.rightMargin = dp(12)
+        ic.layoutParams = icLp
         val t = TextView(this)
         t.text = name
         t.setTextColor(-1)
@@ -567,6 +570,7 @@ class WelcomeActivity : Activity() {
             Prefs.setRouteStarred(this, name, !starredNow)
             build()
         }
+        c.addView(ic)
         c.addView(t)
         c.addView(star)
     }
