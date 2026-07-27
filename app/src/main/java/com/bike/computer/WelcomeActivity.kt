@@ -203,11 +203,11 @@ class WelcomeActivity : Activity() {
             // While navigating, the routes list is replaced by a live nav summary + stop control.
             buildNavSummary()
         } else {
-            menuCard("Navigate", R.drawable.ic_search) {
+            menuCard("Navigate", R.drawable.ic_search, chevron = false) {
                 startActivity(Intent(this, DestinationSearchActivity::class.java))
             }
             if (Prefs.hasHome(this)) {
-                menuCard("🏠  Navigate home") {
+                menuCard("🏠  Navigate home", chevron = false) {
                     val h = Prefs.homeLoc(this)
                     if (h != null) {
                         // Offline: route straight to saved coords (no geocoder / Wi-Fi).
@@ -354,7 +354,7 @@ class WelcomeActivity : Activity() {
         return Triple(c, dot, v)
     }
 
-    private fun menuCard(title: String, iconRes: Int = 0, onClick: () -> Unit) {
+    private fun menuCard(title: String, iconRes: Int = 0, chevron: Boolean = true, onClick: () -> Unit) {
         val c = card()
         if (iconRes != 0) {
             val ic = ImageView(this)
@@ -371,12 +371,14 @@ class WelcomeActivity : Activity() {
         t.textSize = 17f
         t.typeface = Typeface.create("sans-serif-medium", 0)
         t.layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-        val chev = TextView(this)
-        chev.text = "›"
-        chev.setTextColor(Color.parseColor("#FF6E6E6E"))
-        chev.textSize = 22f
         c.addView(t)
-        c.addView(chev)
+        if (chevron) {
+            val chev = TextView(this)
+            chev.text = "›"
+            chev.setTextColor(Color.parseColor("#FF6E6E6E"))
+            chev.textSize = 22f
+            c.addView(chev)
+        }
         c.setOnClickListener { onClick() }
     }
 
