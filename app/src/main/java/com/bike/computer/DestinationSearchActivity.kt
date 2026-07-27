@@ -38,8 +38,8 @@ class DestinationSearchActivity : Activity() {
         enterImmersive()
         container = findViewById(R.id.list_container)
         findViewById<TextView>(R.id.list_title).text = "Navigate to…"
-        findViewById<TextView>(R.id.list_done).visibility = View.GONE
-        findViewById<TextView>(R.id.list_back).apply {
+        findViewById<View>(R.id.list_done).visibility = View.GONE
+        findViewById<View>(R.id.list_back).apply {
             visibility = View.VISIBLE
             setOnClickListener { finish() }
         }

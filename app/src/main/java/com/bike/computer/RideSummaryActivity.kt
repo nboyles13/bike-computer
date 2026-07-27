@@ -39,8 +39,8 @@ class RideSummaryActivity : Activity() {
         container = findViewById(R.id.list_container)
         val startMs = intent.getLongExtra("startMs", 0L)
         val toWelcome = intent.getBooleanExtra("welcomeOnDone", false)
-        val doneBtn = findViewById<TextView>(R.id.list_done)
-        val back = findViewById<TextView>(R.id.list_back)
+        val doneBtn = findViewById<View>(R.id.list_done)
+        val back = findViewById<View>(R.id.list_back)
         if (toWelcome) {
             doneBtn.setOnClickListener { done(true) }
         } else {
