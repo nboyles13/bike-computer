@@ -71,7 +71,7 @@ class DestinationSearchActivity : Activity() {
         btn.text = "Search"
         btn.setTextColor(Color.parseColor("#FF4C8DFF"))
         btn.textSize = 17f
-        btn.setBackgroundResource(R.drawable.card_solid)
+        btn.setBackgroundResource(R.drawable.card_ripple)
         btn.setPadding(dp(16), dp(14), dp(16), dp(14))
         btn.gravity = 17
         val lp2 = LinearLayout.LayoutParams(-1, -2)
@@ -86,7 +86,7 @@ class DestinationSearchActivity : Activity() {
             homeBtn.text = "🏠  Navigate home (offline)"
             homeBtn.setTextColor(-1)
             homeBtn.textSize = 16f
-            homeBtn.setBackgroundResource(R.drawable.card_solid)
+            homeBtn.setBackgroundResource(R.drawable.card_ripple)
             homeBtn.setPadding(dp(16), dp(14), dp(16), dp(14))
             val lp3 = LinearLayout.LayoutParams(-1, -2)
             lp3.setMargins(dp(2), dp(4), dp(2), dp(8))
@@ -155,7 +155,7 @@ class DestinationSearchActivity : Activity() {
         val c = LinearLayout(this)
         c.orientation = LinearLayout.HORIZONTAL
         c.gravity = 16
-        c.setBackgroundResource(R.drawable.card_solid)
+        c.setBackgroundResource(R.drawable.card_ripple)
         c.setPadding(dp(16), dp(14), dp(16), dp(14))
         val lp = LinearLayout.LayoutParams(-1, -2)
         lp.setMargins(dp(2), dp(4), dp(2), dp(4))

@@ -106,7 +106,7 @@ class RidesActivity : Activity() {
         val c = LinearLayout(this)
         c.orientation = LinearLayout.HORIZONTAL
         c.gravity = 16
-        c.setBackgroundResource(R.drawable.card_solid)
+        c.setBackgroundResource(R.drawable.card_ripple)
         c.setPadding(dp(16), dp(14), dp(16), dp(14))
         val lp = LinearLayout.LayoutParams(-1, -2)
         lp.setMargins(dp(2), dp(4), dp(2), dp(4))

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- recenter button is white, so use a dark ripple so it's visible -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33000000">
+    <item android:id="@android:id/mask"><shape android:shape="oval"><solid android:color="#ffffffff"/></shape></item>
+    <item android:drawable="@drawable/mode_bg"/>
+</ripple>
