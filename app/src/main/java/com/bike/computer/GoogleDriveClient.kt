@@ -22,6 +22,7 @@ object GoogleDriveClient {
     const val SCOPE =
         "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly"
     private const val TOKEN = "https://oauth2.googleapis.com/token"
+    private const val LINKS_SHEET_NAME = "Harmin Route Links"
     private val http = OkHttpClient()
 
     private val JSON = "application/json; charset=UTF-8".toMediaType()
@@ -218,16 +219,18 @@ object GoogleDriveClient {
         return added
     }
 
+    /**
+     * Returns the "Harmin Route Links" sheet in the connected routes folder, creating it there if a
+     * sheet with that name isn't found. Looked up fresh each time so it self-heals if the sheet was
+     * deleted or renamed.
+     */
     @Throws(JSONException::class, IOException::class)
     fun ensureLinksSheet(c: Context): String {
-        Prefs.driveSheetId(c).takeIf { it.isNotEmpty() }?.let { return it }
         val token = freshToken(c)
         val folder = ensureRoutesFolder(c, token)
-        findSheetInFolder(token, folder)?.let {
-            Prefs.setDriveSheetId(c, it)
-            return it
-        }
-        val meta = JSONObject().put("name", "Harmin Route Links")
+        findSheetInFolder(token, folder)?.let { return it }
+        // Default-named sheet not found → create it in the connected routes folder.
+        val meta = JSONObject().put("name", LINKS_SHEET_NAME)
             .put("mimeType", "application/vnd.google-apps.spreadsheet")
             .put("parents", JSONArray().put(folder))
         val body = MultipartBody.Builder().setType("multipart/related".toMediaType())
@@ -242,9 +245,7 @@ object GoogleDriveClient {
         http.newCall(req).execute().use { resp ->
             val txt = resp.body?.string() ?: ""
             if (!resp.isSuccessful) throw RuntimeException("HTTP ${resp.code}: $txt")
-            val id = JSONObject(txt).getString("id")
-            Prefs.setDriveSheetId(c, id)
-            return id
+            return JSONObject(txt).getString("id")
         }
     }
 
@@ -327,7 +328,10 @@ object GoogleDriveClient {
 
     @Throws(IOException::class)
     private fun findSheetInFolder(token: String, folder: String): String? {
-        val q = enc("'$folder' in parents and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false")
+        val q = enc(
+            "name='$LINKS_SHEET_NAME' and '$folder' in parents and " +
+                "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
+        )
         val req = Request.Builder()
             .url("https://www.googleapis.com/drive/v3/files?q=$q&fields=files(id)")
             .header("Authorization", "Bearer $token")

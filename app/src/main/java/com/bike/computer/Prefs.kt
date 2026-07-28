@@ -202,9 +202,6 @@ object Prefs {
         sp(c).edit().putString("drive_routes_folder", name).apply()
     }
 
-    fun driveSheetId(c: Context): String = sp(c).getString("drive_sheet", "") ?: ""
-    fun setDriveSheetId(c: Context, id: String) { sp(c).edit().putString("drive_sheet", id).apply() }
-
     fun setDriveTokens(c: Context, access: String, refresh: String?, expiresAt: Long) {
         val e = sp(c).edit().putString("drive_access", access).putLong("drive_expires", expiresAt)
         if (!refresh.isNullOrEmpty()) e.putString("drive_refresh", refresh)
