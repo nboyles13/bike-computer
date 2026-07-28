@@ -163,7 +163,7 @@ class DestinationSearchActivity : Activity() {
         c.isClickable = true
         c.setOnClickListener { navigateTo(p) }
         c.setOnLongClickListener {
-            Prefs.setHomeLoc(this, p.lat, p.lon)
+            Prefs.setHomeLoc(this, p.lat, p.lon, p.name)
             Toast.makeText(this, "Saved as home — “${p.name.substringBefore(',')}”", 1).show()
             true
         }

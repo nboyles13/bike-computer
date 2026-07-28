@@ -100,12 +100,15 @@ object Prefs {
 
     fun hasHome(c: Context): Boolean = homeLoc(c) != null
 
-    fun setHomeLoc(c: Context, lat: Double, lon: Double) {
-        sp(c).edit().putString("home_loc", "$lat,$lon").apply()
+    /** Human-readable label for the saved home (e.g. the address typed/searched); "" if none. */
+    fun homeLabel(c: Context): String = sp(c).getString("home_label", "") ?: ""
+
+    fun setHomeLoc(c: Context, lat: Double, lon: Double, label: String = "") {
+        sp(c).edit().putString("home_loc", "$lat,$lon").putString("home_label", label).apply()
     }
 
     fun clearHomeLoc(c: Context) {
-        sp(c).edit().remove("home_loc").apply()
+        sp(c).edit().remove("home_loc").remove("home_label").apply()
     }
 
     fun starredRoutes(c: Context): Set<String> {

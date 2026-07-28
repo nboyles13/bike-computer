@@ -275,63 +275,64 @@ class SettingsActivity : Activity() {
                 rebuild()
             }
         }
-        // Home location — enables one-tap offline "Navigate home" (routing is offline; only
-        // address *search* needs Wi-Fi, so a saved home avoids the geocoder entirely).
+
+        // 1) Saved routes
+        sectionLabel("SAVED ROUTES")
+        val routes = File(ROUTES_DIR).listFiles { f -> f.name.endsWith(".gpx") }
+            ?.sortedBy { it.name.lowercase() } ?: emptyList()
+        if (routes.isEmpty()) text("No saved routes yet.")
+        for (f in routes) savedRouteRow(f)
+
+        // 2) Home — address entry. Looking it up needs Wi-Fi once; navigating home is offline.
+        sectionLabel("HOME")
         val home = Prefs.homeLoc(this)
         text(
             if (home != null) {
-                "Home is set. Use “🏠 Navigate home” on the main screen to route here — works offline."
+                "Home is set — use “🏠 Navigate home” on the main screen (works offline)."
             } else {
-                "Set a home location for one-tap, offline “Navigate home” (no Wi-Fi needed)."
+                "Set a home address for one-tap “Navigate home”. Looking it up needs Wi-Fi once; navigating there afterwards works offline."
             },
         )
-        button("Set home to current location") {
-            val loc = ride?.lastLocation
-            if (loc == null) {
-                toast("No GPS fix yet — try again outside")
-            } else {
-                Prefs.setHomeLoc(this, loc.latitude, loc.longitude)
-                toast("Home set to current location")
-                rebuild()
+        val addr = editRow("Home address", Prefs.homeLabel(this), "Street, city")
+        button("Set home from address") {
+            val q = addr.text.toString().trim()
+            if (q.isEmpty()) {
+                toast("Enter an address first")
+                return@button
             }
+            toast("Looking up address…")
+            val near = ride?.lastLocation?.let { doubleArrayOf(it.latitude, it.longitude) }
+            Thread {
+                val place = runCatching { Geocoder.search(q, near) }.getOrNull()?.firstOrNull()
+                runOnUiThread {
+                    if (isFinishing) return@runOnUiThread
+                    if (place == null) {
+                        toast("Couldn't find that address (need Wi-Fi?)")
+                    } else {
+                        Prefs.setHomeLoc(this, place.lat, place.lon, place.name)
+                        toast("Home set: ${place.name.substringBefore(',')}")
+                        rebuild()
+                    }
+                }
+            }.start()
         }
         if (home != null) {
-            button("Clear home location") {
+            button("Clear home") {
                 Prefs.clearHomeLoc(this)
                 toast("Home cleared")
                 rebuild()
             }
         }
+
+        // 3) Sync routes from Drive
+        sectionLabel("SYNC ROUTES")
         if (Prefs.driveConnected(this)) {
             val folder = Prefs.driveRoutesFolder(this)
-            text("Sync routes from Drive — either drop GPX files into your “$folder” folder, or add Google Maps links to a Sheet (below):")
+            text("Drop GPX files into your “$folder” folder in Drive, then sync.")
             button("⟳  Sync routes from Drive") { syncDriveRoutes() }
-            val sheetId = Prefs.driveSheetId(this)
-            if (sheetId.isEmpty()) {
-                text("Prefer a table? Create a Google Sheet with Name + Link columns — add a row per route (a Maps directions link), then Sync pulls them in.")
-                button("＋  Create route links sheet") { createLinksSheet() }
-            } else {
-                text("Your “Harmin Route Links” Sheet is in the “$folder” folder. Add a row — Name + a Google Maps directions link — then tap Sync. Editing or deleting a row updates or removes that route on the next sync.")
-                button("⧉  Copy sheet link") { copyText(GoogleDriveClient.sheetUrl(sheetId), "Sheet link copied") }
-            }
+        } else {
+            text("Connect Google Drive (Settings ▸ Google Drive) to sync routes from a Drive folder.")
         }
-        text("Or paste a public GPX route URL (Komoot / RideWithGPS / Strava / bikerouter export). Navigate now, or save it to re-ride offline.")
-        val urlField = editRow("Route GPX URL", "", "Paste GPX URL")
-        button("Download & navigate") {
-            withDownloadedRoute(urlField.text.toString().trim()) { gpx -> navigateGpx(gpx) }
-        }
-        button("Download & save") {
-            withDownloadedRoute(urlField.text.toString().trim()) { gpx -> promptSaveRoute(gpx) }
-        }
-        text("Or paste a Google Maps link (share a place or directions). We build a bike route between the stops — no GPX needed.")
-        val gmapField = editRow("Google Maps link", "", "Paste maps.app.goo.gl / google.com/maps link")
-        button("Navigate this link") { withGmapsRoute(gmapField.text.toString().trim(), false) }
-        button("Save this link") { withGmapsRoute(gmapField.text.toString().trim(), true) }
-        text("Saved routes")
-        val routes = File(ROUTES_DIR).listFiles { f -> f.name.endsWith(".gpx") }
-            ?.sortedBy { it.name.lowercase() } ?: emptyList()
-        if (routes.isEmpty()) text("No saved routes yet")
-        for (f in routes) savedRouteRow(f)
     }
 
     private fun createLinksSheet() {
@@ -525,6 +526,17 @@ class SettingsActivity : Activity() {
         t.setTextColor(Color.parseColor("#FF9E9E9E"))
         t.textSize = 14f
         t.setPadding(dp(10), dp(2), dp(10), dp(8))
+        target.addView(t)
+    }
+
+    private fun sectionLabel(title: String) {
+        val t = TextView(this)
+        t.text = title
+        t.setTextColor(Color.parseColor("#FF8E8E93"))
+        t.textSize = 12f
+        t.typeface = Typeface.create("sans-serif-medium", 0)
+        t.letterSpacing = 0.08f
+        t.setPadding(dp(10), dp(20), dp(10), dp(6))
         target.addView(t)
     }
 
