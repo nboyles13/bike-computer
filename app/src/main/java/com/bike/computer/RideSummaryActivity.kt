@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -91,15 +92,21 @@ class RideSummaryActivity : Activity() {
                 if (isFinishing) return@runOnUiThread
                 container.removeView(loading)
                 if (pts.size >= 2) routeMap(pts)
-                stat("Distance", "${Units.fmtDist(ride.distanceM)} mi")
-                stat("Moving time", fmtDur(ride.movingMs))
-                stat("Avg speed", "${Units.fmtSpeed(ride.avgMps)} mph")
-                stat("Fastest speed", "${Units.fmtSpeed(ride.maxMps)} mph")
-                if (ride.hrMax > 0) stat("Highest HR", "${ride.hrMax} bpm")
-                if (ride.hrAvg > 0) stat("Avg HR", "${ride.hrAvg} bpm")
-                if (ride.ascentM > 0.0) stat("Ascent", "${Units.fmtFeet(ride.ascentM)} ft")
-                if (ride.powerMax > 0) stat("Max power", "${ride.powerMax} W")
-                if (ride.powerAvg > 0) stat("Avg power", "${ride.powerAvg} W")
+                val cSpd = Color.parseColor("#FF4C8DFF")
+                val cHr = Color.parseColor("#FFFF453A")
+                val cDist = Color.parseColor("#FF30D158")
+                val cTime = Color.parseColor("#FFFF9F0A")
+                val cEle = Color.parseColor("#FFBF5AF2")
+                val cPwr = Color.parseColor("#FFFFD60A")
+                stat(R.drawable.ic_distance, cDist, "Distance", "${Units.fmtDist(ride.distanceM)} mi")
+                stat(R.drawable.ic_time, cTime, "Moving time", fmtDur(ride.movingMs))
+                stat(R.drawable.ic_speed, cSpd, "Avg speed", "${Units.fmtSpeed(ride.avgMps)} mph")
+                stat(R.drawable.ic_speed, cSpd, "Fastest speed", "${Units.fmtSpeed(ride.maxMps)} mph")
+                if (ride.hrMax > 0) stat(R.drawable.ic_heart, cHr, "Highest HR", "${ride.hrMax} bpm")
+                if (ride.hrAvg > 0) stat(R.drawable.ic_heart, cHr, "Avg HR", "${ride.hrAvg} bpm")
+                if (ride.ascentM > 0.0) stat(R.drawable.ic_elevation, cEle, "Ascent", "${Units.fmtFeet(ride.ascentM)} ft")
+                if (ride.powerMax > 0) stat(R.drawable.ic_power, cPwr, "Max power", "${ride.powerMax} W")
+                if (ride.powerAvg > 0) stat(R.drawable.ic_power, cPwr, "Avg power", "${ride.powerAvg} W")
                 hrZonesSection(ride, zones, maxHr)
                 ride.route?.let { showComparison(it, ride) }
             }
@@ -253,12 +260,13 @@ class RideSummaryActivity : Activity() {
         val best = list.first()
         val isPR = best.startMs == ride.startMs
         if (list.size > 1) {
+            val cTime = Color.parseColor("#FFFF9F0A")
             if (isPR) {
-                stat("This ride", "${fmtDur(ride.movingMs)}  🏆 fastest!")
+                stat(R.drawable.ic_time, cTime, "This ride", "${fmtDur(ride.movingMs)}  🏆 fastest!")
             } else {
-                stat("This ride", fmtDur(ride.movingMs))
-                stat("Best", "${fmtDur(best.movingMs)} · ${shortDate.format(Date(best.startMs))}")
-                stat("Behind best", "+${fmtDur(ride.movingMs - best.movingMs)}")
+                stat(R.drawable.ic_time, cTime, "This ride", fmtDur(ride.movingMs))
+                stat(R.drawable.ic_time, cTime, "Best", "${fmtDur(best.movingMs)} · ${shortDate.format(Date(best.startMs))}")
+                stat(R.drawable.ic_time, cTime, "Behind best", "+${fmtDur(ride.movingMs - best.movingMs)}")
             }
         }
         for ((i, a) in list.withIndex()) {
@@ -450,6 +458,7 @@ class RideSummaryActivity : Activity() {
     private fun hint(s: String) = text(s)
 
     private fun header(title: String) {
+        statsCard = null // a new section starts a fresh stats card
         val t = TextView(this)
         t.text = title.uppercase()
         t.setTextColor(Color.parseColor("#FF8E8E93"))
@@ -460,25 +469,56 @@ class RideSummaryActivity : Activity() {
         container.addView(t)
     }
 
-    private fun stat(label: String, value: String) {
+    // Stats are grouped into one rounded card with hairline dividers (Material grouped list).
+    private var statsCard: LinearLayout? = null
+
+    private fun statsCard(): LinearLayout {
+        statsCard?.let { return it }
+        val c = LinearLayout(this)
+        c.orientation = LinearLayout.VERTICAL
+        c.setBackgroundResource(R.drawable.card_solid)
+        val lp = LinearLayout.LayoutParams(-1, -2)
+        lp.setMargins(dp(2), dp(6), dp(2), dp(6))
+        c.layoutParams = lp
+        container.addView(c)
+        statsCard = c
+        return c
+    }
+
+    private fun stat(iconRes: Int, iconColor: Int, label: String, value: String) {
+        val card = statsCard()
+        if (card.childCount > 0) {
+            val d = View(this)
+            d.setBackgroundColor(getColor(R.color.m3_outline))
+            val dlp = LinearLayout.LayoutParams(-1, dp(1))
+            dlp.setMargins(dp(14), 0, dp(14), 0)
+            d.layoutParams = dlp
+            card.addView(d)
+        }
         val row = LinearLayout(this)
         row.orientation = LinearLayout.HORIZONTAL
         row.gravity = 16
-        row.setPadding(dp(4), dp(15), dp(4), dp(15))
+        row.setPadding(dp(14), dp(15), dp(14), dp(15))
+        val ic = ImageView(this)
+        ic.setImageResource(iconRes)
+        ic.setColorFilter(iconColor)
+        val iclp = LinearLayout.LayoutParams(dp(20), dp(20))
+        iclp.rightMargin = dp(14)
+        ic.layoutParams = iclp
         val l = TextView(this)
         l.text = label
         l.setTextColor(Color.parseColor("#FFB8B8BD"))
-        l.textSize = 17f
+        l.textSize = 16f
         l.layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
         val v = TextView(this)
         v.text = value
         v.setTextColor(-1)
-        v.textSize = 20f
+        v.textSize = 19f
         v.typeface = Typeface.create("sans-serif-medium", 0)
+        row.addView(ic)
         row.addView(l)
         row.addView(v)
-        container.addView(row)
-        divider()
+        card.addView(row)
     }
 
     private fun attemptRow(rank: Int, a: RideSummary, isThis: Boolean, isBest: Boolean) {
