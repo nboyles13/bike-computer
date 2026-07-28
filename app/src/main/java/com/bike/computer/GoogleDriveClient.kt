@@ -218,8 +218,6 @@ object GoogleDriveClient {
         return added
     }
 
-    fun sheetUrl(id: String): String = "https://docs.google.com/spreadsheets/d/$id/edit"
-
     @Throws(JSONException::class, IOException::class)
     fun ensureLinksSheet(c: Context): String {
         Prefs.driveSheetId(c).takeIf { it.isNotEmpty() }?.let { return it }

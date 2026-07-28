@@ -1,40 +1,10 @@
 package com.bike.computer
 
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.IOException
-import java.util.concurrent.TimeUnit
-
-/** Downloads and parses GPX track/route files into point lists and via waypoints. */
+/** Parses GPX track/route files into point lists and via waypoints. */
 object GpxRoute {
-    private val http = OkHttpClient.Builder()
-        .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
     private val ptRe = Regex("<(?:trkpt|rtept)\\b([^>]*)>", RegexOption.IGNORE_CASE)
     private val latRe = Regex("lat=\"([-0-9.]+)\"", RegexOption.IGNORE_CASE)
     private val lonRe = Regex("lon=\"([-0-9.]+)\"", RegexOption.IGNORE_CASE)
-    private val nameRe = Regex(
-        "<name>(.*?)</name>",
-        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
-    )
-
-    @Throws(IOException::class)
-    fun download(url: String): String {
-        val u = if (url.startsWith("http")) url else "https://$url"
-        http.newCall(
-            Request.Builder().url(u).header("User-Agent", "BikeComputer").build(),
-        ).execute().use { r ->
-            val body = r.body?.string() ?: ""
-            if (!r.isSuccessful) throw RuntimeException("HTTP ${r.code}")
-            return body
-        }
-    }
-
-    fun name(gpx: String): String? {
-        val name = nameRe.find(gpx)?.groupValues?.get(1)?.trim() ?: return null
-        return name.ifEmpty { null }
-    }
 
     fun parse(gpx: String): List<DoubleArray> {
         val pts = ArrayList<DoubleArray>()

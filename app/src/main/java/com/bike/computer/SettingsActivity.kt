@@ -3,8 +3,6 @@ package com.bike.computer
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.role.RoleManager
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -333,36 +331,6 @@ class SettingsActivity : Activity() {
         } else {
             text("Connect Google Drive (Settings ▸ Google Drive) to sync routes from a Drive folder.")
         }
-    }
-
-    private fun createLinksSheet() {
-        toast("Creating Sheet in Drive…")
-        Thread {
-            val outcome = runCatching { GoogleDriveClient.ensureLinksSheet(this) }
-            runOnUiThread {
-                outcome
-                    .onSuccess { id ->
-                        copyText(GoogleDriveClient.sheetUrl(id), "Created “Harmin Route Links” — link copied")
-                        rebuild()
-                    }
-                    .onFailure { e ->
-                        val m = e.message ?: "failed"
-                        toast(
-                            if (m.contains("403") || m.contains("scope", true)) {
-                                "Reconnect Drive to grant access"
-                            } else {
-                                "Couldn't create sheet: $m"
-                            },
-                        )
-                    }
-            }
-        }.start()
-    }
-
-    private fun copyText(text: String, done: String) {
-        (getSystemService("clipboard") as ClipboardManager)
-            .setPrimaryClip(ClipData.newPlainText("Harmin", text))
-        toast(done)
     }
 
     private fun syncDriveRoutes() {
@@ -745,23 +713,6 @@ class SettingsActivity : Activity() {
         return b
     }
 
-    private fun withDownloadedRoute(url: String, onReady: (String) -> Unit) {
-        if (url.isEmpty()) {
-            toast("Enter a route URL")
-            return
-        }
-        Prefs.setLastRouteUrl(this, url)
-        toast("Downloading route…")
-        Thread {
-            val outcome = runCatching { GpxRoute.download(url) }
-            runOnUiThread {
-                outcome
-                    .onSuccess { onReady(it) }
-                    .onFailure { toast("Download failed: ${it.message}") }
-            }
-        }.start()
-    }
-
     private fun navigateGpx(gpx: String, routeName: String? = null) {
         val list = GpxRoute.parse(gpx)
         if (list.size < 2) {
@@ -773,72 +724,6 @@ class SettingsActivity : Activity() {
         toast("Snapping route to roads…")
         startActivity(Intent(this, MainActivity::class.java))
         finish()
-    }
-
-    private fun withGmapsRoute(link: String, save: Boolean) {
-        when {
-            link.isEmpty() -> toast("Paste a Google Maps link")
-            !GmapsRoute.looksLikeLink(link) -> toast("That doesn't look like a Google Maps link")
-            else -> {
-                toast("Reading Google Maps link…")
-                Thread {
-                    val outcome = runCatching { GmapsRoute.points(link) }
-                    runOnUiThread {
-                        outcome
-                            .onSuccess { list ->
-                                when {
-                                    list.isEmpty() -> toast("Couldn't find a location in that link")
-                                    list.size == 1 && save ->
-                                        toast("That link is a single place — use “Navigate” (a saved route needs a start and end)")
-                                    list.size == 1 -> {
-                                        ActionBus.pendingDestination = doubleArrayOf(list[0][1], list[0][0])
-                                        toast("Routing to your destination…")
-                                        startActivity(Intent(this, MainActivity::class.java))
-                                        finish()
-                                    }
-                                    save -> promptSaveRoute(GmapsRoute.toGpx("Maps route", list))
-                                    else -> navigateGpx(GmapsRoute.toGpx("Maps route", list))
-                                }
-                            }
-                            .onFailure { toast("Couldn't read that link (need Wi-Fi): ${it.message}") }
-                    }
-                }.start()
-            }
-        }
-    }
-
-    private fun promptSaveRoute(gpx: String) {
-        if (GpxRoute.parse(gpx).size < 2) {
-            toast("No route points found")
-            return
-        }
-        val input = EditText(this)
-        input.setText(GpxRoute.name(gpx) ?: "Route")
-        input.isSingleLine = true
-        input.setTextColor(-1)
-        input.setPadding(dp(16), dp(12), dp(16), dp(12))
-        AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert)
-            .setTitle("Save route as")
-            .setView(input)
-            .setPositiveButton("Save") { _, _ ->
-                val name = Regex("[/\\\\:*?\"<>|]").replace(input.text.toString().trim(), "_").take(60)
-                if (name.isEmpty()) {
-                    toast("Name required")
-                } else {
-                    val outcome = runCatching {
-                        File(ROUTES_DIR).mkdirs()
-                        File(ROUTES_DIR, "$name.gpx").writeText(gpx)
-                    }
-                    outcome
-                        .onSuccess {
-                            toast("Saved \"$name\"")
-                            rebuild()
-                        }
-                        .onFailure { toast("Save failed: ${it.message}") }
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
     }
 
     private fun savedRouteRow(f: File) {

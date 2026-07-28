@@ -84,11 +84,6 @@ object Prefs {
     fun endurance(c: Context): Boolean = sp(c).getBoolean("endurance", false)
     fun setEndurance(c: Context, v: Boolean) { sp(c).edit().putBoolean("endurance", v).apply() }
 
-    fun lastRouteUrl(c: Context): String = sp(c).getString("route_url", "") ?: ""
-    fun setLastRouteUrl(c: Context, v: String) {
-        sp(c).edit().putString("route_url", v.trim()).apply()
-    }
-
     /** Saved "home" location (lat/lon) for offline navigate-home; null if unset. */
     fun homeLoc(c: Context): DoubleArray? {
         val s = sp(c).getString("home_loc", null) ?: return null
